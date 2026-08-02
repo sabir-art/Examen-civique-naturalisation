@@ -135,7 +135,10 @@ export async function push() {
     progress: p.progress,
     exams: p.exams,
     days: p.days,
+    read: p.read,
   };
+  // La clé de l'assistant n'est volontairement pas transmise : elle reste
+  // sur l'appareil où elle a été saisie.
   await call(`/rest/v1/${TABLE}`, {
     method: 'POST',
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },

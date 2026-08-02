@@ -4,8 +4,11 @@ import { h, icon, toast, modal, confirmDialog } from '../lib/dom.js';
 import { formatDate, formatDateShort } from '../lib/util.js';
 import * as store from '../store.js';
 import * as sync from '../sync.js';
+import * as ai from '../ai.js';
 import { overview } from '../engine.js';
 import { QUESTIONS } from '../data/questions.js';
+import { LIVRET_QUESTIONS } from '../data/q-livret.js';
+import { ROMAN_QUESTIONS } from '../data/roman.js';
 import { PRATIQUE } from '../data/programme.js';
 import { applyTheme, refresh, navigate, canInstall, promptInstall } from '../app.js';
 
@@ -70,6 +73,14 @@ function mainView() {
     : sync.isConfigured() ? 'Configurée, non connectée' : 'Non configurée';
 
   const links = h('div', { class: 'list' }, [
+    h('a', { class: 'item', href: '#/assistant/reglages' }, [
+      h('span', { class: 'item__icon' }, icon('star')),
+      h('span', { class: 'item__body' }, [
+        h('span', { class: 'item__title', text: 'Assistant IA' }),
+        h('span', { class: 'item__sub', text: ai.isConfigured() ? `Activé — clé ${ai.keyHint()}` : 'Non activé (facultatif)' }),
+      ]),
+      h('span', { class: 'item__chev' }, icon('chevron')),
+    ]),
     h('a', { class: 'item', href: '#/compte/synchronisation' }, [
       h('span', { class: 'item__icon' }, icon('cloud')),
       h('span', { class: 'item__body' }, [
@@ -369,8 +380,9 @@ function aboutView() {
       ]),
       h('div', { class: 'card' }, [
         h('h2', { class: 'card__title', text: 'À propos' }),
-        h('p', { class: 'card__sub', text: `Application libre et gratuite d'entraînement, ${QUESTIONS.length} questions rédigées à partir du programme officiel. Elle fonctionne hors ligne et ne collecte aucune donnée : votre progression reste sur votre appareil.` }),
+        h('p', { class: 'card__sub', text: `Application libre et gratuite d'entraînement : ${QUESTIONS.length} questions d'examen, ${LIVRET_QUESTIONS.length} sur le livret du citoyen et ${ROMAN_QUESTIONS.length} sur le récit « La France racontée ». Elle fonctionne hors ligne et ne collecte aucune donnée : votre progression reste sur votre appareil.` }),
         h('p', { class: 'card__sub', style: 'margin-top:8px', text: "Elle ne remplace ni le livret du citoyen, ni les informations officielles, ni l'examen lui-même." }),
+        h('p', { class: 'card__sub', style: 'margin-top:8px', text: "L'assistant IA est facultatif. Aucune clé n'est incluse dans l'application : vous fournissez la vôtre, elle reste sur cet appareil et n'est jamais transmise ailleurs qu'à l'API d'Anthropic." }),
       ]),
     ]),
     title: 'À propos',

@@ -14,6 +14,7 @@ import renderLivret from './views/livret.js';
 import renderRoman from './views/roman.js';
 import renderProgres from './views/progres.js';
 import renderCompte from './views/compte.js';
+import renderAssistant from './views/assistant.js';
 
 const appEl = document.getElementById('app');
 const bootEl = document.getElementById('boot');
@@ -50,6 +51,8 @@ const ROUTES = [
   { path: /^\/livret$/, view: renderLivret, title: 'Livret du citoyen', tab: '/cours', back: '#/cours' },
   { path: /^\/livret\/(.+)$/, view: renderLivret, title: 'Livret du citoyen', tab: '/cours', back: '#/livret' },
   { path: /^\/progres$/, view: renderProgres, title: 'Ma progression', tab: '/progres' },
+  { path: /^\/assistant$/, view: renderAssistant, title: 'Assistant', back: '#/' },
+  { path: /^\/assistant\/(.+)$/, view: renderAssistant, title: 'Assistant', back: '#/assistant' },
   { path: /^\/compte$/, view: renderCompte, title: 'Mon compte', back: '#/' },
   { path: /^\/compte\/(.+)$/, view: renderCompte, title: 'Mon compte', back: '#/compte' },
 ];

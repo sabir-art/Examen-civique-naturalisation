@@ -5,6 +5,7 @@ import { daysBetween, plural } from '../lib/util.js';
 import * as store from '../store.js';
 import { readiness, overview, advice, romanOverview, nextUnread } from '../engine.js';
 import { EXAM } from '../data/programme.js';
+import * as ai from '../ai.js';
 
 function ringLarge(value) {
   const r = 54;
@@ -111,6 +112,10 @@ export default function renderHome() {
     shortcut({
       to: '#/cours', name: 'flag', title: 'Fiches de révision',
       sub: 'Le programme résumé, thème par thème',
+    }),
+    shortcut({
+      to: '#/assistant', name: 'info', title: 'Poser une question',
+      sub: ai.isConfigured() ? "Demander une explication à l'assistant" : 'Assistant IA — facultatif, à activer',
     }),
   ].filter(Boolean));
 

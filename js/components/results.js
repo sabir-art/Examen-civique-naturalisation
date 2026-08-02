@@ -94,6 +94,11 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
             d.chosen ? h('p', { class: 'muted', html: `Votre réponse : <strong>${escapeHtml(d.chosen)}</strong>` }) : h('p', { class: 'muted', text: 'Aucune réponse donnée.' }),
             h('p', { style: 'margin-top:6px', html: `Bonne réponse : <strong>${escapeHtml(d.correct)}</strong>` }),
             h('p', { class: 'muted', style: 'margin-top:8px', text: q.why }),
+            h('a', {
+              class: 'linkbtn', style: 'display:inline-block;margin-top:10px',
+              href: `#/assistant/q/${encodeURIComponent(d.qid)}`,
+              text: "Faire expliquer autrement →",
+            }),
           ]),
         ]);
       }).filter(Boolean)),

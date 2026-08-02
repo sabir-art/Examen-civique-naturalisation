@@ -3,17 +3,31 @@
 Application web gratuite pour s'entraîner au **QCM de l'examen civique** exigé
 pour les demandes de naturalisation déposées depuis le 1er janvier 2026.
 
-L'application est organisée en **deux parties bien séparées**, qui se complètent :
+L'application est organisée en **trois parties bien séparées**, qui se complètent :
 
-| | Banque d'examen | Livret du citoyen |
+| | Banque d'examen | Livret du citoyen | La France racontée |
+|---|---|---|---|
+| Contenu | 363 questions rédigées à partir du référentiel de l'arrêté du 10 octobre 2025 | Le texte officiel du ministère de l'Intérieur (édition mai 2026), repris intégralement, + 284 questions dédiées | Le programme raconté comme un roman : 22 chapitres en 3 actes, + 88 questions |
+| Usage | examens blancs, entraînement par thème, révision espacée | lecture chapitre par chapitre et quiz de vérification | lecture suivie, puis 4 questions par chapitre |
+| Où | onglets **Examen** et **Réviser** | onglet **Cours → Livret du citoyen** | onglet **Histoire** |
+
+Les trois progressions sont suivies séparément : ni les questions du livret ni
+celles du récit n'entrent dans la composition d'un examen blanc, et elles ne
+modifient pas l'indicateur de préparation à l'épreuve.
+
+### La France racontée
+
+Pour qui retient mieux par les histoires que par les listes. Le même programme,
+d'Alésia à l'Union européenne, sous forme de scènes : la reddition de
+Vercingétorix, le 14 juillet, Simone Veil à la tribune. Chaque chapitre se
+termine par un encadré **ce qu'il faut retenir** puis quatre questions, et le
+chapitre est marqué comme lu dès qu'on en atteint la fin.
+
+| Acte | Époque | Chapitres |
 |---|---|---|
-| Contenu | 363 questions rédigées à partir du référentiel de l'arrêté du 10 octobre 2025 | Le texte officiel du ministère de l'Intérieur (édition mai 2026), repris intégralement, + 284 questions dédiées |
-| Usage | examens blancs, entraînement par thème, révision espacée | lecture chapitre par chapitre et quiz de vérification |
-| Où | onglets **Examen** et **Réviser** | onglet **Cours → Livret du citoyen** |
-
-Les deux progressions sont suivies séparément : les questions du livret n'entrent
-jamais dans la composition d'un examen blanc et ne modifient pas l'indicateur de
-préparation à l'épreuve.
+| I — Le temps des rois | 52 av. J.-C. → 1789 | 6 |
+| II — Le temps du peuple | 1789 → 1958 | 10 |
+| III — La France d'aujourd'hui | aujourd'hui | 6 |
 
 ### Trois formats d'examen blanc
 
@@ -29,10 +43,11 @@ Seuls les résultats du format **officiel** entrent dans l'estimation de prépar
 car lui seul respecte la composition de l'épreuve réelle. L'historique conserve le
 format de chaque tentative.
 
-- **647 questions** au total, avec une explication pour chacune
+- **735 questions** au total, avec une explication pour chacune
 - **Révision espacée** : les questions ratées reviennent, celles qui sont acquises s'espacent
 - **Livret du citoyen intégral** : 6 parties, 16 chapitres, 97 sections, annexes comprises
 - **Fiches de révision** synthétiques, distinctes du livret
+- **Assistant IA facultatif** (voir plus bas) pour faire réexpliquer une réponse
 - **Compte et progression** conservés sur l'appareil, avec sauvegarde exportable et synchronisation optionnelle
 - **Fonctionne hors ligne**, installable sur l'écran d'accueil du téléphone
 - Aucune publicité, aucun traçage, aucun compte obligatoire
@@ -58,8 +73,11 @@ Le dépôt contient un workflow qui publie le site à chaque `push`.
    affiche le déploiement et l'URL publique, de la forme
    `https://<utilisateur>.github.io/Examen-civique-naturalisation/`
 
-Le workflow lance d'abord `scripts/check-bank.mjs` : un déploiement échoue si la
-banque de questions est incohérente ou si le plan de tirage ne fait plus 40 questions.
+Le workflow lance d'abord deux contrôles ; un déploiement échoue si l'un des
+deux tombe :
+
+- `scripts/check-secrets.mjs` — recherche de clés d'API dans les fichiers suivis ;
+- `scripts/check-bank.mjs` — cohérence des trois banques et faisabilité du tirage.
 
 ## Développement local
 
@@ -74,8 +92,16 @@ npx http-server -p 8099 -c-1
 Scripts utiles :
 
 ```bash
-node scripts/check-bank.mjs   # intégrité de la banque + couverture du plan de tirage
-node scripts/make-icons.mjs   # régénère les icônes PNG de l'application
+node scripts/check-secrets.mjs  # aucune clé d'API dans les fichiers suivis par Git
+node scripts/check-bank.mjs     # intégrité des banques + couverture du plan de tirage
+node scripts/make-icons.mjs     # régénère les icônes PNG de l'application
+npm run check                   # les deux contrôles à la suite
+```
+
+Pour que le contrôle anti-secrets tourne aussi avant chaque commit local :
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 ## Organisation du code
@@ -88,6 +114,7 @@ js/app.js               routeur et chargement des vues
 js/store.js             comptes locaux, progression, révision espacée (Leitner)
 js/engine.js            tirage des examens, calcul de la maîtrise et de la préparation
 js/sync.js              synchronisation cloud optionnelle
+js/ai.js                appel à l'API Claude (clé saisie par l'utilisateur)
 js/components/          composant de quiz et écran de résultats
 js/views/               une vue par écran
 js/data/programme.js    référentiel officiel et plan de tirage des 40 questions
@@ -98,6 +125,10 @@ js/data/livret.js       assemblage du livret du citoyen
 js/data/livret/*.js     le texte officiel, une partie par fichier
 js/data/q-livret.js     les 284 questions du livret, par chapitre
 js/views/livret.js      lecture du livret et quiz par chapitre
+js/data/roman.js        assemblage du récit + ses 88 questions
+js/data/roman/*.js      les trois actes, un fichier par acte
+js/views/roman.js       lecture d'un chapitre et quiz
+js/views/assistant.js   configuration de la clé et conversation
 ```
 
 ### Ajouter des questions
@@ -117,6 +148,53 @@ Chaque fichier `js/data/q-*.js` exporte un tableau d'objets :
 Les propositions sont **mélangées à l'affichage** : la bonne réponse peut rester
 en première position dans les données. Après modification, relancer
 `node scripts/check-bank.mjs`.
+
+## Assistant IA (facultatif)
+
+L'application propose de poser une question à Claude : faire réexpliquer une
+réponse ratée, demander un exemple, une comparaison, un moyen mnémotechnique.
+Le bouton **Faire expliquer autrement** apparaît sous chaque question ratée.
+
+Tout le reste fonctionne à l'identique sans assistant.
+
+### Pourquoi la clé n'est pas dans le code
+
+Ce dépôt publie un **site statique**. Tout ce qu'il contient est téléchargé par
+le navigateur de chaque visiteur : le HTML, le CSS, le JavaScript. Une clé
+d'API placée dans un fichier du dépôt — ou injectée à la construction depuis un
+secret GitHub Actions — serait donc lisible par n'importe qui, et facturée à son
+propriétaire. **Un secret publié dans une page web n'est plus un secret.**
+
+L'application applique donc le seul modèle qui tienne sans serveur :
+
+| | |
+|---|---|
+| Qui fournit la clé | l'utilisateur, dans l'application (**Mon compte → Assistant IA**) |
+| Où elle est stockée | le `localStorage` de son navigateur, sous `examen-civique.assistant` |
+| Où elle est envoyée | à `api.anthropic.com` uniquement, en direct |
+| Exportée avec le profil | non |
+| Synchronisée entre appareils | non |
+| Présente dans le dépôt | jamais — le déploiement échoue si elle y apparaît |
+
+Pour obtenir une clé : [console.anthropic.com](https://console.anthropic.com) →
+*Billing* (créditer le compte et **fixer une limite de dépense**) → *API Keys*.
+Les échanges sont facturés à l'usage par Anthropic. Une clé qui a pu être vue
+par quelqu'un d'autre doit être **supprimée depuis la console** : c'est la seule
+action qui la rende réellement inutilisable.
+
+Modèle par défaut : `claude-opus-5`. `claude-haiku-4-5` est proposé en second
+choix, plus rapide et moins cher.
+
+### Le garde-fou
+
+`scripts/check-secrets.mjs` parcourt tous les fichiers suivis par Git et cherche
+les formats de clés connus (Anthropic, OpenAI, GitHub, AWS, Google, Slack, clés
+privées, JWT, ainsi que les affectations `password = "..."`). Il tourne dans le
+workflow **avant** la publication : si une clé est trouvée, rien n'est mis en
+ligne. Il peut aussi être branché en `pre-commit` (voir *Développement local*).
+
+Si une clé a malgré tout été poussée : **révoquez-la d'abord**. La supprimer du
+fichier ne suffit pas, elle reste dans l'historique Git.
 
 ## Synchronisation entre appareils (facultatif)
 

@@ -18,14 +18,17 @@ concurrency:
 
 jobs:
   verifier:
-    name: Contrôle de la banque de questions
+    name: Contrôles avant publication
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Contrôle d'intégrité
+      # Le site publié est public : aucun secret ne doit y figurer.
+      - name: Recherche de secrets
+        run: node scripts/check-secrets.mjs
+      - name: Contrôle d'intégrité de la banque
         run: node scripts/check-bank.mjs
 
   deployer:

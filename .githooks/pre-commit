@@ -1,0 +1,4 @@
+#!/bin/sh
+# Empêche de commiter une clé d'API dans ce dépôt public.
+# Pour l'activer :  git config core.hooksPath .githooks
+node scripts/check-secrets.mjs || exit 1

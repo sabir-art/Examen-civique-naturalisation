@@ -1,3 +1,12 @@
 node_modules/
 .DS_Store
 *.log
+
+# Rien qui puisse contenir une clé ne doit être suivi par Git : le site est
+# public. La clé de l'assistant se saisit dans l'application, pas dans un
+# fichier (voir js/ai.js et scripts/check-secrets.mjs).
+.env
+.env.*
+*.key
+*.pem
+secrets.json
