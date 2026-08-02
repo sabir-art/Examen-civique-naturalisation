@@ -42,6 +42,9 @@
   --muted: #5c6b85;
   /* 5:1 sur #fff comme sur #f4f7fc — le gris précédent tombait à 2,8. */
   --faint: #606d84;
+  /* Texte posé sur un aplat de couleur pleine. */
+  --on-brand: #ffffff;
+  --on-accent: #ffffff;
 
   --radius: 18px;
   --radius-sm: 12px;
@@ -87,6 +90,8 @@
     --text: #e8edf7;
     --muted: #a3b0c6;
     --faint: #7c8aa3;
+    --on-brand: #0a1120;
+    --on-accent: #0a1120;
 
     --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px -16px rgba(0, 0, 0, .8);
     --shadow-lg: 0 20px 50px -24px rgba(0, 0, 0, .9);
@@ -108,6 +113,7 @@
   --bg: #0a1120; --surface: #121b2d; --surface-2: #17223a;
   --line: #24314c; --line-strong: #33425f;
   --text: #e8edf7; --muted: #a3b0c6; --faint: #7c8aa3;
+  --on-brand: #0a1120; --on-accent: #0a1120;
   --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px -16px rgba(0,0,0,.8);
   --shadow-lg: 0 20px 50px -24px rgba(0,0,0,.9);
 }
@@ -257,21 +263,19 @@ a { color: var(--brand); }
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 48px; padding: 0 18px; border-radius: 13px; border: 1px solid transparent;
   font-family: inherit; font-size: 15.5px; font-weight: 650; cursor: pointer;
-  background: var(--brand); color: #fff; text-decoration: none; width: 100%;
+  background: var(--brand); color: var(--on-brand); text-decoration: none; width: 100%;
   -webkit-tap-highlight-color: transparent; transition: transform .06s ease, filter .12s ease;
 }
-:root[data-theme="dark"] .btn, :root:not([data-theme="light"]) .btn { color: #0a1120; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .btn { color: #fff; } }
-:root[data-theme="light"] .btn { color: #fff; }
+/* La couleur du texte passe par `--on-brand`, définie une fois par thème.
+   Auparavant chaque thème avait sa propre règle `:root[data-theme=…] .btn`,
+   d'une spécificité supérieure à `.btn--ghost` : en thème clair explicite, tous
+   les boutons secondaires héritaient du blanc et devenaient invisibles. */
 .btn:active { transform: scale(.985); filter: brightness(.95); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn--accent { background: var(--accent); }
+.btn--accent { background: var(--accent); color: var(--on-accent); }
 .btn--ghost { background: var(--surface); color: var(--text); border-color: var(--line-strong); }
-:root[data-theme="dark"] .btn--ghost, :root:not([data-theme="light"]) .btn--ghost { color: var(--text); }
 .btn--quiet { background: transparent; color: var(--brand); border-color: transparent; min-height: 42px; }
-:root[data-theme="dark"] .btn--quiet, :root:not([data-theme="light"]) .btn--quiet { color: var(--brand); }
 .btn--danger { background: var(--bad-100); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 30%, transparent); }
-:root[data-theme="dark"] .btn--danger, :root:not([data-theme="light"]) .btn--danger { color: var(--bad); }
 .btn--sm { min-height: 40px; font-size: 14px; padding: 0 14px; width: auto; }
 .btn--auto { width: auto; }
 .btn svg { width: 19px; height: 19px; }
@@ -373,15 +377,28 @@ a { color: var(--brand); }
   cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .12s, background .12s;
 }
 .choice:active { transform: scale(.995); }
+/* Pastille ronde : la lettre par défaut, une coche quand c'est coché ou juste. */
 .choice__key {
-  width: 27px; height: 27px; flex: none; border-radius: 8px; display: grid; place-items: center;
-  background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; font-weight: 700; color: var(--muted);
+  position: relative; width: 28px; height: 28px; flex: none; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface-2); border: 2px solid var(--line-strong);
+  font-size: 13px; font-weight: 700; color: var(--muted);
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
 }
-.choice__text { flex: 1; padding-top: 2px; }
+.choice__letter, .choice__mark { grid-area: 1 / 1; display: grid; place-items: center; }
+.choice__mark { opacity: 0; transform: scale(.5); transition: opacity .16s ease, transform .18s cubic-bezier(.2, 1.4, .4, 1); }
+.choice__mark svg { width: 15px; height: 15px; stroke-width: 3; }
+.choice__text { flex: 1; padding-top: 3px; }
+
 .choice[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-100); }
-.choice[aria-pressed="true"] .choice__key { background: var(--brand); border-color: var(--brand); color: #fff; }
+.choice[aria-pressed="true"] .choice__key { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.choice[aria-pressed="true"] .choice__letter { opacity: 0; }
+.choice[aria-pressed="true"] .choice__mark { opacity: 1; transform: none; }
+
 .choice.is-correct { border-color: var(--ok); background: var(--ok-100); }
 .choice.is-correct .choice__key { background: var(--ok); border-color: var(--ok); color: #fff; }
+.choice.is-correct .choice__letter { opacity: 0; }
+.choice.is-correct .choice__mark { opacity: 1; transform: none; }
 .choice.is-wrong { border-color: var(--bad); background: var(--bad-100); }
 .choice.is-wrong .choice__key { background: var(--bad); border-color: var(--bad); color: #fff; }
 .choice:disabled { cursor: default; opacity: 1; }
@@ -396,10 +413,25 @@ a { color: var(--brand); }
 .feedback__body { font-size: 14.5px; line-height: 1.5; }
 .feedback__body strong { font-weight: 700; }
 
+/* Barre d'action collée en bas. Elle est opaque et déborde sur les côtés :
+   sinon, sur une question longue, elle flotte au milieu du texte et le cache
+   (c'est ce qui arrivait au panneau « approfondir »). */
 .quizfoot {
-  position: sticky; bottom: calc(var(--tabbar-h) + var(--safe-b) + 8px); margin-top: 16px; z-index: 20;
+  position: sticky; bottom: calc(var(--tabbar-h) + var(--safe-b)); z-index: 20;
+  margin: 16px -14px 0; padding: 10px 14px calc(10px + var(--safe-b));
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
 }
-.quizfoot--nobar { bottom: calc(var(--safe-b) + 10px); }
+.quizfoot--nobar { bottom: 0; }
+/* Panneau « approfondir » ouvert : la barre redescend dans le flux, sous le
+   panneau, au lieu de rester collée par-dessus. */
+.quiz.is-deepened .quizfoot {
+  position: static; margin: 16px 0 0; padding: 0;
+  background: none; backdrop-filter: none; -webkit-backdrop-filter: none; border-top: 0;
+}
+/* De quoi faire défiler le dernier élément au-dessus de la barre. */
+.quizbody { padding-bottom: 8px; }
 
 /* --------------------------------------------------------------- results */
 .score {
@@ -408,7 +440,15 @@ a { color: var(--brand); }
 }
 .score--fail { background: linear-gradient(150deg, #d8544c 0%, #93211b 100%); }
 .score { position: relative; overflow: hidden; }
-.score__verdict { font-size: 21px; font-weight: 750; margin-top: 12px; }
+/* Le verdict arrive en rebondissant : la réussite doit se sentir. */
+.score__verdict { font-size: 21px; font-weight: 750; margin-top: 12px; animation: bounceIn .55s cubic-bezier(.2, 1.5, .4, 1) both .12s; }
+.score .ring { animation: pop .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.scorestats { animation: fadeUp .4s ease both .3s; }
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(.6) translateY(10px); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: none; }
+}
 .score__detail { font-size: 14.5px; opacity: .92; margin-top: 5px; }
 
 .scorestats {
@@ -432,6 +472,30 @@ a { color: var(--brand); }
 }
 @media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
 
+/* ------------------------------------------------------------ corrections */
+.correc { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.correc__q {
+  display: flex; gap: 10px; align-items: flex-start; padding: 12px 13px; cursor: pointer;
+  font-weight: 600; font-size: 14.5px; list-style: none;
+}
+.correc__q::-webkit-details-marker { display: none; }
+.correc__num {
+  flex: none; min-width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center;
+  background: var(--bad-100); color: var(--bad); font-size: 12px; font-weight: 750;
+}
+.correc__body { padding: 0 13px 14px; }
+.correc__label {
+  font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--faint); margin: 12px 0 5px;
+}
+.answerbox {
+  display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px;
+  border-radius: 10px; font-size: 14.5px; line-height: 1.4;
+}
+.answerbox svg { width: 17px; height: 17px; flex: none; margin-top: 2px; stroke-width: 2.6; }
+.answerbox--ok { background: var(--ok-100); color: var(--ok); font-weight: 600; }
+.answerbox--bad { background: var(--bad-100); color: var(--bad); font-weight: 600; }
+
 .themestat { display: grid; gap: 11px; }
 /* Ces lignes sont cliquables : on leur garde une hauteur touchable. */
 .themestat__row { display: grid; gap: 5px; align-content: center; }
@@ -444,16 +508,28 @@ a.themestat__row { min-height: 44px; }
 .field { display: grid; gap: 6px; }
 .label { font-size: 13.5px; font-weight: 650; color: var(--muted); }
 .input, .select {
-  width: 100%; min-height: 48px; padding: 11px 13px; font-family: inherit; font-size: 16px;
+  width: 100%; max-width: 100%; min-width: 0;
+  min-height: 48px; padding: 11px 13px; font-family: inherit; font-size: 16px;
   border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); color: var(--text);
 }
 .input:focus, .select:focus { outline: none; border-color: var(--brand); }
+/* Safari donne aux champs date/heure une largeur intrinsèque qui ignore
+   `width:100%` : le champ débordait de sa carte sur iPhone. */
+.input[type="date"], .input[type="time"], .input[type="datetime-local"] {
+  -webkit-appearance: none; appearance: none;
+  display: block; text-align: left;
+}
+.input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+.input[type="date"]::-webkit-calendar-picker-indicator { margin-left: auto; }
 .hint { font-size: 12.5px; color: var(--faint); }
+.hint--ok { color: var(--ok); font-weight: 600; }
+.hint--bad { color: var(--bad); font-weight: 600; }
 
 .seg { display: grid; grid-auto-flow: column; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 13px; }
 .seg__btn {
-  min-height: 38px; border: 0; background: transparent; border-radius: 10px; font-family: inherit;
+  min-height: 44px; border: 0; background: transparent; border-radius: 10px; font-family: inherit;
   font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: background .15s ease, color .15s ease;
 }
 .seg__btn[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
 
@@ -486,6 +562,12 @@ a.themestat__row { min-height: 44px; }
 /* ------------------------------------------------------------- accueil */
 .greet { display: flex; align-items: center; gap: 12px; padding: 2px 2px 0; }
 .greet__hello { font-size: 21px; font-weight: 750; letter-spacing: -.02em; }
+.wave { display: inline-block; transform-origin: 70% 80%; animation: hello 2.6s ease-in-out 1s 2 both; }
+@keyframes hello {
+  0%, 60%, 100% { transform: none; }
+  10%, 30% { transform: rotate(14deg); }
+  20%, 40% { transform: rotate(-8deg); }
+}
 .greet__line { font-size: 14px; color: var(--muted); margin-top: 2px; }
 .streak {
   flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px;
@@ -704,6 +786,43 @@ a.themestat__row { min-height: 44px; }
 .summary::after { content: '⌄'; margin-left: auto; font-size: 17px; line-height: 1; opacity: .7; }
 details[open] > .summary::after { content: '⌃'; }
 
+/* ------------------------------------------------------------ animations */
+/* Tout ce qui apparaît ou change de place le fait avec un mouvement court :
+   on comprend d'où vient l'élément. Le bloc `prefers-reduced-motion` en fin de
+   feuille neutralise l'ensemble d'un coup. */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes unfold {
+  from { opacity: 0; transform: translateY(-6px); clip-path: inset(0 0 100% 0); }
+  to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); }
+}
+@keyframes pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+
+/* Entrée de l'écran courant. */
+.app > * { animation: fadeUp .26s cubic-bezier(.2, .8, .2, 1) both; }
+
+/* Ouverture d'un bloc dépliant. */
+details[open] > *:not(summary) { animation: unfold .28s cubic-bezier(.2, .8, .2, 1) both; }
+.summary svg:first-child { transition: transform .2s ease; }
+details[open] > .summary svg:first-child { transform: rotate(-12deg) scale(1.08); }
+
+/* Correction et explication après une réponse. */
+.feedback { animation: fadeUp .3s cubic-bezier(.2, .8, .2, 1) both; }
+.choice { transition: background .16s ease, border-color .16s ease, transform .1s ease; }
+.choice:active:not(:disabled) { transform: scale(.99); }
+.choice.is-correct { animation: pop .34s cubic-bezier(.2, 1.3, .4, 1) both; }
+
+/* Réponse de l'assistant et bulles de conversation. */
+.deepen__answer:not([hidden]) { animation: fadeUp .24s ease both; }
+.msg { animation: fadeUp .24s cubic-bezier(.2, .8, .2, 1) both; }
+
+.chip { transition: background .15s ease, border-color .15s ease, color .15s ease, transform .1s ease; }
+.chip:active { transform: scale(.96); }
+.item, .trow { transition: background .15s ease, transform .1s ease; }
+.item:active { transform: scale(.995); }
+.iconbtn { transition: background .15s ease, transform .1s ease; }
+.iconbtn:active { transform: scale(.94); }
+
 /* --------------------------------------------------- approfondir une réponse */
 .deepen { margin-top: 12px; display: grid; gap: 10px; }
 .deepen__row { display: flex; align-items: center; gap: 10px; }
@@ -712,6 +831,7 @@ details[open] > .summary::after { content: '⌃'; }
   background: var(--surface-2); border: 1px solid var(--line);
   border-radius: var(--radius-sm); padding: 11px 13px;
 }
+.deepen__inner { margin-top: 10px; }
 .deepen__answer {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius-sm); padding: 11px 13px; font-size: 14.5px; line-height: 1.55;

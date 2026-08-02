@@ -257,20 +257,72 @@ function voixSection(container) {
     }))));
   }
 
+  // Le diagnostic remplace un message d'erreur vague : ElevenLabs indique dans
+  // sa réponse s'il s'agit d'une clé fausse, de permissions manquantes ou d'un
+  // quota atteint, et ce n'est pas la même chose à corriger.
+  const diag = h('p', { class: 'hint', style: 'min-height:17px' });
+
   const charger = h('button', {
     class: 'btn btn--ghost', type: 'button',
     onclick: async () => {
       charger.disabled = true;
-      try { afficher(await ai.listVoices()); }
-      catch (err) { toast(err.message); }
-      finally { charger.disabled = false; }
+      diag.textContent = 'Chargement…';
+      diag.className = 'hint';
+      try {
+        afficher(await ai.listVoices());
+        diag.textContent = '';
+      } catch (err) {
+        diag.textContent = err.message;
+        diag.className = 'hint hint--bad';
+      } finally {
+        charger.disabled = false;
+      }
     },
   }, [icon('refresh'), h('span', { text: 'Charger mes voix' })]);
+
+  const tester = h('button', {
+    class: 'btn btn--quiet', type: 'button',
+    onclick: async () => {
+      diag.textContent = 'Vérification…';
+      diag.className = 'hint';
+      const r = await ai.testVoiceKey();
+      diag.textContent = r.message;
+      diag.className = `hint hint--${r.ok ? 'ok' : 'bad'}`;
+    },
+  }, [icon('check'), h('span', { text: 'Vérifier la clé' })]);
+
+  // Repli : certaines clés n'ont pas le droit de lister les voix mais peuvent
+  // parler. On accepte alors un identifiant de voix collé à la main.
+  const manuel = h('input', {
+    class: 'input', type: 'text', placeholder: 'ou collez un identifiant de voix',
+    'aria-label': 'Identifiant de voix', value: cfg.voiceId || '',
+    autocapitalize: 'off', spellcheck: 'false',
+    onchange: (e) => {
+      const v = e.target.value.trim();
+      if (v) { ai.setVoice(v, `voix ${v.slice(0, 6)}…`); toast('Voix enregistrée.'); }
+    },
+  });
 
   card.append(
     h('p', { class: 'small', html: `Clé enregistrée : <strong>${escapeHtml(ai.voiceKeyHint())}</strong>${cfg.voiceName ? ` · voix <strong>${escapeHtml(cfg.voiceName)}</strong>` : ''}` }),
     liste,
     charger,
+    diag,
+    tester,
+    h('details', { class: 'deepen__box' }, [
+      h('summary', { class: 'summary' }, [icon('info'), h('span', { text: 'La voix ne marche pas ?' })]),
+      h('div', { class: 'deepen__inner' }, [
+        h('div', { class: 'prose', html: `
+<p>Presque toujours, la clé est bonne mais ses <strong>permissions</strong> sont
+trop étroites. Sur <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" rel="noopener">elevenlabs.io → API Keys</a>,
+modifiez la clé et cochez au minimum :</p>
+<ul><li><strong>Voices</strong> : Read</li><li><strong>Text to Speech</strong> : Access</li><li><strong>User</strong> : Read (pour le bouton « Vérifier la clé »)</li></ul>
+<p>Si vous ne pouvez pas changer les permissions, collez directement l'identifiant
+d'une voix ci-dessous : il se trouve dans l'adresse de la page de la voix, sur le
+site d'ElevenLabs.</p>` }),
+        manuel,
+      ]),
+    ]),
     h('button', {
       class: 'btn btn--quiet', type: 'button',
       onclick: async () => {

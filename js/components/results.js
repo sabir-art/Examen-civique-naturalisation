@@ -112,19 +112,31 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
     parts.push(h('div', { class: 'card' }, [
       h('h3', { class: 'card__title', text: `${wrong.length} question${wrong.length > 1 ? 's' : ''} à revoir` }),
       h('p', { class: 'card__sub', text: 'Relisez la bonne réponse et son explication : c\'est là que se joue la progression.' }),
-      h('div', { class: 'stack stack--tight mt' }, wrong.map((d) => {
+      h('div', { class: 'stack stack--tight mt' }, wrong.map((d, i) => {
         const q = findQuestion(d.qid);
         if (!q) return null;
-        return h('details', { class: 'card card--flat card--pad-sm' }, [
-          h('summary', { style: 'cursor:pointer;font-weight:600;font-size:14.5px', text: q.scenario ? `${q.scenario} — ${q.q}` : q.q }),
-          h('div', { class: 'mt small' }, [
-            d.chosen ? h('p', { class: 'muted', html: `Votre réponse : <strong>${escapeHtml(d.chosen)}</strong>` }) : h('p', { class: 'muted', text: 'Aucune réponse donnée.' }),
-            h('p', { style: 'margin-top:6px', html: `Bonne réponse : <strong>${escapeHtml(d.correct)}</strong>` }),
-            h('p', { class: 'muted', style: 'margin-top:8px', text: q.why }),
+        return h('details', { class: 'correc' }, [
+          h('summary', { class: 'correc__q' }, [
+            h('span', { class: 'correc__num', text: String(i + 1) }),
+            h('span', { text: q.scenario ? `${q.scenario} — ${q.q}` : q.q }),
+          ]),
+          h('div', { class: 'correc__body' }, [
+            h('p', { class: 'correc__label', text: 'Votre réponse' }),
+            h('div', { class: 'answerbox answerbox--bad' }, [
+              icon('cross'),
+              h('span', { text: d.chosen ?? 'Aucune réponse donnée' }),
+            ]),
+            h('p', { class: 'correc__label', text: 'Bonne réponse' }),
+            h('div', { class: 'answerbox answerbox--ok' }, [
+              icon('check'),
+              h('span', { text: d.correct }),
+            ]),
+            h('p', { class: 'correc__label', text: 'Explication' }),
+            h('p', { class: 'small muted', text: q.why }),
             h('a', {
-              class: 'linkbtn', style: 'display:inline-block;margin-top:10px',
+              class: 'linkbtn', style: 'display:inline-block;margin-top:12px',
               href: `#/assistant/q/${encodeURIComponent(d.qid)}`,
-              text: "Faire expliquer autrement →",
+              text: 'Faire expliquer autrement →',
             }),
           ]),
         ]);
@@ -149,8 +161,4 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
 
   parts.push(h('div', { class: 'stack stack--tight' }, buttons));
   return h('div', { class: 'stack' }, parts);
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }

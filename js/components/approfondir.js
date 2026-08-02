@@ -93,17 +93,30 @@ export function createApprofondir(q, chosen = null) {
     }
   }
 
+  const contenu = h('div', { class: 'deepen__inner stack stack--tight' }, [
+    chips,
+    h('div', { class: 'row', style: 'gap:8px' }, [field, envoyer]),
+    answer,
+  ]);
+
   const details = h('details', { class: 'deepen__box' }, [
     h('summary', { class: 'summary' }, [
       icon('star'),
       h('span', { text: 'Approfondir avec l\'IA' }),
     ]),
-    h('div', { class: 'stack stack--tight', style: 'margin-top:10px' }, [
-      chips,
-      h('div', { class: 'row', style: 'gap:8px' }, [field, envoyer]),
-      answer,
-    ]),
+    contenu,
   ]);
+
+  // Tant que le panneau est ouvert, la barre d'action quitte le mode collé et
+  // redescend sous le contenu : sinon « Question suivante » reste en travers du
+  // panneau et cache les propositions.
+  details.addEventListener('toggle', () => {
+    root.closest('.quiz')?.classList.toggle('is-deepened', details.open);
+    if (!details.open) return;
+    requestAnimationFrame(() => {
+      details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
 
   root.append(
     h('div', { class: 'deepen__row' }, [

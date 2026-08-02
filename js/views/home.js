@@ -70,7 +70,10 @@ export default function renderHome() {
 
   const tete = h('div', { class: 'greet' }, [
     h('div', { class: 'grow' }, [
-      h('p', { class: 'greet__hello', text: `${salut} ${p.name}` }),
+      h('p', { class: 'greet__hello' }, [
+        h('span', { text: `${salut} ${p.name} ` }),
+        h('span', { class: 'wave', 'aria-hidden': 'true', text: '👋' }),
+      ]),
       h('p', {
         class: 'greet__line',
         text: days === null ? "Prêt à continuer votre préparation ?"

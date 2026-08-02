@@ -88,7 +88,12 @@ export function createQuiz({
         disabled: revealed,
         onclick: () => pick(i),
       }, [
-        h('span', { class: 'choice__key', text: LETTERS[i] }),
+        // Pastille ronde façon bouton radio : on voit d'un coup d'œil ce qui
+        // est coché, et la lettre reste pour repérer la réponse à l'oral.
+        h('span', { class: 'choice__key' }, [
+          h('span', { class: 'choice__letter', text: LETTERS[i] }),
+          h('span', { class: 'choice__mark' }, icon('check')),
+        ]),
         h('span', { class: 'choice__text', text }),
       ]);
       if (revealed) {

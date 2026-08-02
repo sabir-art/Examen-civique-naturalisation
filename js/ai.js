@@ -429,6 +429,37 @@ export function setVoice(voiceId, name) {
   write({ ...cfg, tts: { ...(cfg.tts || {}), voiceId, voiceName: name } });
 }
 
+/**
+ * Traduit une erreur ElevenLabs en message actionnable.
+ *
+ * Un 401 ne veut presque jamais dire « clé fausse » : le plus souvent la clé
+ * est bonne mais a été créée avec des permissions restreintes, et ElevenLabs
+ * le précise dans le corps de la réponse. On relaie donc ce détail, sinon
+ * l'utilisateur cherche du mauvais côté.
+ */
+async function ttsMessage(res) {
+  let detail = '';
+  let code = '';
+  try {
+    const payload = await res.json();
+    const d = payload?.detail ?? payload;
+    code = d?.status || d?.code || '';
+    detail = typeof d === 'string' ? d : (d?.message || '');
+  } catch {
+    /* corps illisible */
+  }
+
+  if (res.status === 401 || res.status === 403) {
+    if (/permission/i.test(code) || /permission/i.test(detail)) {
+      return `Cette clé ElevenLabs n'a pas les droits nécessaires. Sur elevenlabs.io → API Keys, modifiez-la et cochez « Voices : Read » et « Text to Speech ». ${detail}`.trim();
+    }
+    if (/quota|limit/i.test(code + detail)) return `Quota ElevenLabs atteint. ${detail}`.trim();
+    return `Clé ElevenLabs refusée${detail ? ` : ${detail}` : '. Vérifiez-la sur elevenlabs.io → API Keys.'}`;
+  }
+  if (res.status === 429) return 'Trop de demandes, ou quota épuisé. Réessayez dans un instant.';
+  return `ElevenLabs : erreur ${res.status}${detail ? ` — ${detail}` : ''}.`;
+}
+
 /** Voix disponibles sur le compte ElevenLabs de l'utilisateur. */
 export async function listVoices() {
   const { key } = voiceConfig();
@@ -439,16 +470,39 @@ export async function listVoices() {
   } catch {
     throw new Error("Impossible de joindre ElevenLabs. Vérifiez votre connexion.");
   }
-  if (!res.ok) {
-    if (res.status === 401) throw new Error('Clé ElevenLabs refusée.');
-    throw new Error(`ElevenLabs : erreur ${res.status}.`);
-  }
+  if (!res.ok) throw new Error(await ttsMessage(res));
   const json = await res.json();
   return (json.voices || []).map((v) => ({
     id: v.voice_id,
     name: v.name,
     note: [v.labels?.gender, v.labels?.accent, v.labels?.description].filter(Boolean).join(' · '),
   }));
+}
+
+/**
+ * Vérifie la clé et dit précisément ce qui manque.
+ * @returns {Promise<{ok: boolean, message: string}>}
+ */
+export async function testVoiceKey() {
+  const { key } = voiceConfig();
+  if (!key) return { ok: false, message: 'Aucune clé enregistrée.' };
+  try {
+    const res = await fetch(`${TTS_ENDPOINT}/user`, { headers: { 'xi-api-key': key } });
+    if (res.ok) {
+      const u = await res.json();
+      const c = u?.subscription?.character_count;
+      const lim = u?.subscription?.character_limit;
+      return {
+        ok: true,
+        message: Number.isFinite(c) && Number.isFinite(lim)
+          ? `Clé valide. ${lim - c} caractères restants ce mois-ci.`
+          : 'Clé valide.',
+      };
+    }
+    return { ok: false, message: await ttsMessage(res) };
+  } catch {
+    return { ok: false, message: "Impossible de joindre ElevenLabs. Vérifiez votre connexion." };
+  }
 }
 
 /**
@@ -470,11 +524,7 @@ export async function speak(text, { signal } = {}) {
       body: JSON.stringify({ text: clean, model_id: TTS_MODEL }),
       signal,
     });
-    if (!res.ok) {
-      if (res.status === 401) throw new Error('Clé ElevenLabs refusée.');
-      if (res.status === 429) throw new Error('Quota ElevenLabs épuisé pour le moment.');
-      throw new Error(`Lecture impossible (erreur ${res.status}).`);
-    }
+    if (!res.ok) throw new Error(await ttsMessage(res));
     const url = URL.createObjectURL(await res.blob());
     const audio = new Audio(url);
     audio.addEventListener('ended', () => URL.revokeObjectURL(url), { once: true });
