@@ -8,12 +8,18 @@ import { THEMES, EXAM } from '../data/programme.js';
 import { BY_ID } from '../data/questions.js';
 import { LIVRET_BY_ID } from '../data/q-livret.js';
 import { CHAPITRE_BY_KEY, PARTIE_BY_KEY } from '../data/livret.js';
+import { ROMAN_BY_ID, CHAPITRE_BY_KEY as ROMAN_BY_KEY, ACTE_BY_KEY } from '../data/roman.js';
 
-/** Libellé d'un groupe de résultats : thème d'examen, partie ou chapitre du livret. */
+/** Libellé d'un groupe de résultats : thème d'examen, partie du livret, chapitre du récit. */
 const groupLabel = (key) =>
-  THEMES[key]?.short || PARTIE_BY_KEY.get(key)?.title || CHAPITRE_BY_KEY.get(key)?.title || key;
+  THEMES[key]?.short
+  || PARTIE_BY_KEY.get(key)?.title
+  || CHAPITRE_BY_KEY.get(key)?.title
+  || ROMAN_BY_KEY.get(key)?.titre
+  || ACTE_BY_KEY.get(key)?.titre
+  || key;
 
-const findQuestion = (id) => BY_ID.get(id) || LIVRET_BY_ID.get(id) || null;
+const findQuestion = (id) => BY_ID.get(id) || LIVRET_BY_ID.get(id) || ROMAN_BY_ID.get(id) || null;
 
 function ring(value, total) {
   const r = 54;

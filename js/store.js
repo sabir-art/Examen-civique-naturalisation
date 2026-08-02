@@ -45,6 +45,7 @@ function migrate(s) {
     p.progress = p.progress || {};
     p.exams = p.exams || [];
     p.days = p.days || {};
+    p.read = p.read || {};
     p.settings = { theme: 'auto', ...(p.settings || {}) };
   }
   return s;
@@ -90,6 +91,7 @@ export function createProfile(name, goalDate = null) {
     progress: {},   // qid -> { box, seen, ok, ko, last, due }
     exams: [],      // historique des examens blancs
     days: {},       // 'AAAA-MM-JJ' -> nombre de questions traitées
+    read: {},       // clé de chapitre lu -> horodatage
     settings: { theme: 'auto' },
   };
   state.activeProfile = id;
@@ -183,6 +185,28 @@ export function weakIds() {
     .map(([id]) => id);
 }
 
+/* -------------------------------------------------------- lecture suivie */
+
+/** Marque un chapitre comme lu (récit, livret…). */
+export function markRead(key) {
+  const p = current();
+  if (!p || !key) return;
+  p.read = p.read || {};
+  if (p.read[key]) return;
+  p.read[key] = Date.now();
+  persist();
+}
+
+export function isRead(key) {
+  return Boolean(current()?.read?.[key]);
+}
+
+/** Nombre de clés lues parmi celles fournies. */
+export function readCount(keys) {
+  const read = current()?.read || {};
+  return keys.filter((k) => read[k]).length;
+}
+
 /* ------------------------------------------------------------- examens */
 
 export function saveExam(result) {
@@ -252,6 +276,7 @@ export function replaceCurrentProfileData(data) {
   p.progress = data.progress || {};
   p.exams = data.exams || [];
   p.days = data.days || {};
+  p.read = data.read || {};
   if (data.goalDate !== undefined) p.goalDate = data.goalDate;
   persist();
 }
@@ -273,5 +298,6 @@ export function resetProgress() {
   p.progress = {};
   p.exams = [];
   p.days = {};
+  p.read = {};
   persist();
 }

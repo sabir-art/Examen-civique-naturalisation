@@ -11,6 +11,7 @@ import renderReviser from './views/reviser.js';
 import renderExamen from './views/examen.js';
 import renderCours from './views/cours.js';
 import renderLivret from './views/livret.js';
+import renderRoman from './views/roman.js';
 import renderProgres from './views/progres.js';
 import renderCompte from './views/compte.js';
 
@@ -38,6 +39,8 @@ export function applyTheme() {
 
 const ROUTES = [
   { path: /^\/$/, view: renderHome, title: 'Examen civique', tab: '/' },
+  { path: /^\/histoire$/, view: renderRoman, title: 'La France racontée', tab: '/histoire' },
+  { path: /^\/histoire\/(.+)$/, view: renderRoman, title: 'La France racontée', tab: '/histoire', back: '#/histoire' },
   { path: /^\/reviser$/, view: renderReviser, title: 'Réviser', tab: '/reviser' },
   { path: /^\/reviser\/(.+)$/, view: renderReviser, title: 'Entraînement', tab: '/reviser', back: '#/reviser' },
   { path: /^\/examen$/, view: renderExamen, title: 'Examen blanc', tab: '/examen' },

@@ -10,6 +10,10 @@ import { QUESTIONS, BY_ID, pool } from './data/questions.js';
 import { BLUEPRINT, THEMES, EXAM, blueprintCount } from './data/programme.js';
 import { LIVRET_QUESTIONS, LIVRET_BY_ID, questionsOf } from './data/q-livret.js';
 import { CHAPITRES, CHAPITRE_BY_KEY } from './data/livret.js';
+import {
+  ROMAN_QUESTIONS, ROMAN_BY_ID, CHAPITRES as ROMAN_CHAPITRES,
+  CHAPITRE_BY_KEY as ROMAN_BY_KEY, questionsOf as romanQuestionsOf, questionsOfActe,
+} from './data/roman.js';
 import { shuffle, sample, pct } from './lib/util.js';
 import * as store from './store.js';
 
@@ -19,20 +23,28 @@ import * as store from './store.js';
  */
 export function toCard(q, { group = null } = {}) {
   const order = shuffle(q.c.map((_, i) => i));
-  const tags = q.source === 'livret'
-    ? [
+  let tags;
+  if (q.source === 'livret') {
+    tags = [
       { text: 'Livret du citoyen', tone: 'brand' },
       { text: CHAPITRE_BY_KEY.get(q.chapter)?.title || 'Chapitre', tone: null },
-    ]
-    : [
+    ];
+  } else if (q.source === 'roman') {
+    tags = [
+      { text: 'La France racontée', tone: 'brand' },
+      { text: ROMAN_BY_KEY.get(q.chapitre)?.titre || 'Chapitre', tone: null },
+    ];
+  } else {
+    tags = [
       { text: THEMES[q.theme]?.short || 'Question', tone: 'brand' },
       { text: q.type === 'situation' ? 'Mise en situation' : 'Connaissances', tone: null },
     ];
+  }
   return {
     id: q.id,
     q,
     tags,
-    group: group || (q.source === 'livret' ? q.chapter : q.theme),
+    group: group || q.chapter || q.chapitre || q.theme,
     choices: order.map((i) => q.c[i]),
     correct: order.indexOf(q.a),
   };
@@ -158,7 +170,9 @@ export const modeOf = (exam) => (EXAM_MODES[exam?.mode] ? exam.mode : 'officiel'
  */
 export function buildTraining({ mode = 'theme', theme = null, sub = null, count = 20, ids = null } = {}) {
   if (ids) {
-    return ids.map((id) => BY_ID.get(id)).filter(Boolean).slice(0, count).map(toCard);
+    // Les trois banques sont acceptées : la reprise des erreurs sert aussi
+    // aux séries du livret et du récit.
+    return ids.map((id) => findQuestion(id)).filter(Boolean).slice(0, count).map((q) => toCard(q));
   }
 
   if (mode === 'revision') {
@@ -340,9 +354,76 @@ export function livretOverview() {
   };
 }
 
-/** Recherche d'une question dans l'une ou l'autre des deux banques. */
+/* ------------------------------------------------- la France racontée ---- */
+
+/**
+ * Questions du récit. Troisième banque, indépendante des deux autres :
+ * elles vérifient ce qui a été retenu d'un chapitre qu'on vient de lire.
+ */
+export function buildRomanSet({ chapitre = null, acte = null, count = 20 } = {}) {
+  let candidates = ROMAN_QUESTIONS;
+  if (chapitre) candidates = romanQuestionsOf(chapitre);
+  else if (acte) candidates = questionsOfActe(acte);
+
+  const never = [];
+  const due = [];
+  const rest = [];
+  const now = Date.now();
+  for (const q of candidates) {
+    const r = store.progressOf(q.id);
+    if (!r) never.push(q);
+    else if (r.due <= now) due.push(q);
+    else rest.push(q);
+  }
+  return [...shuffle(never), ...shuffle(due), ...shuffle(rest)].slice(0, count).map((q) => toCard(q));
+}
+
+/** Maîtrise d'un chapitre du récit (0 à 1). Sans argument : récit entier. */
+export function romanMastery(chapitre = null) {
+  const qs = chapitre ? romanQuestionsOf(chapitre) : ROMAN_QUESTIONS;
+  if (!qs.length) return 0;
+  return qs.reduce((s, q) => s + scoreOf(q.id), 0) / qs.length;
+}
+
+export function romanActeMastery(acteKey) {
+  const qs = questionsOfActe(acteKey);
+  if (!qs.length) return 0;
+  return qs.reduce((s, q) => s + scoreOf(q.id), 0) / qs.length;
+}
+
+/** Chiffres-clés de la partie récit, lecture comprise. */
+export function romanOverview() {
+  let seen = 0, ok = 0, ko = 0, due = 0;
+  const now = Date.now();
+  for (const q of ROMAN_QUESTIONS) {
+    const r = store.progressOf(q.id);
+    if (!r) continue;
+    seen += 1;
+    ok += r.ok;
+    ko += r.ko;
+    if (r.due <= now) due += 1;
+  }
+  const keys = ROMAN_CHAPITRES.map((c) => c.key);
+  const lus = store.readCount(keys);
+  return {
+    total: ROMAN_QUESTIONS.length,
+    chapitres: keys.length,
+    lus,
+    seen,
+    due,
+    accuracy: ok + ko > 0 ? pct(ok, ok + ko) : null,
+    mastery: Math.round(romanMastery() * 100),
+  };
+}
+
+/** Premier chapitre non lu — celui que l'on propose de reprendre. */
+export function nextUnread() {
+  return ROMAN_CHAPITRES.find((c) => !store.isRead(c.key)) || null;
+}
+
+/** Recherche d'une question dans l'une des trois banques. */
 export function findQuestion(id) {
-  return BY_ID.get(id) || LIVRET_BY_ID.get(id) || null;
+  return BY_ID.get(id) || LIVRET_BY_ID.get(id) || ROMAN_BY_ID.get(id) || null;
 }
 
 /** Message d'orientation affiché sur l'accueil. */

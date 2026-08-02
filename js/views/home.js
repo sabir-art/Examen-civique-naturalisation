@@ -3,7 +3,7 @@
 import { h, icon } from '../lib/dom.js';
 import { daysBetween, plural } from '../lib/util.js';
 import * as store from '../store.js';
-import { readiness, overview, advice } from '../engine.js';
+import { readiness, overview, advice, romanOverview, nextUnread } from '../engine.js';
 import { EXAM } from '../data/programme.js';
 
 function ringLarge(value) {
@@ -74,7 +74,18 @@ export default function renderHome() {
     ]),
   ]);
 
+  const roman = romanOverview();
+  const suite = nextUnread();
+
   const shortcuts = h('div', { class: 'list' }, [
+    shortcut({
+      to: suite ? `#/histoire/c/${suite.key}` : '#/histoire',
+      name: 'star', title: 'La France racontée',
+      sub: suite
+        ? (roman.lus === 0 ? `L'histoire du pays en ${roman.chapitres} chapitres — commencer` : `Chapitre ${suite.num} : ${suite.titre}`)
+        : `${roman.chapitres} chapitres lus · mémorisation ${roman.mastery} %`,
+      badge: roman.lus > 0 && suite ? { tone: 'brand', text: `${roman.lus}/${roman.chapitres}` } : null,
+    }),
     shortcut({
       to: '#/examen', name: 'clock', title: 'Examen blanc',
       sub: `3 formats · ${EXAM.questions} questions · ${EXAM.minutes} min · seuil ${EXAM.passing}/${EXAM.questions}`,
@@ -94,7 +105,7 @@ export default function renderHome() {
       badge: { tone: 'bad', text: String(o.weak) },
     }) : null,
     shortcut({
-      to: '#/livret', name: 'star', title: 'Livret du citoyen',
+      to: '#/livret', name: 'bank', title: 'Livret du citoyen',
       sub: 'Le document officiel, chapitre par chapitre',
     }),
     shortcut({

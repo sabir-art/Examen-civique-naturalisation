@@ -181,7 +181,7 @@ function session({ mode, count, label }) {
 
 /* ---------------------------------------------------------- exécution */
 
-export function runQuiz({ container, cards, immediate, label, backTo, onRestart, timeLimitSec = null, isExam = false, onFinished }) {
+export function runQuiz({ container, cards, immediate, label, backTo, onRestart, timeLimitSec = null, isExam = false, onFinished, extraActions = [] }) {
   const quiz = createQuiz({
     cards,
     immediate,
@@ -197,7 +197,10 @@ export function runQuiz({ container, cards, immediate, label, backTo, onRestart,
           const again = buildTraining({ ids, count: ids.length });
           runQuiz({ container, cards: again, immediate: true, label: 'Reprise des erreurs', backTo, onRestart });
         },
-        actions: [h('a', { class: 'btn btn--ghost', href: backTo || '#/', text: 'Retour' })],
+        actions: [
+          ...extraActions,
+          h('a', { class: 'btn btn--ghost', href: backTo || '#/', text: 'Retour' }),
+        ],
       }));
       window.scrollTo(0, 0);
     },

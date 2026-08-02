@@ -3,7 +3,7 @@
 import { h, icon } from '../lib/dom.js';
 import { formatDateShort, duration, pct, plural } from '../lib/util.js';
 import { EXAM } from '../data/programme.js';
-import { overview, themeStats, readiness, EXAM_MODES, modeOf } from '../engine.js';
+import { overview, themeStats, readiness, EXAM_MODES, modeOf, livretOverview, romanOverview } from '../engine.js';
 import * as store from '../store.js';
 
 export default function renderProgres() {
@@ -54,6 +54,29 @@ export default function renderProgres() {
           h('div', { class: 'bar' }, h('div', { class: `bar__fill bar__fill--${t}`, style: `width:${m}%` })),
         ]);
       })),
+  ]);
+
+  // Les deux sections annexes sont suivies séparément : elles ne modifient ni
+  // la préparation globale ni la maîtrise par thème affichées plus haut.
+  const lv = livretOverview();
+  const rm = romanOverview();
+  const autres = h('div', { class: 'card' }, [
+    h('h2', { class: 'card__title', text: 'Les autres sections' }),
+    h('p', { class: 'card__sub', text: "Suivies à part : elles n'entrent pas dans l'estimation de préparation à l'épreuve." }),
+    h('div', { class: 'themestat mt' }, [
+      { href: '#/histoire', name: 'La France racontée', m: rm.mastery, sub: `${rm.lus}/${rm.chapitres} chapitres lus · ${rm.seen}/${rm.total} questions vues` },
+      { href: '#/livret', name: 'Livret du citoyen', m: lv.mastery, sub: `${lv.seen}/${lv.total} questions vues` },
+    ].map((s) => {
+      const t = s.m >= 70 ? 'ok' : s.m >= 35 ? 'warn' : 'bad';
+      return h('a', { class: 'themestat__row', href: s.href, style: 'text-decoration:none;color:inherit' }, [
+        h('div', { class: 'themestat__head' }, [
+          h('span', { class: 'themestat__name', text: s.name }),
+          h('span', { class: 'themestat__val', text: `${s.m} %` }),
+        ]),
+        h('div', { class: 'bar' }, h('div', { class: `bar__fill bar__fill--${t}`, style: `width:${s.m}%` })),
+        h('p', { class: 'hint', style: 'margin-top:5px', text: s.sub }),
+      ]);
+    })),
   ]);
 
   const officiels = history.filter((e) => modeOf(e) === 'officiel');
@@ -107,6 +130,7 @@ export default function renderProgres() {
       kpis,
       empty,
       themes,
+      autres,
       spark,
       historyCard,
     ].filter(Boolean)),
