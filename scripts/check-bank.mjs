@@ -6,6 +6,8 @@
  */
 import { QUESTIONS, audit, pool } from '../js/data/questions.js';
 import { BLUEPRINT, THEMES, EXAM, blueprintCount } from '../js/data/programme.js';
+import { LIVRET_QUESTIONS, questionsOf } from '../js/data/q-livret.js';
+import { PARTIES, CHAPITRES, TOTAL_SECTIONS } from '../js/data/livret.js';
 
 let failed = false;
 const fail = (msg) => { console.error(`  ✗ ${msg}`); failed = true; };
@@ -44,6 +46,35 @@ const connaissances = pool({ type: 'connaissance' }).length;
 const plannedSit = BLUEPRINT.filter((b) => b.type === 'situation').reduce((s, b) => s + b.n, 0);
 console.log(`Connaissances : ${connaissances} · Mises en situation : ${situations} (12 attendues par examen, ${plannedSit} planifiées)`);
 if (plannedSit !== 12) fail(`le plan prévoit ${plannedSit} mises en situation au lieu de 12`);
+
+/* ------------------------------------------------- livret du citoyen ---- */
+
+console.log(`\nLivret du citoyen : ${PARTIES.length} parties, ${CHAPITRES.length} chapitres, ${TOTAL_SECTIONS} sections`);
+console.log(`Banque du livret : ${LIVRET_QUESTIONS.length} questions`);
+
+const livretIds = new Set();
+const examIds = new Set(QUESTIONS.map((q) => q.id));
+for (const q of LIVRET_QUESTIONS) {
+  const at = `${q.id} — ${(q.q || '').slice(0, 45)}`;
+  if (livretIds.has(q.id)) fail(`Identifiant dupliqué dans le livret : ${at}`);
+  livretIds.add(q.id);
+  if (examIds.has(q.id)) fail(`Collision d'identifiant avec la banque d'examen : ${at}`);
+  if (!Array.isArray(q.c) || q.c.length < 3) fail(`Moins de 3 propositions : ${at}`);
+  if (typeof q.a !== 'number' || q.a < 0 || q.a >= (q.c || []).length) fail(`Index de réponse invalide : ${at}`);
+  if (new Set(q.c).size !== q.c.length) fail(`Propositions identiques : ${at}`);
+  if (!q.why) fail(`Explication manquante : ${at}`);
+  if (!CHAPITRES.some((c) => c.key === q.chapter)) fail(`Chapitre inconnu (${q.chapter}) : ${at}`);
+}
+
+console.log('\nCouverture des chapitres du livret');
+for (const c of CHAPITRES) {
+  const n = questionsOf(c.key).length;
+  const label = `${c.partieTitle} / ${c.num}. ${c.title}`;
+  if (n === 0 && c.key !== 'ax-i' && c.key !== 'ax-iii') fail(`${label} : aucune question`);
+  else console.log(`  ${n ? '✓' : '·'} ${label.slice(0, 62).padEnd(64)} ${String(n).padStart(3)} questions`);
+}
+
+console.log(`\nTotal des deux banques : ${QUESTIONS.length + LIVRET_QUESTIONS.length} questions`);
 
 console.log(failed ? '\n✗ Contrôle en échec' : '\n✓ Contrôle réussi');
 process.exit(failed ? 1 : 0);

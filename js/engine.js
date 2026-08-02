@@ -8,6 +8,8 @@
 
 import { QUESTIONS, BY_ID, pool } from './data/questions.js';
 import { BLUEPRINT, THEMES, EXAM, blueprintCount } from './data/programme.js';
+import { LIVRET_QUESTIONS, LIVRET_BY_ID, questionsOf } from './data/q-livret.js';
+import { CHAPITRES, CHAPITRE_BY_KEY } from './data/livret.js';
 import { shuffle, sample, pct } from './lib/util.js';
 import * as store from './store.js';
 
@@ -17,9 +19,20 @@ import * as store from './store.js';
  */
 export function toCard(q) {
   const order = shuffle(q.c.map((_, i) => i));
+  const tags = q.source === 'livret'
+    ? [
+      { text: 'Livret du citoyen', tone: 'brand' },
+      { text: CHAPITRE_BY_KEY.get(q.chapter)?.title || 'Chapitre', tone: null },
+    ]
+    : [
+      { text: THEMES[q.theme]?.short || 'Question', tone: 'brand' },
+      { text: q.type === 'situation' ? 'Mise en situation' : 'Connaissances', tone: null },
+    ];
   return {
     id: q.id,
     q,
+    tags,
+    group: q.source === 'livret' ? q.chapter : q.theme,
     choices: order.map((i) => q.c[i]),
     correct: order.indexOf(q.a),
   };
@@ -181,6 +194,62 @@ export function overview() {
     due: store.dueIds().length,
     weak: store.weakIds().length,
   };
+}
+
+/* ------------------------------------------------- livret du citoyen ---- */
+
+/**
+ * Série de questions portant sur le livret officiel.
+ * Banque distincte de celle des examens blancs : elle sert à vérifier
+ * chapitre par chapitre la maîtrise du document du ministère.
+ */
+export function buildLivretSet({ chapter = null, count = 15 } = {}) {
+  const candidates = chapter ? questionsOf(chapter) : LIVRET_QUESTIONS;
+  const never = [];
+  const due = [];
+  const rest = [];
+  const now = Date.now();
+  for (const q of candidates) {
+    const r = store.progressOf(q.id);
+    if (!r) never.push(q);
+    else if (r.due <= now) due.push(q);
+    else rest.push(q);
+  }
+  return [...shuffle(never), ...shuffle(due), ...shuffle(rest)].slice(0, count).map(toCard);
+}
+
+/** Maîtrise d'un chapitre du livret (0 à 1). Sans argument : livret entier. */
+export function livretMastery(chapter = null) {
+  const qs = chapter ? questionsOf(chapter) : LIVRET_QUESTIONS;
+  if (!qs.length) return 0;
+  return qs.reduce((s, q) => s + scoreOf(q.id), 0) / qs.length;
+}
+
+/** Chiffres-clés de la partie livret. */
+export function livretOverview() {
+  let seen = 0, ok = 0, ko = 0, due = 0;
+  const now = Date.now();
+  for (const q of LIVRET_QUESTIONS) {
+    const r = store.progressOf(q.id);
+    if (!r) continue;
+    seen += 1;
+    ok += r.ok;
+    ko += r.ko;
+    if (r.due <= now) due += 1;
+  }
+  return {
+    total: LIVRET_QUESTIONS.length,
+    chapters: CHAPITRES.length,
+    seen,
+    due,
+    accuracy: ok + ko > 0 ? pct(ok, ok + ko) : null,
+    mastery: Math.round(livretMastery() * 100),
+  };
+}
+
+/** Recherche d'une question dans l'une ou l'autre des deux banques. */
+export function findQuestion(id) {
+  return BY_ID.get(id) || LIVRET_BY_ID.get(id) || null;
 }
 
 /** Message d'orientation affiché sur l'accueil. */

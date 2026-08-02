@@ -70,10 +70,13 @@ export function createQuiz({
     countEl.textContent = `Question ${index + 1} sur ${cards.length}`;
     barFill.style.width = `${pct(index + (revealed || chosen !== null ? 1 : 0), cards.length)}%`;
 
-    const tags = h('div', { class: 'qtag' }, [
-      h('span', { class: 'badge badge--brand', text: THEMES[q.theme].short }),
-      h('span', { class: 'badge', text: q.type === 'situation' ? 'Mise en situation' : (SUBS[q.sub] || 'Connaissances') }),
-    ]);
+    const labels = card.tags || [
+      { text: THEMES[q.theme]?.short || 'Question', tone: 'brand' },
+      { text: q.type === 'situation' ? 'Mise en situation' : (SUBS[q.sub] || 'Connaissances'), tone: null },
+    ];
+    const tags = h('div', { class: 'qtag' }, labels.map((t) => h('span', {
+      class: `badge${t.tone ? ` badge--${t.tone}` : ''}`, text: t.text,
+    })));
 
     const choices = h('div', { class: 'choices' }, card.choices.map((text, i) => {
       const isChosen = chosen === i;
@@ -191,7 +194,7 @@ export function createQuiz({
 
     const detail = cards.map((c, i) => ({
       qid: c.id,
-      theme: c.q.theme,
+      theme: c.group || c.q.theme,
       ok: answers[i] === c.correct,
       chosen: answers[i] === null ? null : c.choices[answers[i]],
       correct: c.choices[c.correct],

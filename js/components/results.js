@@ -6,6 +6,14 @@ import { h, icon } from '../lib/dom.js';
 import { duration, pct } from '../lib/util.js';
 import { THEMES, EXAM } from '../data/programme.js';
 import { BY_ID } from '../data/questions.js';
+import { LIVRET_BY_ID } from '../data/q-livret.js';
+import { CHAPITRE_BY_KEY } from '../data/livret.js';
+
+/** Libellé d'un groupe de résultats : thème d'examen ou chapitre du livret. */
+const groupLabel = (key) =>
+  THEMES[key]?.short || CHAPITRE_BY_KEY.get(key)?.title || key;
+
+const findQuestion = (id) => BY_ID.get(id) || LIVRET_BY_ID.get(id) || null;
 
 function ring(value, total) {
   const r = 54;
@@ -52,7 +60,7 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
       const tone = p >= 80 ? 'ok' : p >= 50 ? 'warn' : 'bad';
       return h('div', { class: 'themestat__row' }, [
         h('div', { class: 'themestat__head' }, [
-          h('span', { class: 'themestat__name', text: THEMES[key]?.short || key }),
+          h('span', { class: 'themestat__name', text: groupLabel(key) }),
           h('span', { class: 'themestat__val', text: `${v.ok}/${v.total}` }),
         ]),
         h('div', { class: 'bar' }, h('div', { class: `bar__fill bar__fill--${tone}`, style: `width:${p}%` })),
@@ -62,7 +70,7 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
   const parts = [
     head,
     h('div', { class: 'card' }, [
-      h('h3', { class: 'card__title', text: 'Résultat par thème' }),
+      h('h3', { class: 'card__title', text: isExam ? 'Résultat par thème' : 'Résultat par partie' }),
       h('div', { class: 'themestat mt' }, themeRows),
     ]),
   ];
@@ -72,7 +80,7 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
       h('h3', { class: 'card__title', text: `${wrong.length} question${wrong.length > 1 ? 's' : ''} à revoir` }),
       h('p', { class: 'card__sub', text: 'Relisez la bonne réponse et son explication : c\'est là que se joue la progression.' }),
       h('div', { class: 'stack stack--tight mt' }, wrong.map((d) => {
-        const q = BY_ID.get(d.qid);
+        const q = findQuestion(d.qid);
         if (!q) return null;
         return h('details', { class: 'card card--flat card--pad-sm' }, [
           h('summary', { style: 'cursor:pointer;font-weight:600;font-size:14.5px', text: q.scenario ? `${q.scenario} — ${q.q}` : q.q }),

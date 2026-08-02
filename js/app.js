@@ -10,6 +10,7 @@ import renderHome from './views/home.js';
 import renderReviser from './views/reviser.js';
 import renderExamen from './views/examen.js';
 import renderCours from './views/cours.js';
+import renderLivret from './views/livret.js';
 import renderProgres from './views/progres.js';
 import renderCompte from './views/compte.js';
 
@@ -41,8 +42,10 @@ const ROUTES = [
   { path: /^\/reviser\/(.+)$/, view: renderReviser, title: 'Entraînement', tab: '/reviser', back: '#/reviser' },
   { path: /^\/examen$/, view: renderExamen, title: 'Examen blanc', tab: '/examen' },
   { path: /^\/examen\/(.+)$/, view: renderExamen, title: 'Examen blanc', tab: '/examen', back: '#/examen' },
-  { path: /^\/cours$/, view: renderCours, title: 'Fiches de cours', tab: '/cours' },
+  { path: /^\/cours$/, view: renderCours, title: 'Cours', tab: '/cours' },
   { path: /^\/cours\/(.+)$/, view: renderCours, title: 'Fiche', tab: '/cours', back: '#/cours' },
+  { path: /^\/livret$/, view: renderLivret, title: 'Livret du citoyen', tab: '/cours', back: '#/cours' },
+  { path: /^\/livret\/(.+)$/, view: renderLivret, title: 'Livret du citoyen', tab: '/cours', back: '#/livret' },
   { path: /^\/progres$/, view: renderProgres, title: 'Ma progression', tab: '/progres' },
   { path: /^\/compte$/, view: renderCompte, title: 'Mon compte', back: '#/' },
   { path: /^\/compte\/(.+)$/, view: renderCompte, title: 'Mon compte', back: '#/compte' },

@@ -4,7 +4,8 @@ import { h, icon } from '../lib/dom.js';
 import { COURS, COURS_BY_KEY } from '../data/cours.js';
 import { THEMES } from '../data/programme.js';
 import { pool } from '../data/questions.js';
-import { mastery } from '../engine.js';
+import { mastery, livretOverview } from '../engine.js';
+import { LIVRET, PARTIES, CHAPITRES } from '../data/livret.js';
 
 export default function renderCours({ params }) {
   const key = params[0];
@@ -13,11 +14,34 @@ export default function renderCours({ params }) {
 }
 
 function liste() {
+  const lo = livretOverview();
+
+  const officiel = h('div', { class: 'stack stack--tight' }, [
+    h('p', { class: 'section-title', text: 'Document officiel' }),
+    h('a', { class: 'item', href: '#/livret', style: 'align-items:flex-start' }, [
+      h('span', { class: 'item__icon', style: 'background:var(--accent-100);color:var(--accent)' }, icon('star')),
+      h('span', { class: 'item__body' }, [
+        h('span', { class: 'item__title', text: LIVRET.titre }),
+        h('span', { class: 'item__sub', text: `${LIVRET.edition} · ${LIVRET.editeur}` }),
+        h('span', { class: 'item__sub', style: 'margin-top:6px', text: `${PARTIES.length} parties, ${CHAPITRES.length} chapitres, ${lo.total} questions dédiées` }),
+        h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', {
+          class: `bar__fill bar__fill--${lo.mastery >= 70 ? 'ok' : lo.mastery >= 35 ? 'warn' : 'bad'}`,
+          style: `width:${lo.mastery}%`,
+        })),
+        h('span', { class: 'item__sub', style: 'margin-top:5px', text: `Maîtrise du livret : ${lo.mastery} %` }),
+      ]),
+      h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
+    ]),
+    h('p', { class: 'hint', text: "Le texte du ministère de l'Intérieur, repris intégralement, avec un quiz par chapitre." }),
+  ]);
+
   return {
     node: h('div', { class: 'stack' }, [
-      h('div', { class: 'card' }, [
-        h('h2', { class: 'card__title', text: 'Le programme, résumé' }),
-        h('p', { class: 'card__sub', text: "Cinq fiches calquées sur le livret du citoyen et le référentiel officiel, plus une fiche pratique sur l'épreuve elle-même." }),
+      officiel,
+      h('div', { class: 'divider' }),
+      h('p', { class: 'section-title', text: 'Fiches de révision' }),
+      h('div', { class: 'card card--pad-sm' }, [
+        h('p', { class: 'card__sub', text: "Synthèses rédigées pour l'entraînement : cinq fiches calquées sur le référentiel officiel, plus une fiche pratique sur l'épreuve. Elles complètent le livret sans le remplacer." }),
       ]),
       h('div', { class: 'list' }, COURS.map((c) => {
         const m = c.theme ? Math.round(mastery(c.theme) * 100) : null;
@@ -32,7 +56,7 @@ function liste() {
         ].filter(Boolean));
       })),
     ]),
-    title: 'Fiches de cours',
+    title: 'Cours',
   };
 }
 

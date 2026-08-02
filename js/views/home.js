@@ -94,7 +94,11 @@ export default function renderHome() {
       badge: { tone: 'bad', text: String(o.weak) },
     }) : null,
     shortcut({
-      to: '#/cours', name: 'flag', title: 'Fiches de cours',
+      to: '#/livret', name: 'star', title: 'Livret du citoyen',
+      sub: 'Le document officiel, chapitre par chapitre',
+    }),
+    shortcut({
+      to: '#/cours', name: 'flag', title: 'Fiches de révision',
       sub: 'Le programme résumé, thème par thème',
     }),
   ].filter(Boolean));

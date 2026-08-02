@@ -3,10 +3,23 @@
 Application web gratuite pour s'entraîner au **QCM de l'examen civique** exigé
 pour les demandes de naturalisation déposées depuis le 1er janvier 2026.
 
-- **363 questions** rédigées à partir du programme officiel, avec explication pour chacune
+L'application est organisée en **deux parties bien séparées**, qui se complètent :
+
+| | Banque d'examen | Livret du citoyen |
+|---|---|---|
+| Contenu | 363 questions rédigées à partir du référentiel de l'arrêté du 10 octobre 2025 | Le texte officiel du ministère de l'Intérieur (édition mai 2026), repris intégralement, + 284 questions dédiées |
+| Usage | examens blancs, entraînement par thème, révision espacée | lecture chapitre par chapitre et quiz de vérification |
+| Où | onglets **Examen** et **Réviser** | onglet **Cours → Livret du citoyen** |
+
+Les deux progressions sont suivies séparément : les questions du livret n'entrent
+jamais dans la composition d'un examen blanc et ne modifient pas l'indicateur de
+préparation à l'épreuve.
+
+- **647 questions** au total, avec une explication pour chacune
 - **Examens blancs** de 40 questions en 45 minutes, tirage conforme à la répartition officielle
 - **Révision espacée** : les questions ratées reviennent, celles qui sont acquises s'espacent
-- **Fiches de cours** calquées sur le livret du citoyen
+- **Livret du citoyen intégral** : 6 parties, 16 chapitres, 97 sections, annexes comprises
+- **Fiches de révision** synthétiques, distinctes du livret
 - **Compte et progression** conservés sur l'appareil, avec sauvegarde exportable et synchronisation optionnelle
 - **Fonctionne hors ligne**, installable sur l'écran d'accueil du téléphone
 - Aucune publicité, aucun traçage, aucun compte obligatoire
@@ -65,9 +78,13 @@ js/sync.js              synchronisation cloud optionnelle
 js/components/          composant de quiz et écran de résultats
 js/views/               une vue par écran
 js/data/programme.js    référentiel officiel et plan de tirage des 40 questions
-js/data/questions.js    agrégation de la banque + contrôle d'intégrité
-js/data/q-*.js          les questions, par thème
+js/data/questions.js    agrégation de la banque d'examen + contrôle d'intégrité
+js/data/q-*.js          les questions d'examen, par thème
 js/data/cours.js        fiches de révision
+js/data/livret.js       assemblage du livret du citoyen
+js/data/livret/*.js     le texte officiel, une partie par fichier
+js/data/q-livret.js     les 284 questions du livret, par chapitre
+js/views/livret.js      lecture du livret et quiz par chapitre
 ```
 
 ### Ajouter des questions
@@ -130,8 +147,9 @@ propres données.
 
 - Décret n° 2025-648 du 15 juillet 2025 instituant l'examen civique
 - Arrêté du 10 octobre 2025 relatif au programme, aux épreuves et aux modalités
-  d'organisation de l'examen civique
-- Livret du citoyen, ministère de l'Intérieur (arrêté du 3 juillet 2026)
+  d'organisation de l'examen civique (annexe I : référentiel de connaissances)
+- **Livret du citoyen, ministère de l'Intérieur, édition mai 2026** — transcrit
+  intégralement dans `js/data/livret/`
 - [service-public.fr](https://www.service-public.fr) et [legifrance.gouv.fr](https://www.legifrance.gouv.fr)
 
 ## Avertissement
