@@ -15,8 +15,21 @@ Les deux progressions sont suivies séparément : les questions du livret n'entr
 jamais dans la composition d'un examen blanc et ne modifient pas l'indicateur de
 préparation à l'épreuve.
 
+### Trois formats d'examen blanc
+
+Tous en 40 questions, 45 minutes, seuil 32/40 :
+
+| Format | Tirage |
+|---|---|
+| **Officiel** | Banque d'examen, répartition exacte de l'arrêté du 10 octobre 2025 (11/6/11/8/4, 28 connaissances + 12 mises en situation) |
+| **Livret du citoyen** | Uniquement des questions du livret, avec la même pondération par thème (partie 1 : 11, partie 2 : 6, partie 3 + annexes : 11, partie 4 : 8, partie 5 : 4) |
+| **Aléatoire** | 40 questions au hasard parmi les 647, sans répartition imposée |
+
+Seuls les résultats du format **officiel** entrent dans l'estimation de préparation,
+car lui seul respecte la composition de l'épreuve réelle. L'historique conserve le
+format de chaque tentative.
+
 - **647 questions** au total, avec une explication pour chacune
-- **Examens blancs** de 40 questions en 45 minutes, tirage conforme à la répartition officielle
 - **Révision espacée** : les questions ratées reviennent, celles qui sont acquises s'espacent
 - **Livret du citoyen intégral** : 6 parties, 16 chapitres, 97 sections, annexes comprises
 - **Fiches de révision** synthétiques, distinctes du livret

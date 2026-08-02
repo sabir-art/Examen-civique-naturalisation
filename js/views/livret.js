@@ -68,7 +68,15 @@ function sommaire() {
       actions,
       h('p', { class: 'section-title', text: 'Sommaire du livret' }),
       list,
-      h('p', { class: 'hint center mt', text: "Transcription du livret officiel à des fins de révision. Le PDF de référence reste téléchargeable gratuitement sur les sites en .gouv.fr." }),
+      h('p', { class: 'hint center mt' }, [
+        'Transcription du livret officiel à des fins de révision. Le PDF de référence est téléchargeable gratuitement sur ',
+        h('a', {
+          href: 'https://www.immigration.interieur.gouv.fr/documentation/guides-textes-et-brochures/livret-du-citoyen.html',
+          target: '_blank', rel: 'noopener',
+          text: 'immigration.interieur.gouv.fr',
+        }),
+        '.',
+      ]),
     ]),
     title: 'Livret du citoyen',
     back: '#/cours',

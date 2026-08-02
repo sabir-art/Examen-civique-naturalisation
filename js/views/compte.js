@@ -354,7 +354,15 @@ function aboutView() {
         h('ul', { class: 'prose small', style: 'margin-top:8px' }, [
           h('li', { html: 'Décret n° 2025-648 du 15 juillet 2025 instituant l\'examen civique' }),
           h('li', { html: 'Arrêté du 10 octobre 2025 relatif au programme, aux épreuves et aux modalités d\'organisation de l\'examen civique' }),
-          h('li', { html: 'Livret du citoyen, ministère de l\'Intérieur (arrêté du 3 juillet 2026)' }),
+          h('li', { html: "Livret du citoyen, ministère de l'Intérieur — édition mai 2026, transcrit intégralement dans l'application" }),
+          h('li', {}, [
+            'Téléchargement officiel : ',
+            h('a', {
+              href: 'https://www.immigration.interieur.gouv.fr/documentation/guides-textes-et-brochures/livret-du-citoyen.html',
+              target: '_blank', rel: 'noopener',
+              text: 'immigration.interieur.gouv.fr',
+            }),
+          ]),
           h('li', { html: 'service-public.fr et legifrance.gouv.fr' }),
         ]),
         h('p', { class: 'hint mt', text: PRATIQUE.note }),

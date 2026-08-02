@@ -7,11 +7,11 @@ import { duration, pct } from '../lib/util.js';
 import { THEMES, EXAM } from '../data/programme.js';
 import { BY_ID } from '../data/questions.js';
 import { LIVRET_BY_ID } from '../data/q-livret.js';
-import { CHAPITRE_BY_KEY } from '../data/livret.js';
+import { CHAPITRE_BY_KEY, PARTIE_BY_KEY } from '../data/livret.js';
 
-/** Libellé d'un groupe de résultats : thème d'examen ou chapitre du livret. */
+/** Libellé d'un groupe de résultats : thème d'examen, partie ou chapitre du livret. */
 const groupLabel = (key) =>
-  THEMES[key]?.short || CHAPITRE_BY_KEY.get(key)?.title || key;
+  THEMES[key]?.short || PARTIE_BY_KEY.get(key)?.title || CHAPITRE_BY_KEY.get(key)?.title || key;
 
 const findQuestion = (id) => BY_ID.get(id) || LIVRET_BY_ID.get(id) || null;
 

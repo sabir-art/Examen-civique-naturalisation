@@ -17,7 +17,7 @@ import * as store from './store.js';
  * Prépare une question pour l'affichage : les propositions sont mélangées
  * pour que la bonne réponse ne soit jamais à la même place.
  */
-export function toCard(q) {
+export function toCard(q, { group = null } = {}) {
   const order = shuffle(q.c.map((_, i) => i));
   const tags = q.source === 'livret'
     ? [
@@ -32,7 +32,7 @@ export function toCard(q) {
     id: q.id,
     q,
     tags,
-    group: q.source === 'livret' ? q.chapter : q.theme,
+    group: group || (q.source === 'livret' ? q.chapter : q.theme),
     choices: order.map((i) => q.c[i]),
     correct: order.indexOf(q.a),
   };
@@ -60,6 +60,97 @@ export function buildExam() {
 
   return shuffle(picked).map(toCard);
 }
+
+/**
+ * Examen blanc tiré du seul livret du citoyen.
+ * Même pondération officielle par thème, mais les questions proviennent
+ * uniquement du document du ministère : chaque partie du livret alimente le
+ * thème correspondant du référentiel.
+ */
+const LIVRET_BLUEPRINT = [
+  { parts: ['p1'], n: 11 },
+  { parts: ['p2'], n: 6 },
+  { parts: ['p3', 'annexes'], n: 11 },
+  { parts: ['p4'], n: 8 },
+  { parts: ['p5'], n: 4 },
+];
+
+const CHAPTER_TO_PART = new Map(CHAPITRES.map((c) => [c.key, c.partieKey]));
+
+export function buildExamLivret() {
+  const picked = [];
+  const used = new Set();
+
+  for (const line of LIVRET_BLUEPRINT) {
+    const candidates = LIVRET_QUESTIONS.filter(
+      (q) => line.parts.includes(CHAPTER_TO_PART.get(q.chapter)) && !used.has(q.id),
+    );
+    const chosen = sample(candidates, line.n);
+    chosen.forEach((q) => used.add(q.id));
+    picked.push(...chosen.map((q) => [q, line.parts[0]]));
+  }
+
+  return shuffle(picked).map(([q, part]) => toCard(q, { group: part }));
+}
+
+/** Examen blanc entièrement aléatoire, tiré des deux banques réunies. */
+export function buildExamMixte() {
+  return sample([...QUESTIONS, ...LIVRET_QUESTIONS], EXAM.questions).map((q) => toCard(q));
+}
+
+/** Les trois formats d'examen blanc proposés. */
+export const EXAM_MODES = {
+  officiel: {
+    key: 'officiel',
+    title: 'Examen officiel',
+    short: 'Officiel',
+    icon: 'clock',
+    accent: true,
+    blurb: "Le format de l'épreuve réelle : tirage conforme à la répartition fixée par l'arrêté du 10 octobre 2025.",
+    source: () => `${QUESTIONS.length} questions d'entraînement`,
+    details: [
+      '11 principes et valeurs, dont 6 mises en situation',
+      '11 droits et devoirs, dont 6 mises en situation',
+      '8 histoire, géographie et culture',
+      '6 système institutionnel, 4 vivre en société',
+    ],
+    build: buildExam,
+  },
+  livret: {
+    key: 'livret',
+    title: 'Examen « livret du citoyen »',
+    short: 'Livret',
+    icon: 'star',
+    blurb: "Uniquement des questions tirées du livret officiel du ministère, avec la même pondération par thème.",
+    source: () => `${LIVRET_QUESTIONS.length} questions issues du livret`,
+    details: [
+      'Partie 1 : 11 questions · Partie 2 : 6 questions',
+      'Partie 3 et annexes : 11 · Partie 4 : 8',
+      'Partie 5 : 4 questions',
+      'Pour vérifier que le document officiel est acquis',
+    ],
+    build: buildExamLivret,
+  },
+  mixte: {
+    key: 'mixte',
+    title: 'Examen aléatoire',
+    short: 'Aléatoire',
+    icon: 'refresh',
+    blurb: "40 questions tirées au hasard dans les deux banques réunies, sans répartition imposée.",
+    source: () => `${QUESTIONS.length + LIVRET_QUESTIONS.length} questions au total`,
+    details: [
+      'Aucune contrainte de thème : la composition change à chaque tirage',
+      'Le plus exigeant des trois formats',
+      'Utile pour ne rien laisser de côté avant le jour J',
+    ],
+    build: buildExamMixte,
+  },
+};
+
+export const EXAM_MODE_LIST = Object.values(EXAM_MODES);
+
+/** Mode d'un résultat enregistré (les anciens examens n'en portaient pas). */
+export const modeOf = (exam) => (EXAM_MODES[exam?.mode] ? exam.mode : 'officiel');
 
 /**
  * Compose une série d'entraînement.
@@ -140,7 +231,9 @@ export function readiness() {
   }
   const base = weighted * 100;
 
-  const recent = store.exams().slice(0, 3);
+  // Seuls les examens au format officiel entrent dans l'estimation : les
+  // formats « livret » et « aléatoire » n'ont pas la composition de l'épreuve.
+  const recent = store.exams().filter((e) => modeOf(e) === 'officiel').slice(0, 3);
   if (!recent.length) return Math.round(base);
 
   const avg = recent.reduce((s, e) => s + (e.score / e.total) * 100, 0) / recent.length;

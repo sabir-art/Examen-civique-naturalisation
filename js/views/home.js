@@ -77,7 +77,7 @@ export default function renderHome() {
   const shortcuts = h('div', { class: 'list' }, [
     shortcut({
       to: '#/examen', name: 'clock', title: 'Examen blanc',
-      sub: `${EXAM.questions} questions · ${EXAM.minutes} min · seuil ${EXAM.passing}/${EXAM.questions}`,
+      sub: `3 formats · ${EXAM.questions} questions · ${EXAM.minutes} min · seuil ${EXAM.passing}/${EXAM.questions}`,
     }),
     shortcut({
       to: '#/reviser/revision', name: 'refresh', title: 'Révision du jour',

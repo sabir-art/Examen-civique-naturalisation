@@ -3,7 +3,7 @@
 import { h, icon } from '../lib/dom.js';
 import { formatDateShort, duration, pct, plural } from '../lib/util.js';
 import { EXAM } from '../data/programme.js';
-import { overview, themeStats, readiness } from '../engine.js';
+import { overview, themeStats, readiness, EXAM_MODES, modeOf } from '../engine.js';
 import * as store from '../store.js';
 
 export default function renderProgres() {
@@ -56,9 +56,10 @@ export default function renderProgres() {
       })),
   ]);
 
-  const spark = history.length >= 2 ? h('div', { class: 'card' }, [
-    h('h2', { class: 'card__title', text: 'Évolution des examens blancs' }),
-    h('div', { class: 'spark mt' }, history.slice(0, 12).reverse().map((e) => {
+  const officiels = history.filter((e) => modeOf(e) === 'officiel');
+  const spark = officiels.length >= 2 ? h('div', { class: 'card' }, [
+    h('h2', { class: 'card__title', text: 'Évolution au format officiel' }),
+    h('div', { class: 'spark mt' }, officiels.slice(0, 12).reverse().map((e) => {
       const ratio = e.score / e.total;
       return h('div', {
         class: `spark__bar spark__bar--${e.score >= EXAM.passing ? 'ok' : 'bad'}`,
@@ -79,6 +80,7 @@ export default function renderProgres() {
           h('div', { text: `${pct(e.score, e.total)} % — ${ok ? 'reçu' : 'échec'}` }),
           h('div', { class: 'histrow__date', text: `${formatDateShort(e.date)} · ${duration(e.durationSec)}` }),
         ]),
+        h('span', { class: 'badge', text: EXAM_MODES[modeOf(e)].short }),
       ]);
     })),
   ]) : null;
