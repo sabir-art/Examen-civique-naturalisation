@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#c3d5f5"/>
+    <!-- pile de cartes mémoire -->
+    <rect x="58" y="56" width="128" height="94" rx="12" fill="#c3d5f5"/><rect x="68" y="46" width="128" height="94" rx="12" fill="#4f7bd4"/><rect x="78" y="34" width="128" height="94" rx="12" fill="#1e3a8a"/>
+    <rect x="96" y="58" width="76" height="6" rx="3" fill="#e8eefb" opacity=".7"/><rect x="96" y="76" width="56" height="6" rx="3" fill="#e8eefb" opacity=".7"/><rect x="96" y="94" width="36" height="6" rx="3" fill="#e8eefb" opacity=".7"/>
+    <!-- flèche du retour espacé -->
+    <g transform="translate(238 84)">
+      <path d="M0 -30 a30 30 0 1 1 -26 45" fill="none" stroke="#e9a23b" stroke-width="8" stroke-linecap="round"/>
+      <path d="M-2 -34 l14 4 l-12 10Z" fill="#e9a23b"/>
+    </g>
+</svg>

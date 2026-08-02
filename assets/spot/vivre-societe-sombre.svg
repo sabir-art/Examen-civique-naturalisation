@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
+    <path d="M-40 148 Q 70 56 180 148Z" fill="#1b2743"/>
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#2b3b60"/>
+    <!-- une maison et deux personnes -->
+    <g transform="translate(96 148)" fill="#7d9cf5">
+      <rect x="-52" y="-76" width="104" height="76" rx="4"/>
+      <path d="M-62 -76 l62 -38 l62 38Z"/>
+      <rect x="-14" y="-40" width="28" height="40" rx="3" fill="#1b2743"/>
+      <rect x="-42" y="-64" width="20" height="18" rx="3" fill="#f0b45c"/>
+      <rect x="22" y="-64" width="20" height="18" rx="3" fill="#f0b45c"/>
+    </g>
+    <g transform="translate(208 148) scale(1)" fill="#5678c8">
+      <circle cx="0" cy="-58" r="12"/>
+      <path d="M-15 -44 q15 -8 30 0 l4 32 -9 2 -3 10 -14 0 -3 -10 -9 -2Z"/>
+    </g><g transform="translate(242 148) scale(0.86)" fill="#5678c8">
+      <circle cx="0" cy="-58" r="12"/>
+      <path d="M-15 -44 q15 -8 30 0 l4 32 -9 2 -3 10 -14 0 -3 -10 -9 -2Z"/>
+    </g><g transform="translate(268 148) scale(0.94)" fill="#5678c8">
+      <circle cx="0" cy="-58" r="12"/>
+      <path d="M-15 -44 q15 -8 30 0 l4 32 -9 2 -3 10 -14 0 -3 -10 -9 -2Z"/>
+    </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
+    <path d="M-40 148 Q 60 56 160 148Z" fill="#e8eefb"/>
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#c3d5f5"/>
+    <!-- la balance de l'égalité -->
+    <g transform="translate(150 148)">
+      <rect x="-30" y="-10" width="60" height="10" rx="5" fill="#1e3a8a"/>
+      <rect x="-4" y="-116" width="8" height="108" rx="4" fill="#1e3a8a"/>
+      <rect x="-76" y="-118" width="152" height="8" rx="4" fill="#1e3a8a"/>
+      <rect x="-77.5" y="-114" width="3" height="26" fill="#4f7bd4"/>
+        <path d="M-102 -88 h52 l-13 24 h-26Z" fill="#e9a23b"/><rect x="74.5" y="-114" width="3" height="26" fill="#4f7bd4"/>
+        <path d="M50 -88 h52 l-13 24 h-26Z" fill="#e9a23b"/>
+      <circle cx="0" cy="-126" r="9" fill="#e9a23b"/>
+    </g>
+    <g transform="translate(238 66)">
+    <rect x="-3" y="-6" width="5" height="86" rx="2.5" fill="#94a3b8"/>
+    <rect x="2" y="-6" width="20.666666666666668" height="42" fill="#1e3a8a"/>
+    <rect x="22.666666666666668" y="-6" width="20.666666666666668" height="42" fill="#f1f5f9"/>
+    <rect x="43.333333333333336" y="-6" width="20.666666666666668" height="42" fill="#d8322b"/>
+  </g>
+</svg>

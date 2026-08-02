@@ -4,15 +4,19 @@
    ========================================================================= */
 
 :root {
-  --brand: #1b3a8f;
-  --brand-600: #16307a;
-  --brand-100: #e6ecfb;
+  /* Palette validée avec la skill ui-ux-pro-max (profil « gouvernement,
+     éducation, accessibilité ») et alignée sur les maquettes de référence :
+     bleu de confiance, rouge en accent, surfaces claires et aérées. */
+  --brand: #1e3a8a;
+  --brand-600: #17307a;
+  --brand-100: #e8eefb;
+  --brand-50: #f2f6fd;
   --accent: #d8322b;
   --accent-100: #fdecea;
   --ok: #15803d;
-  --ok-100: #e6f6ec;
+  --ok-100: #e7f6ed;
   --warn: #b45309;
-  --warn-100: #fdf0dc;
+  --warn-100: #fdf1de;
   --bad: #c0231d;
   --bad-100: #fdeceb;
 
@@ -29,20 +33,22 @@
   --progress: #15803d;   /* Progrès — vert */
   --progress-100: #e6f6ec;
 
-  --bg: #f2f5fa;
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --surface-2: #f7f9fd;
-  --line: #dfe5f0;
-  --line-strong: #c6d0e3;
-  --text: #101828;
-  --muted: #5b6779;
-  --faint: #8b96a8;
+  --surface-2: #f4f7fc;
+  --line: #e6ecf5;
+  --line-strong: #cdd8e8;
+  --text: #0f1b33;
+  --muted: #5c6b85;
+  /* 5:1 sur #fff comme sur #f4f7fc — le gris précédent tombait à 2,8. */
+  --faint: #606d84;
 
-  --radius: 16px;
-  --radius-sm: 11px;
-  --radius-lg: 22px;
-  --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 8px 24px -14px rgba(16, 24, 40, .28);
-  --shadow-lg: 0 18px 45px -22px rgba(16, 24, 40, .45);
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 24px;
+  /* Ombres légères : les maquettes reposent sur la bordure, pas sur l'ombre. */
+  --shadow: 0 1px 2px rgba(15, 27, 51, .04), 0 6px 18px -12px rgba(15, 27, 51, .2);
+  --shadow-lg: 0 16px 40px -22px rgba(15, 27, 51, .4);
 
   --tabbar-h: 62px;
   --appbar-h: 56px;
@@ -72,6 +78,7 @@
     --livret: #e0a86a; --livret-100: #2e2216;
     --progress: #63d392; --progress-100: #14301f;
 
+    --brand-50: #141d33;
     --bg: #0a1120;
     --surface: #121b2d;
     --surface-2: #17223a;
@@ -97,6 +104,7 @@
   --revise: #56c6de; --revise-100: #102c33;
   --livret: #e0a86a; --livret-100: #2e2216;
   --progress: #63d392; --progress-100: #14301f;
+  --brand-50: #141d33;
   --bg: #0a1120; --surface: #121b2d; --surface-2: #17223a;
   --line: #24314c; --line-strong: #33425f;
   --text: #e8edf7; --muted: #a3b0c6; --faint: #7c8aa3;
@@ -137,7 +145,7 @@ a { color: var(--brand); }
 }
 .boot__mark {
   width: 56px; height: 56px; border-radius: 16px;
-  background: linear-gradient(115deg, #1b3a8f 0 33%, #f4f6fb 33% 66%, #d8322b 66%);
+  background: linear-gradient(115deg, #1e3a8a 0 33%, #f4f6fb 33% 66%, #d8322b 66%);
   animation: pulse 1.4s ease-in-out infinite;
 }
 .boot__text { color: var(--muted); font-size: 14px; }
@@ -322,11 +330,18 @@ a { color: var(--brand); }
 .bar__fill--warn { background: var(--warn); }
 .bar__fill--bad { background: var(--bad); }
 
+/* Anneau de progression. Par défaut sur une carte claire ; les blocs colorés
+   (bandeau, écran de résultat) le repassent en blanc juste en dessous. */
 .ring { display: block; width: 128px; height: 128px; margin: 0 auto; }
-.ring__track { stroke: rgba(255,255,255,.22); }
-.ring__value { stroke: #fff; transition: stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1); }
-.ring__label { font-size: 26px; font-weight: 750; fill: #fff; }
-.ring__sub { font-size: 9.5px; fill: rgba(255,255,255,.8); font-weight: 600; letter-spacing: .06em; }
+.ring__track { stroke: var(--line); }
+.ring__value { stroke: var(--brand); transition: stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1); }
+.ring__label { font-size: 26px; font-weight: 750; fill: var(--text); }
+.ring__sub { font-size: 9.5px; fill: var(--muted); font-weight: 600; letter-spacing: .06em; }
+
+.hero .ring__track, .score .ring__track { stroke: rgba(255,255,255,.22); }
+.hero .ring__value, .score .ring__value { stroke: #fff; }
+.hero .ring__label, .score .ring__label { fill: #fff; }
+.hero .ring__sub, .score .ring__sub { fill: rgba(255,255,255,.8); }
 
 /* ------------------------------------------------------------------- quiz */
 .quizbar {
@@ -392,11 +407,35 @@ a { color: var(--brand); }
   background: linear-gradient(150deg, var(--ok) 0%, #0d6b33 100%); box-shadow: var(--shadow-lg);
 }
 .score--fail { background: linear-gradient(150deg, #d8544c 0%, #93211b 100%); }
+.score { position: relative; overflow: hidden; }
 .score__verdict { font-size: 21px; font-weight: 750; margin-top: 12px; }
 .score__detail { font-size: 14.5px; opacity: .92; margin-top: 5px; }
 
+.scorestats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 18px;
+  background: rgba(255, 255, 255, .14); border-radius: 14px; padding: 12px 4px;
+}
+.scorestat__val { font-size: 19px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.scorestat__lab { font-size: 11.5px; opacity: .85; margin-top: 1px; line-height: 1.25; }
+
+/* Confettis d'une réussite : décor pur, retiré si l'utilisateur limite
+   les animations. */
+.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.confetti i {
+  position: absolute; top: -14px; width: 8px; height: 13px; border-radius: 2px;
+  animation: fall 2.6s cubic-bezier(.3, .1, .5, 1) forwards;
+}
+@keyframes fall {
+  0% { opacity: 0; transform: translateY(-20px) rotate(0deg); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(280px) rotate(420deg); }
+}
+@media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
+
 .themestat { display: grid; gap: 11px; }
-.themestat__row { display: grid; gap: 5px; }
+/* Ces lignes sont cliquables : on leur garde une hauteur touchable. */
+.themestat__row { display: grid; gap: 5px; align-content: center; }
+a.themestat__row { min-height: 44px; }
 .themestat__head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13.5px; }
 .themestat__name { font-weight: 600; }
 .themestat__val { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12.5px; }
@@ -420,8 +459,11 @@ a { color: var(--brand); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chip {
-  padding: 8px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface);
+  /* 44 px de haut : la cible tactile minimale recommandée. */
+  min-height: 44px; padding: 8px 15px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--surface);
   font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 .chip[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-100); color: var(--brand); }
 
@@ -440,6 +482,72 @@ a { color: var(--brand); }
 .empty { text-align: center; padding: 34px 18px; color: var(--muted); }
 .empty__icon { width: 52px; height: 52px; margin: 0 auto 12px; border-radius: 16px; background: var(--surface-2); display: grid; place-items: center; color: var(--faint); }
 .empty__icon svg { width: 26px; height: 26px; }
+
+/* ------------------------------------------------------------- accueil */
+.greet { display: flex; align-items: center; gap: 12px; padding: 2px 2px 0; }
+.greet__hello { font-size: 21px; font-weight: 750; letter-spacing: -.02em; }
+.greet__line { font-size: 14px; color: var(--muted); margin-top: 2px; }
+.streak {
+  flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px;
+  border-radius: 999px; background: var(--warn-100); color: var(--warn);
+  font-size: 14px; font-weight: 750; font-variant-numeric: tabular-nums;
+}
+.streak svg { width: 16px; height: 16px; }
+
+.progrow { display: flex; align-items: center; gap: 16px; }
+.progrow__stats { flex: 1; min-width: 0; display: grid; gap: 9px; }
+.ministat { display: flex; align-items: baseline; gap: 8px; }
+.ministat__val { font-size: 19px; font-weight: 750; font-variant-numeric: tabular-nums; flex: none; }
+.ministat__lab { font-size: 12.5px; color: var(--muted); line-height: 1.3; }
+
+.advice {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--brand-50); border: 1px solid var(--line);
+  border-left: 3px solid var(--brand); border-radius: var(--radius-sm); padding: 12px 13px;
+}
+.advice--ok { border-left-color: var(--ok); background: var(--ok-100); }
+.advice--warn { border-left-color: var(--warn); background: var(--warn-100); }
+.advice__icon { flex: none; color: var(--brand); display: grid; place-items: center; }
+.advice--ok .advice__icon { color: var(--ok); }
+.advice--warn .advice__icon { color: var(--warn); }
+.advice__icon svg { width: 18px; height: 18px; }
+
+/* Liste compacte des thèmes, avec barre et pourcentage. */
+.trows { display: grid; }
+.trow {
+  display: flex; align-items: center; gap: 12px; padding: 11px 2px;
+  text-decoration: none; color: inherit; border-bottom: 1px solid var(--line);
+  -webkit-tap-highlight-color: transparent;
+}
+.trow:last-child { border-bottom: 0; }
+.trow:active { opacity: .6; }
+.trow__icon {
+  width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center;
+  background: var(--brand-100); color: var(--brand);
+}
+.trow__icon svg { width: 19px; height: 19px; }
+.trow__body { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.trow__title { font-size: 14.5px; font-weight: 650; }
+.trow__sub { font-size: 12px; color: var(--faint); }
+.trow__pct { flex: none; font-size: 13.5px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Une teinte par thème du programme, comme dans les maquettes. */
+.trow__icon--principes-valeurs { background: var(--brand-100); color: var(--brand); }
+.trow__icon--institutions { background: #e6f4f1; color: #0f766e; }
+.trow__icon--droits-devoirs { background: var(--accent-100); color: var(--accent); }
+.trow__icon--histoire-geo-culture { background: var(--story-100); color: var(--story); }
+.trow__icon--vivre-societe { background: var(--warn-100); color: var(--warn); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .trow__icon--institutions { background: #0e2b28; color: #5eead4; }
+}
+:root[data-theme="dark"] .trow__icon--institutions { background: #0e2b28; color: #5eead4; }
+
+.bar--thin { height: 6px; display: block; }
+.bar__fill--story { background: var(--story); }
+
+.card__eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+.card--link { display: block; text-decoration: none; color: inherit; -webkit-tap-highlight-color: transparent; }
+.card--link:active { background: var(--surface-2); }
 
 .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
 .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 13px 10px; text-align: center; box-shadow: var(--shadow); }
@@ -468,6 +576,43 @@ a { color: var(--brand); }
 .prose--story h4 { margin: 22px 0 8px; font-size: 15px; letter-spacing: .2px; text-transform: none; }
 .prose--story blockquote { margin: 16px 0 12px; padding: 13px 15px; font-size: 15px; line-height: 1.6; }
 .prose--story em { font-style: italic; }
+
+/* ---------------------------------------------------- vignettes de cartes */
+/* Deux fichiers par vignette, un par thème ; la feuille de style choisit. */
+/* Les sélecteurs gardent tous la même forme `.spot img.spot__x` : sinon la
+   règle générique `.spot img` l'emporte et les deux versions s'affichent. */
+.spot { display: block; line-height: 0; }
+.spot img { width: 100%; height: auto; }
+.spot img.spot__l { display: block; }
+.spot img.spot__d { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .spot img.spot__l { display: none; }
+  :root:not([data-theme="light"]) .spot img.spot__d { display: block; }
+}
+:root[data-theme="dark"] .spot img.spot__l { display: none; }
+:root[data-theme="dark"] .spot img.spot__d { display: block; }
+:root[data-theme="light"] .spot img.spot__l { display: block; }
+:root[data-theme="light"] .spot img.spot__d { display: none; }
+
+/* Vignette posée dans le coin d'une carte, derrière le texte. */
+.card--spot { position: relative; overflow: hidden; }
+.card--spot > .spot {
+  position: absolute; right: -14px; bottom: -10px; width: 158px;
+  opacity: .95; pointer-events: none;
+}
+.card--spot > *:not(.spot) { position: relative; }
+.card--spot .card__sub, .card--spot .card__title { max-width: 62%; }
+
+/* Bandeau d'en-tête de section : titre à gauche, vignette à droite. */
+.banner {
+  display: flex; align-items: center; gap: 10px; overflow: hidden;
+  background: var(--brand-50); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px 0 16px 16px;
+}
+.banner__text { flex: 1; min-width: 0; }
+.banner__title { font-size: 18px; font-weight: 700; }
+.banner__sub { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+.banner > .spot { flex: none; width: 132px; margin-right: -6px; }
 
 /* Carte à illustration pleine largeur : l'image occupe le haut, sans marge. */
 .card--illus { padding: 0; overflow: hidden; }

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#2b3b60"/>
+    <!-- histogramme montant -->
+    <rect x="52" y="106" width="30" height="42" rx="7" fill="#5678c8"/><rect x="96" y="82" width="30" height="66" rx="7" fill="#5678c8"/><rect x="140" y="52" width="30" height="96" rx="7" fill="#5678c8"/><rect x="184" y="18" width="30" height="130" rx="7" fill="#63d392"/>
+    <path d="M60 96 L104 72 L148 42 L192 8" fill="none" stroke="#f0b45c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="60" cy="96" r="6" fill="#f0b45c"/><circle cx="104" cy="72" r="6" fill="#f0b45c"/><circle cx="148" cy="42" r="6" fill="#f0b45c"/><circle cx="192" cy="8" r="6" fill="#f0b45c"/>
+    <polygon points="244.0,23.0 247.2,31.6 256.4,32.0 249.2,37.7 251.6,46.5 244.0,41.5 236.4,46.5 238.8,37.7 231.6,32.0 240.8,31.6" fill="#f0b45c"/>
+</svg>

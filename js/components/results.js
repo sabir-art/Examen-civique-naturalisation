@@ -38,6 +38,24 @@ function ring(value, total) {
 }
 
 /**
+ * Confettis d'une réussite. Purement décoratif, donc masqué aux lecteurs
+ * d'écran et désactivé quand l'utilisateur limite les animations.
+ */
+function confettis() {
+  const colors = ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#f4f4f4'];
+  const wrap = h('div', { class: 'confetti', 'aria-hidden': 'true' });
+  for (let i = 0; i < 26; i++) {
+    const left = (i * 37 + (i % 5) * 11) % 100;
+    const delay = ((i % 7) * 90) / 1000;
+    wrap.append(h('i', {
+      style: `left:${left}%;background:${colors[i % colors.length]};animation-delay:${delay}s;`
+        + `transform:rotate(${(i * 53) % 360}deg)`,
+    }));
+  }
+  return wrap;
+}
+
+/**
  * @param {object} result   résultat produit par le composant de quiz
  * @param {object} options  { isExam, onRetry, onReviewErrors, actions }
  */
@@ -54,10 +72,19 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
     : `${result.score} bonne${result.score > 1 ? 's' : ''} réponse${result.score > 1 ? 's' : ''} sur ${result.total} · ${duration(result.durationSec)}`;
 
   const head = h('div', { class: `score ${passed ? '' : 'score--fail'}` }, [
+    passed ? confettis() : null,
     ring(result.score, result.total),
     h('p', { class: 'score__verdict', text: verdict }),
     h('p', { class: 'score__detail', text: detailLine }),
-  ]);
+    h('div', { class: 'scorestats' }, [
+      { v: result.score, l: `bonne${result.score > 1 ? 's' : ''} réponse${result.score > 1 ? 's' : ''}` },
+      { v: result.total - result.score, l: 'erreur' + (result.total - result.score > 1 ? 's' : '') },
+      { v: duration(result.durationSec), l: 'temps total' },
+    ].map((s) => h('div', { class: 'scorestat' }, [
+      h('div', { class: 'scorestat__val', text: String(s.v) }),
+      h('div', { class: 'scorestat__lab', text: s.l }),
+    ]))),
+  ].filter(Boolean));
 
   const themeRows = Object.entries(result.byTheme)
     .sort((a, b) => (a[1].ok / a[1].total) - (b[1].ok / b[1].total))

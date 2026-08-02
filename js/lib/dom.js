@@ -64,6 +64,21 @@ export function icon(name, size) {
   return svg;
 }
 
+/**
+ * Vignette décorative d'une carte.
+ *
+ * Les deux versions (claire et sombre) sont posées dans le document et c'est la
+ * feuille de style qui montre la bonne : un SVG chargé en `<img>` n'hérite pas
+ * des couleurs de la page, et le thème « automatique » peut basculer sans
+ * rechargement. L'ensemble des vignettes pèse 28 Ko, le doublon est indolore.
+ */
+export function spot(name, extraClass = '') {
+  return h('span', { class: `spot ${extraClass}`.trim(), 'aria-hidden': 'true' }, [
+    h('img', { class: 'spot__l', src: `./assets/spot/${name}-clair.svg`, alt: '', loading: 'lazy', width: '300', height: '170' }),
+    h('img', { class: 'spot__d', src: `./assets/spot/${name}-sombre.svg`, alt: '', loading: 'lazy', width: '300', height: '170' }),
+  ]);
+}
+
 let toastTimer;
 export function toast(message, ms = 2600) {
   const el = document.getElementById('toast');

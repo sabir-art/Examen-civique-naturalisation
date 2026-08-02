@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#c3d5f5"/>
+    <!-- un château sort des pages du livre -->
+    <g transform="translate(150 96)" fill="#4f7bd4">
+      <rect x="-46" y="-38" width="92" height="38"/>
+      <rect x="-58" y="-58" width="24" height="58"/>
+      <rect x="34" y="-58" width="24" height="58"/>
+      <path d="M-58 -58 l12 -22 l12 22Z"/><path d="M34 -58 l12 -22 l12 22Z"/>
+      <path d="M-46 -38 l46 -30 l46 30Z"/>
+      <rect x="-9" y="-18" width="18" height="18" rx="9" fill="#e8eefb"/>
+    </g>
+    <!-- le livre ouvert, au premier plan -->
+    <g transform="translate(150 130)">
+      <path d="M-96 0 q48 -26 96 -8 q48 -18 96 8 l0 22 q-48 -26 -96 -8 q-48 -18 -96 8Z" fill="#1e3a8a"/>
+      <path d="M0 -8 l0 22" stroke="#e8eefb" stroke-width="3"/>
+    </g>
+    <polygon points="150.0,16.0 153.5,25.2 163.3,25.7 155.6,31.8 158.2,41.3 150.0,35.9 141.8,41.3 144.4,31.8 136.7,25.7 146.5,25.2" fill="#e9a23b"/>
+    <polygon points="86.0,36.0 88.0,41.3 93.6,41.5 89.2,45.0 90.7,50.5 86.0,47.4 81.3,50.5 82.8,45.0 78.4,41.5 84.0,41.3" fill="#c3d5f5"/><polygon points="214.0,35.0 215.2,38.3 218.8,38.5 216.0,40.6 216.9,44.0 214.0,42.1 211.1,44.0 212.0,40.6 209.2,38.5 212.8,38.3" fill="#c3d5f5"/><polygon points="64.0,70.0 66.0,75.3 71.6,75.5 67.2,79.0 68.7,84.5 64.0,81.4 59.3,84.5 60.8,79.0 56.4,75.5 62.0,75.3" fill="#c3d5f5"/><polygon points="236.0,69.0 237.2,72.3 240.8,72.5 238.0,74.6 238.9,78.0 236.0,76.1 233.1,78.0 234.0,74.6 231.2,72.5 234.8,72.3" fill="#c3d5f5"/>
+</svg>

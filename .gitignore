@@ -10,3 +10,7 @@ node_modules/
 *.key
 *.pem
 secrets.json
+
+# La skill ui-ux-pro-max est un outil de développement (1,9 Mo de données de
+# référence) : elle n'a pas à être publiée avec le site.
+.claude/skills/

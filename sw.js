@@ -4,7 +4,7 @@
  * en arrière-plan. Changer CACHE force le rechargement des fichiers.
  */
 
-const CACHE = 'examen-civique-v5';
+const CACHE = 'examen-civique-v6';
 
 const ASSETS = [
   './',
@@ -14,6 +14,30 @@ const ASSETS = [
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/maskable-512.png',
+  './assets/spot/principes-valeurs-clair.svg',
+  './assets/spot/principes-valeurs-sombre.svg',
+  './assets/spot/institutions-clair.svg',
+  './assets/spot/institutions-sombre.svg',
+  './assets/spot/droits-devoirs-clair.svg',
+  './assets/spot/droits-devoirs-sombre.svg',
+  './assets/spot/histoire-geo-culture-clair.svg',
+  './assets/spot/histoire-geo-culture-sombre.svg',
+  './assets/spot/vivre-societe-clair.svg',
+  './assets/spot/vivre-societe-sombre.svg',
+  './assets/spot/examen-clair.svg',
+  './assets/spot/examen-sombre.svg',
+  './assets/spot/revision-clair.svg',
+  './assets/spot/revision-sombre.svg',
+  './assets/spot/livret-clair.svg',
+  './assets/spot/livret-sombre.svg',
+  './assets/spot/histoire-clair.svg',
+  './assets/spot/histoire-sombre.svg',
+  './assets/spot/progres-clair.svg',
+  './assets/spot/progres-sombre.svg',
+  './assets/spot/assistant-clair.svg',
+  './assets/spot/assistant-sombre.svg',
+  './assets/spot/compte-clair.svg',
+  './assets/spot/compte-sombre.svg',
   './assets/story/ch01.svg',
   './assets/story/ch02.svg',
   './assets/story/ch03.svg',

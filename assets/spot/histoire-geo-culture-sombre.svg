@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
+    <path d="M90 148 Q 210 68 330 148Z" fill="#1b2743"/>
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#2b3b60"/>
+    <!-- silhouette de monuments -->
+    <g fill="#7d9cf5">
+      <path d="M46 148 l0 -58 l14 -46 l14 46 l0 58Z"/>
+      <path d="M38 108 h44" stroke="#1b2743" stroke-width="4"/>
+      <rect x="104" y="76" width="56" height="72" rx="2"/>
+      <path d="M100 76 l32 -30 l32 30Z"/>
+      <rect x="128" y="112" width="16" height="36" rx="2" fill="#1b2743"/>
+      <path d="M198 148 l0 -46 a22 22 0 0 1 44 0 l0 46Z"/>
+      <rect x="192" y="96" width="56" height="8" rx="4"/>
+      <rect x="216" y="52" width="8" height="42" rx="4"/>
+      <circle cx="220" cy="46" r="9"/>
+    </g>
+    <polygon points="272.0,25.0 274.2,30.9 280.6,31.2 275.6,35.2 277.3,41.3 272.0,37.8 266.7,41.3 268.4,35.2 263.4,31.2 269.8,30.9" fill="#f0b45c"/>
+</svg>

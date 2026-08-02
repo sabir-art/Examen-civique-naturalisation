@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#2b3b60"/>
+    <!-- bulle de conversation et étincelles -->
+    <g transform="translate(132 88)">
+      <path d="M-74 -50 h148 a14 14 0 0 1 14 14 v62 a14 14 0 0 1 -14 14 h-102 l-32 26 v-26 h-14 a14 14 0 0 1 -14 -14 v-62 a14 14 0 0 1 14 -14Z" fill="#7d9cf5"/>
+      <rect x="-52" y="-30" width="104" height="6" rx="3" fill="#1b2743" opacity=".7"/><rect x="-52" y="-12" width="74" height="6" rx="3" fill="#1b2743" opacity=".7"/><rect x="-52" y="6" width="44" height="6" rx="3" fill="#1b2743" opacity=".7"/>
+    </g>
+    <polygon points="242.0,34.0 246.4,45.9 259.1,46.4 249.2,54.3 252.6,66.6 242.0,59.6 231.4,66.6 234.8,54.3 224.9,46.4 237.6,45.9" fill="#f0b45c"/><polygon points="272.0,82.0 274.5,88.6 281.5,88.9 276.0,93.3 277.9,100.1 272.0,96.2 266.1,100.1 268.0,93.3 262.5,88.9 269.5,88.6" fill="#f0b45c"/><polygon points="252.0,111.0 253.7,115.6 258.7,115.8 254.8,118.9 256.1,123.7 252.0,120.9 247.9,123.7 249.2,118.9 245.3,115.8 250.3,115.6" fill="#2b3b60"/>
+</svg>

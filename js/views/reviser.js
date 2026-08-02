@@ -1,6 +1,6 @@
 /** Entraînement : choix du thème, révision espacée, reprise des erreurs. */
 
-import { h, icon, toast } from '../lib/dom.js';
+import { h, icon, toast, spot } from '../lib/dom.js';
 import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
 import { CHAPITRES } from '../data/livret.js';
@@ -52,21 +52,52 @@ function hub() {
     ]) : null,
   ].filter(Boolean));
 
-  const themes = h('div', { class: 'list' }, Object.entries(THEMES).map(([key, t]) => {
-    const m = Math.round(mastery(key) * 100);
-    const cov = Math.round(coverage(key) * 100);
-    const tone = m >= 70 ? 'ok' : m >= 35 ? 'warn' : 'bad';
-    return h('a', { class: 'item', href: `#/reviser/t/${key}`, style: 'align-items:flex-start' }, [
-      h('span', { class: 'item__icon' }, icon(t.icon)),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: t.short }),
-        h('span', { class: 'item__sub', text: `${pool({ theme: key }).length} questions · ${t.count} tirées à l'examen` }),
-        h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone}`, style: `width:${m}%` })),
-        h('span', { class: 'item__sub', style: 'margin-top:5px', text: `Maîtrise ${m} % · ${cov} % du thème déjà vu` }),
-      ]),
-      h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
-    ]);
-  }));
+  // Filtres repris des maquettes : on ne veut pas relire toute la liste pour
+  // retrouver le thème qu'on a commencé.
+  const FILTRES = [
+    { key: 'tous', label: 'Tous', match: () => true },
+    { key: 'commences', label: 'En cours', match: (s) => s.cov > 0 && s.m < 70 },
+    { key: 'nouveaux', label: 'Non commencés', match: (s) => s.cov === 0 },
+    { key: 'acquis', label: 'Acquis', match: (s) => s.m >= 70 },
+  ];
+  let filtre = 'tous';
+
+  const themes = h('div', { class: 'card card--pad-sm' });
+  const chips = h('div', { class: 'chips' });
+
+  function drawThemes() {
+    const lignes = Object.entries(THEMES).map(([key, t]) => ({
+      key, t,
+      m: Math.round(mastery(key) * 100),
+      cov: Math.round(coverage(key) * 100),
+      n: pool({ theme: key }).length,
+    }));
+    const f = FILTRES.find((x) => x.key === filtre);
+    const visibles = lignes.filter(f.match);
+
+    chips.replaceChildren(...FILTRES.map((x) => h('button', {
+      class: 'chip', type: 'button', 'aria-pressed': filtre === x.key ? 'true' : 'false',
+      text: `${x.label} (${lignes.filter(x.match).length})`,
+      onclick: () => { filtre = x.key; drawThemes(); },
+    })));
+
+    themes.replaceChildren(visibles.length
+      ? h('div', { class: 'trows' }, visibles.map((s) => {
+        const tone = s.m >= 70 ? 'ok' : s.m >= 35 ? 'warn' : 'bad';
+        return h('a', { class: 'trow', href: `#/reviser/t/${s.key}` }, [
+          h('span', { class: `trow__icon trow__icon--${s.key}` }, icon(s.t.icon)),
+          h('span', { class: 'trow__body' }, [
+            h('span', { class: 'trow__title', text: s.t.short }),
+            h('span', { class: 'trow__sub', text: `${s.n} questions · ${s.t.count} tirées à l'examen` }),
+            h('span', { class: 'bar bar--thin' }, h('span', { class: `bar__fill bar__fill--${tone}`, style: `width:${s.m}%` })),
+          ]),
+          h('span', { class: 'trow__pct', text: `${s.m}%` }),
+        ]);
+      }))
+      : h('p', { class: 'hint center', style: 'padding:14px 0', text: 'Aucun thème dans cette catégorie.' }));
+  }
+
+  drawThemes();
 
   const lire = h('div', { class: 'list' }, [
     h('a', { class: 'item item--livret', href: '#/livret' }, [
@@ -89,9 +120,17 @@ function hub() {
 
   return {
     node: h('div', { class: 'stack' }, [
+      h('div', { class: 'banner' }, [
+        h('div', { class: 'banner__text' }, [
+          h('p', { class: 'banner__title', text: 'Réviser' }),
+          h('p', { class: 'banner__sub', text: `${pool({}).length} questions, reprises quand il le faut` }),
+        ]),
+        spot('revision'),
+      ]),
       h('p', { class: 'section-title', text: 'Séances recommandées' }),
       quick,
       h('p', { class: 'section-title', text: 'Thèmes du programme officiel' }),
+      chips,
       themes,
       h('p', { class: 'section-title', text: 'À lire' }),
       lire,
