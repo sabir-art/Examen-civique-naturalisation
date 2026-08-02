@@ -115,7 +115,7 @@ function acte(key) {
 
   return {
     node: h('div', { class: 'stack' }, [
-      h('div', { class: 'card' }, [
+      h('div', { class: 'card card--info' }, [
         h('p', { class: 'card__sub', text: `Acte ${a.num} · ${a.epoque}` }),
         h('h1', { class: 'card__title', style: 'font-size:20px;margin-top:4px', text: a.titre }),
         h('p', { class: 'card__sub', style: 'margin-top:6px', text: a.sous_titre }),

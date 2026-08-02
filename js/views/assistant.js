@@ -111,7 +111,7 @@ function chat({ about = null }) {
 
   function welcome() {
     return h('div', { class: 'stack stack--tight' }, [
-      h('div', { class: 'card card--pad-sm' }, [
+      h('div', { class: 'card card--info card--pad-sm' }, [
         h('p', { class: 'small', text: "Posez une question sur le programme, une réponse que vous n'avez pas comprise, ou demandez un exemple concret. Les échanges ne sont pas conservés." }),
       ]),
       h('div', { class: 'chips' }, SUGGESTIONS.map((s) => h('button', {

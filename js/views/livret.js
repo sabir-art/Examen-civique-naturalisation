@@ -105,7 +105,7 @@ function partie(key) {
 
   return {
     node: h('div', { class: 'stack' }, [
-      h('div', { class: 'card' }, [
+      h('div', { class: 'card card--info' }, [
         h('h1', { class: 'card__title', style: 'font-size:19px', text: p.num === 'A' ? p.title : `Partie ${p.num} — ${p.title}` }),
         h('p', { class: 'card__sub', text: `${LIVRET.titre}, ${LIVRET.edition} · pages ${p.pages}` }),
       ]),
@@ -128,7 +128,7 @@ function chapitre(key) {
   const prev = CHAPITRES[index - 1];
   const next = CHAPITRES[index + 1];
 
-  const toc = c.sections.length > 2 ? h('div', { class: 'card card--pad-sm' }, [
+  const toc = c.sections.length > 2 ? h('div', { class: 'card card--info card--pad-sm' }, [
     h('p', { class: 'section-title', style: 'margin:0 0 8px', text: 'Dans ce chapitre' }),
     h('div', { class: 'stack stack--tight' }, c.sections.map((s, i) => h('button', {
       class: 'small', type: 'button',

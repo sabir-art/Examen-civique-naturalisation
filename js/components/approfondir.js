@@ -11,6 +11,11 @@ import * as ai from '../ai.js';
 import { systemPrompt, questionContext, QUICK_ASKS } from '../ai-context.js';
 import { format, dots, boutonVoix } from './reponse-ia.js';
 
+/** L'utilisateur est-il resté en bas de page ? Sinon, on ne le déplace pas. */
+function prochePied() {
+  return window.innerHeight + window.scrollY >= document.body.scrollHeight - 220;
+}
+
 /**
  * @param {object} q       la question posée
  * @param {string|null} chosen  la réponse donnée par l'utilisateur
@@ -66,6 +71,11 @@ export function createApprofondir(q, chosen = null) {
     body.replaceChildren(dots());
     busy = true;
     chips.setAttribute('aria-busy', 'true');
+    // Sans cela, la réponse s'écrit hors de l'écran et on croit qu'il ne se
+    // passe rien. On amène la zone de réponse sous les yeux tout de suite,
+    // puis on l'y maintient au fur et à mesure qu'elle s'allonge.
+    const suivre = () => answer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    requestAnimationFrame(suivre);
 
     // Le contexte de la question n'est envoyé qu'au premier message du fil.
     const contenu = thread.length ? texte : `${questionContext(q, chosen)}\n\n${texte}`;
@@ -77,10 +87,16 @@ export function createApprofondir(q, chosen = null) {
         system: systemPrompt(),
         messages: thread,
         signal: controller.signal,
-        onText: (_c, full) => { body.innerHTML = format(full); },
+        onText: (_c, full) => {
+          body.innerHTML = format(full);
+          // On ne suit le texte que si l'utilisateur n'a pas repris la main :
+          // remonter pendant qu'il lit serait pire que de ne rien faire.
+          if (prochePied()) suivre();
+        },
       });
       thread.push({ role: 'assistant', content: out.text });
       body.innerHTML = format(out.text);
+      if (prochePied()) suivre();
     } catch (err) {
       if (err?.name !== 'AbortError') {
         thread.pop();

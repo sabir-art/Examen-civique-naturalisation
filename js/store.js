@@ -143,6 +143,11 @@ export function recordAnswer(qid, correct) {
   const now = Date.now();
   const rec = p.progress[qid] || { box: 1, seen: 0, ok: 0, ko: 0, last: 0, due: 0 };
   rec.seen += 1;
+  // `lastOk` retient uniquement la dernière réponse. C'est lui qui décide de la
+  // présence dans « Mes erreurs » : une question à laquelle on vient de
+  // répondre juste en sort immédiatement, ce qui est la seule règle
+  // compréhensible sans connaître le fonctionnement des boîtes.
+  rec.lastOk = Boolean(correct);
   if (correct) {
     rec.ok += 1;
     rec.box = Math.min(MAX_BOX, rec.box + 1);
@@ -175,12 +180,19 @@ export function dueIds(now = Date.now()) {
     .map(([id]) => id);
 }
 
-/** Questions déjà ratées au moins une fois et pas encore consolidées. */
+/**
+ * Questions dont la DERNIÈRE réponse était fausse.
+ *
+ * Règle volontairement simple : on répond juste, la question sort de la liste ;
+ * on répond faux, elle y entre. L'ancienne version gardait aussi les questions
+ * encore dans les premières boîtes de révision, si bien qu'après une bonne
+ * réponse certaines partaient et d'autres restaient sans raison visible.
+ */
 export function weakIds() {
   const p = current();
   if (!p) return [];
   return Object.entries(p.progress)
-    .filter(([, r]) => r.ko > 0 && r.box <= 3)
+    .filter(([, r]) => (r.lastOk === undefined ? r.ko > 0 && r.box <= 2 : r.lastOk === false))
     .sort((a, b) => b[1].ko - a[1].ko || a[1].box - b[1].box)
     .map(([id]) => id);
 }
