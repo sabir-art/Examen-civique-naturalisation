@@ -32,7 +32,7 @@ function sommaire() {
   const suite = nextUnread();
   const reprise = suite || CHAPITRES[CHAPITRES.length - 1];
 
-  const head = h('div', { class: 'hero' }, [
+  const head = h('div', { class: 'hero hero--story' }, [
     h('p', { class: 'hero__eyebrow', text: ROMAN.sous_titre }),
     h('h1', { class: 'hero__title', text: ROMAN.titre }),
     h('p', {
@@ -64,7 +64,7 @@ function sommaire() {
   const list = h('div', { class: 'list' }, ACTES.map((a) => {
     const m = Math.round(romanActeMastery(a.key) * 100);
     const lus = store.readCount(a.chapitres.map((c) => c.key));
-    return h('a', { class: 'item', href: `#/histoire/a/${a.key}`, style: 'align-items:flex-start' }, [
+    return h('a', { class: 'item item--story', href: `#/histoire/a/${a.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'item__icon' }, icon(a.icon)),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: `Acte ${a.num} — ${a.titre}` }),
@@ -97,7 +97,7 @@ function acte(key) {
   const list = h('div', { class: 'list' }, a.chapitres.map((c) => {
     const m = Math.round(romanMastery(c.key) * 100);
     const lu = store.isRead(c.key);
-    return h('a', { class: 'item', href: `#/histoire/c/${c.key}`, style: 'align-items:flex-start' }, [
+    return h('a', { class: `item ${lu ? 'item--story' : ''}`, href: `#/histoire/c/${c.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'item__icon', text: String(c.num), style: 'font-weight:700;font-size:14px' }),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: c.titre }),

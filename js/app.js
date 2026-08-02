@@ -46,10 +46,12 @@ const ROUTES = [
   { path: /^\/reviser\/(.+)$/, view: renderReviser, title: 'Entraînement', tab: '/reviser', back: '#/reviser' },
   { path: /^\/examen$/, view: renderExamen, title: 'Examen blanc', tab: '/examen' },
   { path: /^\/examen\/(.+)$/, view: renderExamen, title: 'Examen blanc', tab: '/examen', back: '#/examen' },
-  { path: /^\/cours$/, view: renderCours, title: 'Cours', tab: '/cours' },
-  { path: /^\/cours\/(.+)$/, view: renderCours, title: 'Fiche', tab: '/cours', back: '#/cours' },
-  { path: /^\/livret$/, view: renderLivret, title: 'Livret du citoyen', tab: '/cours', back: '#/cours' },
-  { path: /^\/livret\/(.+)$/, view: renderLivret, title: 'Livret du citoyen', tab: '/cours', back: '#/livret' },
+  // Les fiches et le livret vivent sous l'onglet Réviser : cinq onglets
+  // suffisent, et une cible tactile trop étroite devient inutilisable.
+  { path: /^\/cours$/, view: renderCours, title: 'Fiches de révision', tab: '/reviser', back: '#/reviser' },
+  { path: /^\/cours\/(.+)$/, view: renderCours, title: 'Fiche', tab: '/reviser', back: '#/cours' },
+  { path: /^\/livret$/, view: renderLivret, title: 'Livret du citoyen', tab: '/reviser', back: '#/reviser' },
+  { path: /^\/livret\/(.+)$/, view: renderLivret, title: 'Livret du citoyen', tab: '/reviser', back: '#/livret' },
   { path: /^\/progres$/, view: renderProgres, title: 'Ma progression', tab: '/progres' },
   { path: /^\/assistant$/, view: renderAssistant, title: 'Assistant', back: '#/' },
   { path: /^\/assistant\/(.+)$/, view: renderAssistant, title: 'Assistant', back: '#/assistant' },

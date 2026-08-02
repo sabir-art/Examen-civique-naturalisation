@@ -22,8 +22,8 @@ function ringLarge(value) {
   return svg;
 }
 
-function shortcut({ to, name, title, sub, badge }) {
-  return h('a', { class: 'item', href: to }, [
+function shortcut({ to, name, title, sub, badge, tone }) {
+  return h('a', { class: `item${tone ? ` item--${tone}` : ''}`, href: to }, [
     h('span', { class: 'item__icon' }, icon(name)),
     h('span', { class: 'item__body' }, [
       h('span', { class: 'item__title', text: title }),
@@ -81,23 +81,23 @@ export default function renderHome() {
   const shortcuts = h('div', { class: 'list' }, [
     shortcut({
       to: suite ? `#/histoire/c/${suite.key}` : '#/histoire',
-      name: 'star', title: 'La France racontée',
+      name: 'star', title: 'La France racontée', tone: 'story',
       sub: suite
         ? (roman.lus === 0 ? `L'histoire du pays en ${roman.chapitres} chapitres — commencer` : `Chapitre ${suite.num} : ${suite.titre}`)
         : `${roman.chapitres} chapitres lus · mémorisation ${roman.mastery} %`,
       badge: roman.lus > 0 && suite ? { tone: 'brand', text: `${roman.lus}/${roman.chapitres}` } : null,
     }),
     shortcut({
-      to: '#/examen', name: 'clock', title: 'Examen blanc',
+      to: '#/examen', name: 'clock', title: 'Examen blanc', tone: 'exam',
       sub: `3 formats · ${EXAM.questions} questions · ${EXAM.minutes} min · seuil ${EXAM.passing}/${EXAM.questions}`,
     }),
     shortcut({
-      to: '#/reviser/revision', name: 'refresh', title: 'Révision du jour',
+      to: '#/reviser/revision', name: 'refresh', title: 'Révision du jour', tone: 'revise',
       sub: o.due > 0 ? `${o.due} question${o.due > 1 ? 's' : ''} arrivée${o.due > 1 ? 's' : ''} à échéance` : 'Consolidez ce que vous avez déjà vu',
       badge: o.due > 0 ? { tone: 'warn', text: String(o.due) } : null,
     }),
     shortcut({
-      to: '#/reviser', name: 'book', title: 'Entraînement par thème',
+      to: '#/reviser', name: 'book', title: 'Entraînement par thème', tone: 'revise',
       sub: 'Choisissez un thème du programme officiel',
     }),
     o.weak > 0 ? shortcut({
@@ -106,15 +106,15 @@ export default function renderHome() {
       badge: { tone: 'bad', text: String(o.weak) },
     }) : null,
     shortcut({
-      to: '#/livret', name: 'bank', title: 'Livret du citoyen',
+      to: '#/livret', name: 'bank', title: 'Livret du citoyen', tone: 'livret',
       sub: 'Le document officiel, chapitre par chapitre',
     }),
     shortcut({
-      to: '#/cours', name: 'flag', title: 'Fiches de révision',
+      to: '#/cours', name: 'flag', title: 'Fiches de révision', tone: 'revise',
       sub: 'Le programme résumé, thème par thème',
     }),
     shortcut({
-      to: '#/assistant', name: 'info', title: 'Poser une question',
+      to: '#/assistant', name: 'info', title: 'Poser une question', tone: 'ai',
       sub: ai.isConfigured() ? "Demander une explication à l'assistant" : 'Assistant IA — facultatif, à activer',
     }),
   ].filter(Boolean));

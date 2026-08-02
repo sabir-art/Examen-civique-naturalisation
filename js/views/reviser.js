@@ -3,6 +3,7 @@
 import { h, icon, toast } from '../lib/dom.js';
 import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
+import { CHAPITRES } from '../data/livret.js';
 import { buildTraining, mastery, coverage } from '../engine.js';
 import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
@@ -67,12 +68,33 @@ function hub() {
     ]);
   }));
 
+  const lire = h('div', { class: 'list' }, [
+    h('a', { class: 'item item--livret', href: '#/livret' }, [
+      h('span', { class: 'item__icon' }, icon('bank')),
+      h('span', { class: 'item__body' }, [
+        h('span', { class: 'item__title', text: 'Livret du citoyen' }),
+        h('span', { class: 'item__sub', text: `Le document officiel du ministère, ${CHAPITRES.length} chapitres` }),
+      ]),
+      h('span', { class: 'item__chev' }, icon('chevron')),
+    ]),
+    h('a', { class: 'item', href: '#/cours' }, [
+      h('span', { class: 'item__icon' }, icon('flag')),
+      h('span', { class: 'item__body' }, [
+        h('span', { class: 'item__title', text: 'Fiches de révision' }),
+        h('span', { class: 'item__sub', text: 'Le programme résumé, thème par thème' }),
+      ]),
+      h('span', { class: 'item__chev' }, icon('chevron')),
+    ]),
+  ]);
+
   return {
     node: h('div', { class: 'stack' }, [
       h('p', { class: 'section-title', text: 'Séances recommandées' }),
       quick,
       h('p', { class: 'section-title', text: 'Thèmes du programme officiel' }),
       themes,
+      h('p', { class: 'section-title', text: 'À lire' }),
+      lire,
       h('p', { class: 'hint center mt', text: "La maîtrise augmente quand vous répondez juste plusieurs fois à intervalles croissants." }),
     ]),
     title: 'Réviser',

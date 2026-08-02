@@ -16,6 +16,19 @@
   --bad: #c0231d;
   --bad-100: #fdeceb;
 
+  /* Une couleur par section, pour qu'on sache où l'on est d'un coup d'œil.
+     Elles se déclinent en variante « 100 » pour les fonds. */
+  --story: #7c3aed;      /* Histoire — violet */
+  --story-100: #f1ebfe;
+  --exam: #d8322b;       /* Examen — rouge, comme l'accent */
+  --exam-100: #fdecea;
+  --revise: #0e7490;     /* Réviser — bleu-vert */
+  --revise-100: #e2f4f8;
+  --livret: #92400e;     /* Livret du citoyen — brun encre */
+  --livret-100: #fbf0e4;
+  --progress: #15803d;   /* Progrès — vert */
+  --progress-100: #e6f6ec;
+
   --bg: #f2f5fa;
   --surface: #ffffff;
   --surface-2: #f7f9fd;
@@ -53,6 +66,12 @@
     --bad: #f4796f;
     --bad-100: #351a18;
 
+    --story: #b794f6; --story-100: #241a3d;
+    --exam: #f4756d; --exam-100: #34201f;
+    --revise: #56c6de; --revise-100: #102c33;
+    --livret: #e0a86a; --livret-100: #2e2216;
+    --progress: #63d392; --progress-100: #14301f;
+
     --bg: #0a1120;
     --surface: #121b2d;
     --surface-2: #17223a;
@@ -73,6 +92,11 @@
   --ok: #63d392; --ok-100: #14301f;
   --warn: #f0b45c; --warn-100: #33260f;
   --bad: #f4796f; --bad-100: #351a18;
+  --story: #b794f6; --story-100: #241a3d;
+  --exam: #f4756d; --exam-100: #34201f;
+  --revise: #56c6de; --revise-100: #102c33;
+  --livret: #e0a86a; --livret-100: #2e2216;
+  --progress: #63d392; --progress-100: #14301f;
   --bg: #0a1120; --surface: #121b2d; --surface-2: #17223a;
   --line: #24314c; --line-strong: #33425f;
   --text: #e8edf7; --muted: #a3b0c6; --faint: #7c8aa3;
@@ -158,25 +182,37 @@ a { color: var(--brand); }
 .stack--tight { gap: 9px; }
 
 /* ---------------------------------------------------------------- tabbar */
+/* Flex et non grid : avec `grid-template-columns`, un onglet ajouté sans mise à
+   jour de la feuille de style bascule sur une ligne implicite, hors de la
+   hauteur fixe — invisible et impossible à toucher. En flex, il se resserre. */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
-  display: grid; grid-template-columns: repeat(6, 1fr);
-  height: calc(var(--tabbar-h) + var(--safe-b));
+  display: flex;
+  min-height: calc(var(--tabbar-h) + var(--safe-b));
   padding-bottom: var(--safe-b);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-top: 1px solid var(--line);
 }
 .tab {
-  display: grid; place-items: center; gap: 2px; text-decoration: none; min-width: 0;
-  color: var(--faint); font-size: 9.5px; font-weight: 600; letter-spacing: -.1px;
+  position: relative; flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  /* Cible tactile confortable même sur un iPhone SE. */
+  min-height: var(--tabbar-h); padding: 6px 2px;
+  text-decoration: none; color: var(--faint); font-size: 10.5px; font-weight: 600;
   -webkit-tap-highlight-color: transparent;
 }
 .tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tab svg { width: 22px; height: 22px; }
+.tab svg { width: 23px; height: 23px; flex: none; }
 .tab[aria-current="page"] { color: var(--brand); }
 .tab--accent[aria-current="page"] { color: var(--accent); }
+.tab--story[aria-current="page"] { color: var(--story); }
+/* Repère visuel de l'onglet actif, utile quand la couleur seule ne suffit pas. */
+.tab[aria-current="page"]::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 26px; height: 3px; border-radius: 0 0 3px 3px; background: currentColor;
+}
 
 /* ----------------------------------------------------------------- cards */
 .card {
@@ -200,6 +236,13 @@ a { color: var(--brand); }
 .hero__eyebrow { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; opacity: .8; font-weight: 700; }
 .hero__title { font-size: 22px; margin-top: 5px; }
 .hero__sub { font-size: 14px; opacity: .9; margin-top: 6px; }
+
+/* Chaque section a son dégradé, cohérent avec la couleur de son onglet. */
+.hero--story  { background: linear-gradient(150deg, #4c1d95 0%, #7c3aed 62%, #a855f7 130%); }
+.hero--exam   { background: linear-gradient(150deg, #7f1d1d 0%, #b91c1c 60%, #d8322b 130%); }
+.hero--revise { background: linear-gradient(150deg, #0c4a6e 0%, #0e7490 62%, #0d9488 130%); }
+.hero--livret { background: linear-gradient(150deg, #451a03 0%, #92400e 62%, #b45309 130%); }
+.hero--progress { background: linear-gradient(150deg, #14532d 0%, #15803d 62%, #16a34a 130%); }
 
 /* --------------------------------------------------------------- buttons */
 .btn {
@@ -246,6 +289,20 @@ a { color: var(--brand); }
 .item__sub { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
 .item__chev { color: var(--faint); flex: none; }
 .item__chev svg { width: 18px; height: 18px; }
+
+/* Couleur de section : liseré à gauche et pastille d'icône assortie, pour
+   qu'une liste mélangée reste lisible d'un coup d'œil. */
+.item--story   { border-left: 3px solid var(--story); }
+.item--story   .item__icon { background: var(--story-100); color: var(--story); }
+.item--exam    { border-left: 3px solid var(--exam); }
+.item--exam    .item__icon { background: var(--exam-100); color: var(--exam); }
+.item--revise  { border-left: 3px solid var(--revise); }
+.item--revise  .item__icon { background: var(--revise-100); color: var(--revise); }
+.item--livret  { border-left: 3px solid var(--livret); }
+.item--livret  .item__icon { background: var(--livret-100); color: var(--livret); }
+.item--progress { border-left: 3px solid var(--progress); }
+.item--progress .item__icon { background: var(--progress-100); color: var(--progress); }
+.item--ai      { border-left: 3px solid var(--brand); }
 
 /* ---------------------------------------------------------------- badges */
 .badge {

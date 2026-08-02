@@ -26,7 +26,7 @@ const tone = (m) => (m >= 70 ? 'ok' : m >= 35 ? 'warn' : 'bad');
 function sommaire() {
   const o = livretOverview();
 
-  const head = h('div', { class: 'hero' }, [
+  const head = h('div', { class: 'hero hero--livret' }, [
     h('p', { class: 'hero__eyebrow', text: LIVRET.editeur }),
     h('h1', { class: 'hero__title', text: LIVRET.titre }),
     h('p', { class: 'hero__sub', text: `${LIVRET.edition} — le document de référence officiel de l'examen civique, repris ici intégralement : ${PARTIES.length} parties, ${o.chapters} chapitres.` }),
@@ -50,7 +50,7 @@ function sommaire() {
     const m = Math.round(
       p.chapters.reduce((s, c) => s + livretMastery(c.key), 0) / p.chapters.length * 100,
     );
-    return h('a', { class: 'item', href: `#/livret/p/${p.key}`, style: 'align-items:flex-start' }, [
+    return h('a', { class: 'item item--livret', href: `#/livret/p/${p.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'item__icon' }, icon(p.icon)),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: `${p.num === 'A' ? '' : `Partie ${p.num} — `}${p.title}` }),
@@ -79,7 +79,7 @@ function sommaire() {
       ]),
     ]),
     title: 'Livret du citoyen',
-    back: '#/cours',
+    back: '#/reviser',
   };
 }
 

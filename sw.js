@@ -60,7 +60,10 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(ASSETS))
+      // `cache: 'reload'` contourne le cache HTTP du navigateur. Sans cela, une
+      // feuille de style périmée peut être servie à côté d'un index.html neuf :
+      // les deux versions se mélangent et la mise en page casse.
+      .then((cache) => cache.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting()),
   );
 });
