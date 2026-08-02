@@ -1,0 +1,13 @@
+{
+  "name": "examen-civique-naturalisation",
+  "version": "1.0.0",
+  "description": "Entraînement gratuit au QCM de l'examen civique pour la naturalisation française.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes http-server -p 8099 -c-1",
+    "check": "node scripts/check-bank.mjs",
+    "icons": "node scripts/make-icons.mjs"
+  },
+  "license": "MIT"
+}

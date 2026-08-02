@@ -1,0 +1,23 @@
+{
+  "name": "Examen civique — Entraînement naturalisation",
+  "short_name": "Examen civique",
+  "description": "Entraînement gratuit au QCM de l'examen civique pour la naturalisation française.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "categories": ["education"],
+  "icons": [
+    { "src": "./assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Examen blanc", "short_name": "Examen", "url": "./#/examen" },
+    { "name": "Révision du jour", "short_name": "Réviser", "url": "./#/reviser" }
+  ]
+}
