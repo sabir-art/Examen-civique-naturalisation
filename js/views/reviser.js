@@ -41,6 +41,14 @@ function hub() {
       due > 0 ? h('span', { class: 'badge badge--warn', text: String(due) }) : null,
       h('span', { class: 'item__chev' }, icon('chevron')),
     ].filter(Boolean)),
+    h('a', { class: 'item item--revise', href: '#/cartes' }, [
+      h('span', { class: 'item__icon' }, icon('list')),
+      h('span', { class: 'item__body' }, [
+        h('span', { class: 'item__title', text: 'Cartes mémoire' }),
+        h('span', { class: 'item__sub', text: 'Répondre de tête, puis retourner la carte' }),
+      ]),
+      h('span', { class: 'item__chev' }, icon('chevron')),
+    ]),
     weak > 0 ? h('a', { class: 'item', href: '#/reviser/erreurs' }, [
       h('span', { class: 'item__icon' }, icon('target')),
       h('span', { class: 'item__body' }, [

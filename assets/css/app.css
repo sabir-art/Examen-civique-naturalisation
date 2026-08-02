@@ -838,6 +838,62 @@ a.themestat__row { min-height: 44px; }
 .summary::after { content: '⌄'; margin-left: auto; font-size: 17px; line-height: 1; opacity: .7; }
 details[open] > .summary::after { content: '⌃'; }
 
+/* ------------------------------------------------------- cartes mémoire */
+.flash {
+  width: 100%; min-height: 300px; display: grid; place-items: center; text-align: center;
+  background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: var(--radius-lg);
+  padding: 26px 20px; font-family: inherit; color: inherit; cursor: pointer;
+  box-shadow: var(--shadow); -webkit-tap-highlight-color: transparent;
+  transition: transform .12s ease, box-shadow .2s ease;
+}
+.flash:active { transform: scale(.99); }
+.flash__face { display: grid; gap: 12px; justify-items: center; animation: flip .3s ease both; }
+.flash.is-flipped > .flash__face:first-child,
+.flash:not(.is-flipped) > .flash__face--back { display: none; }
+.flash.is-flipped { border-color: var(--ok); background: var(--ok-100); }
+@keyframes flip { from { opacity: 0; transform: rotateX(-28deg); } to { opacity: 1; transform: none; } }
+
+.flash__icon {
+  width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center;
+  background: var(--brand-100); color: var(--brand);
+}
+.flash__icon svg { width: 25px; height: 25px; }
+.flash__scenario { font-size: 14px; color: var(--muted); }
+.flash__q { font-size: 19px; font-weight: 700; line-height: 1.35; }
+.flash__hint {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+  font-size: 12.5px; font-weight: 650; color: var(--faint);
+}
+.flash__hint svg { width: 15px; height: 15px; }
+.flash__label {
+  font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ok);
+}
+.flash__a { font-size: 20px; font-weight: 750; line-height: 1.3; }
+.flash__why { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+.btn--easy { background: var(--ok-100); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 32%, transparent); }
+.btn--hard { background: var(--bad-100); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 32%, transparent); }
+
+/* --------------------------------------------- chronomètre du mode examen */
+.timerring { display: grid; place-items: center; gap: 4px; padding: 8px 0 4px; }
+.timerring svg { width: 190px; height: 190px; }
+.timerring__track { stroke: var(--line); }
+.timerring__value { stroke: var(--brand); transition: stroke-dashoffset 1s linear; }
+.timerring--low .timerring__value { stroke: var(--bad); }
+.timerring__time { font-size: 27px; font-weight: 750; fill: var(--text); font-variant-numeric: tabular-nums; }
+.timerring__sub { font-size: 10.5px; fill: var(--muted); font-weight: 600; }
+
+/* ------------------------------------------------- graphique hebdomadaire */
+.week { display: flex; align-items: flex-end; gap: 8px; height: 96px; margin-top: 6px; }
+.week__day { flex: 1; display: grid; gap: 6px; justify-items: center; align-content: end; }
+.week__bar {
+  width: 100%; max-width: 26px; min-height: 5px; border-radius: 7px 7px 3px 3px;
+  background: var(--brand-100);
+}
+.week__bar--on { background: var(--brand); }
+.week__bar--today { background: var(--accent); }
+.week__lab { font-size: 11px; color: var(--faint); font-weight: 650; }
+
 /* ------------------------------------------------------------ animations */
 /* Tout ce qui apparaît ou change de place le fait avec un mouvement court :
    on comprend d'où vient l'élément. Le bloc `prefers-reduced-motion` en fin de

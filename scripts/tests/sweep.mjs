@@ -19,7 +19,7 @@ const ROUTES = [
   '#/cours', '#/cours/principes-valeurs',
   '#/livret', '#/livret/p/p1', '#/livret/c/p1-i',
   '#/progres', '#/compte', '#/compte/ia', '#/compte/synchronisation', '#/compte/a-propos',
-  '#/assistant',
+  '#/assistant', '#/cartes',
 ];
 
 const browser = await chromium.launch();

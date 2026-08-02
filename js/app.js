@@ -13,6 +13,7 @@ import renderExamen from './views/examen.js';
 import renderCours from './views/cours.js';
 import renderLivret from './views/livret.js';
 import renderRoman from './views/roman.js';
+import renderCartes from './views/cartes.js';
 import renderProgres from './views/progres.js';
 import renderCompte from './views/compte.js';
 import renderAssistant from './views/assistant.js';
@@ -44,6 +45,8 @@ const ROUTES = [
   { path: /^\/histoire$/, view: renderRoman, title: 'La France racontée', tab: '/histoire' },
   { path: /^\/histoire\/(.+)$/, view: renderRoman, title: 'La France racontée', tab: '/histoire', back: '#/histoire' },
   { path: /^\/reviser$/, view: renderReviser, title: 'Réviser', tab: '/reviser' },
+  { path: /^\/cartes$/, view: renderCartes, title: 'Cartes mémoire', tab: '/reviser', back: '#/reviser' },
+  { path: /^\/cartes\/(.+)$/, view: renderCartes, title: 'Cartes mémoire', tab: '/reviser', back: '#/reviser' },
   { path: /^\/reviser\/(.+)$/, view: renderReviser, title: 'Entraînement', tab: '/reviser', back: '#/reviser' },
   { path: /^\/examen$/, view: renderExamen, title: 'Examen blanc', tab: '/examen' },
   { path: /^\/examen\/(.+)$/, view: renderExamen, title: 'Examen blanc', tab: '/examen', back: '#/examen' },

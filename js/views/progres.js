@@ -117,6 +117,38 @@ export default function renderProgres() {
   const streakDays = store.streak();
   const today = store.answeredToday();
 
+  /* ------------------------------------------------- les sept derniers jours */
+
+  const JOURS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+  const semaine = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    semaine.push({
+      lettre: JOURS[d.getDay()],
+      n: store.current()?.days?.[store.dayKey(d.getTime())] || 0,
+      aujourdhui: i === 0,
+    });
+  }
+  const maxJour = Math.max(1, ...semaine.map((j) => j.n));
+  const totalSemaine = semaine.reduce((s, j) => s + j.n, 0);
+
+  const hebdo = h('div', { class: 'card' }, [
+    h('div', { class: 'row row--between' }, [
+      h('h2', { class: 'card__title', text: 'Ces sept derniers jours' }),
+      h('span', { class: 'badge badge--brand', text: `${totalSemaine} réponse${totalSemaine > 1 ? 's' : ''}` }),
+    ]),
+    h('div', { class: 'week' }, semaine.map((j) => h('div', { class: 'week__day' }, [
+      h('div', {
+        class: `week__bar ${j.aujourdhui ? 'week__bar--today' : j.n > 0 ? 'week__bar--on' : ''}`,
+        style: `height:${Math.round((j.n / maxJour) * 74) + 5}px`,
+        title: `${j.n} réponse${j.n > 1 ? 's' : ''}`,
+      }),
+      h('span', { class: 'week__lab', text: j.lettre }),
+    ]))),
+    h('p', { class: 'hint mt', text: totalSemaine === 0 ? "Rien cette semaine pour l'instant." : `Moyenne : ${Math.round(totalSemaine / 7)} par jour.` }),
+  ]);
+
   return {
     node: h('div', { class: 'stack' }, [
       head,
@@ -128,6 +160,7 @@ export default function renderProgres() {
         ]),
       ]),
       kpis,
+      hebdo,
       empty,
       themes,
       autres,
