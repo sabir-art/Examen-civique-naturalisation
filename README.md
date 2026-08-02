@@ -29,6 +29,10 @@ chapitre est marqué comme lu dès qu'on en atteint la fin.
 | II — Le temps du peuple | 1789 → 1958 | 10 |
 | III — La France d'aujourd'hui | aujourd'hui | 6 |
 
+Chaque chapitre a son illustration. Elles sont **dessinées en SVG** par
+`scripts/make-illustrations.mjs` — environ 4 Ko pièce, nettes sur tous les
+écrans, disponibles hors ligne, et sans aucune image reprise d'ailleurs.
+
 ### Trois formats d'examen blanc
 
 Tous en 40 questions, 45 minutes, seuil 32/40 :
@@ -92,10 +96,11 @@ npx http-server -p 8099 -c-1
 Scripts utiles :
 
 ```bash
-node scripts/check-secrets.mjs  # aucune clé d'API dans les fichiers suivis par Git
-node scripts/check-bank.mjs     # intégrité des banques + couverture du plan de tirage
-node scripts/make-icons.mjs     # régénère les icônes PNG de l'application
-npm run check                   # les deux contrôles à la suite
+node scripts/check-secrets.mjs      # aucune clé d'API dans les fichiers suivis par Git
+node scripts/check-bank.mjs         # intégrité des banques + couverture du plan de tirage
+node scripts/make-icons.mjs         # régénère les icônes PNG de l'application
+node scripts/make-illustrations.mjs # régénère les 22 illustrations du récit
+npm run check                       # les deux contrôles à la suite
 ```
 
 Pour que le contrôle anti-secrets tourne aussi avant chaque commit local :
@@ -114,7 +119,8 @@ js/app.js               routeur et chargement des vues
 js/store.js             comptes locaux, progression, révision espacée (Leitner)
 js/engine.js            tirage des examens, calcul de la maîtrise et de la préparation
 js/sync.js              synchronisation cloud optionnelle
-js/ai.js                appel à l'API Claude (clé saisie par l'utilisateur)
+js/ai.js                appels aux API d'IA et de voix (clés saisies par l'utilisateur)
+js/ai-context.js        consigne système et contexte d'une question
 js/components/          composant de quiz et écran de résultats
 js/views/               une vue par écran
 js/data/programme.js    référentiel officiel et plan de tirage des 40 questions
@@ -151,9 +157,17 @@ en première position dans les données. Après modification, relancer
 
 ## Assistant IA (facultatif)
 
-L'application propose de poser une question à Claude : faire réexpliquer une
-réponse ratée, demander un exemple, une comparaison, un moyen mnémotechnique.
-Le bouton **Faire expliquer autrement** apparaît sous chaque question ratée.
+L'application peut être reliée à **votre propre compte d'IA** — Claude, ChatGPT,
+Gemini ou Mistral — pour faire réexpliquer une réponse, demander un exemple ou
+un moyen mnémotechnique. Réglages : **Mon compte → Assistant et voix**.
+
+Vous collez votre clé, le fournisseur est reconnu à sa forme, puis l'application
+demande à son API la **liste des modèles auxquels cette clé donne droit** : le
+choix proposé n'est donc jamais un devinage. Plusieurs clés peuvent cohabiter.
+
+Sous chaque explication de quiz — que la réponse ait été juste ou fausse — un
+panneau **Approfondir avec l'IA** propose des demandes toutes prêtes, une
+question libre, et la lecture à voix haute de la réponse.
 
 Tout le reste fonctionne à l'identique sans assistant.
 
@@ -169,21 +183,31 @@ L'application applique donc le seul modèle qui tienne sans serveur :
 
 | | |
 |---|---|
-| Qui fournit la clé | l'utilisateur, dans l'application (**Mon compte → Assistant IA**) |
+| Qui fournit la clé | l'utilisateur, dans l'application (**Mon compte → Assistant et voix**) |
 | Où elle est stockée | le `localStorage` de son navigateur, sous `examen-civique.assistant` |
 | Où elle est envoyée | à `api.anthropic.com` uniquement, en direct |
 | Exportée avec le profil | non |
 | Synchronisée entre appareils | non |
 | Présente dans le dépôt | jamais — le déploiement échoue si elle y apparaît |
 
-Pour obtenir une clé : [console.anthropic.com](https://console.anthropic.com) →
-*Billing* (créditer le compte et **fixer une limite de dépense**) → *API Keys*.
-Les échanges sont facturés à l'usage par Anthropic. Une clé qui a pu être vue
-par quelqu'un d'autre doit être **supprimée depuis la console** : c'est la seule
-action qui la rende réellement inutilisable.
+Où créer une clé, selon le fournisseur choisi :
+[Anthropic](https://console.anthropic.com) ·
+[OpenAI](https://platform.openai.com/api-keys) ·
+[Google](https://aistudio.google.com/apikey) ·
+[Mistral](https://console.mistral.ai/api-keys) ·
+[ElevenLabs](https://elevenlabs.io/app/settings/api-keys).
 
-Modèle par défaut : `claude-opus-5`. `claude-haiku-4-5` est proposé en second
-choix, plus rapide et moins cher.
+Pensez à **fixer une limite de dépense** : les échanges sont facturés à l'usage.
+Une clé qui a pu être vue par quelqu'un d'autre doit être **supprimée depuis la
+console du fournisseur** — c'est la seule action qui la rende inutilisable.
+
+### Voix
+
+Facultative elle aussi. Sans clé, la lecture à voix haute utilise la synthèse
+vocale intégrée au téléphone : gratuite, hors ligne, mais mécanique. Avec une
+clé [ElevenLabs](https://elevenlabs.io), on choisit une voix parmi celles du
+compte et le rendu est nettement meilleur (modèle `eleven_multilingual_v2`,
+indispensable pour une prononciation française correcte).
 
 ### Le garde-fou
 

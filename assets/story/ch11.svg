@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#123a63"/><stop offset="1" stop-color="#3d7ea6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="52%">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="420" fill="url(#sky)"/>
+  <circle cx="400" cy="150" r="250" fill="url(#glow)"/>
+    <path d="M-70 358 Q 130 268 330 358 Z" fill="#1d5480"/><path d="M500 358 Q 700 280 900 358 Z" fill="#1d5480"/>
+    <!-- l'école -->
+    <g transform="translate(400 358)" fill="#0f2c4d">
+      <rect x="-150" y="-130" width="300" height="130"/>
+      <path d="M-166 -130 l166 -54 l166 54Z"/>
+      <rect x="-30" y="-64" width="60" height="64" fill="#06121f"/>
+      <rect x="-128" y="-104" width="36" height="36" rx="3" fill="#ffd27a" opacity=".85"/><rect x="-84" y="-104" width="36" height="36" rx="3" fill="#ffd27a" opacity=".85"/><rect x="48" y="-104" width="36" height="36" rx="3" fill="#ffd27a" opacity=".85"/><rect x="92" y="-104" width="36" height="36" rx="3" fill="#ffd27a" opacity=".85"/>
+      <rect x="-6" y="-206" width="12" height="26" fill="#06121f"/>
+      <circle cx="0" cy="-214" r="9" fill="#ffd27a"/>
+    </g>
+    <g transform="translate(560 170)">
+    <rect x="-3" y="-14" width="5" height="110" fill="#2b2b2b"/>
+    <path d="M2 -10 h25.333333333333332 v50 h-25.333333333333332Z" fill="#0d3b8f"/>
+    <path d="M27.333333333333332 -10 h25.333333333333332 v50 h-25.333333333333332Z" fill="#f4f4f4"/>
+    <path d="M52.666666666666664 -10 h25.333333333333332 v50 h-25.333333333333332Z" fill="#d8322b"/>
+  </g>
+    <path d="M0 358 Q 200 344 400 358 T 800 352 L800 420 L0 420Z" fill="#06121f"/>
+    <!-- les enfants -->
+    <g transform="translate(128 400) scale(0.5)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(170 400) scale(0.58)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(212 400) scale(0.5)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(254 400) scale(0.58)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(296 400) scale(0.5)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(338 400) scale(0.58)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g>
+    <g transform="translate(560 400) scale(0.5)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(602 400) scale(0.58)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(644 400) scale(0.5)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(686 400) scale(0.58)" fill="#2f6f9e">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g>
+</svg>

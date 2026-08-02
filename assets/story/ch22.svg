@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d4f57"/><stop offset="1" stop-color="#3fa3a3"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="52%">
+      <stop offset="0" stop-color="#ffe08a" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffe08a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="420" fill="url(#sky)"/>
+  <circle cx="400" cy="190" r="300" fill="url(#glow)"/><circle cx="572" cy="196" r="0.9" fill="#fff" opacity="0.24"/><circle cx="242" cy="190" r="1.6" fill="#fff" opacity="0.46"/><circle cx="265" cy="69" r="1.8" fill="#fff" opacity="0.18"/><circle cx="570" cy="113" r="1.5" fill="#fff" opacity="0.25"/><circle cx="438" cy="2" r="1.2" fill="#fff" opacity="0.27"/><circle cx="6" cy="101" r="0.9" fill="#fff" opacity="0.52"/><circle cx="716" cy="125" r="0.9" fill="#fff" opacity="0.21"/><circle cx="692" cy="36" r="1.7" fill="#fff" opacity="0.37"/><circle cx="250" cy="175" r="0.7" fill="#fff" opacity="0.17"/><circle cx="744" cy="153" r="1.9" fill="#fff" opacity="0.38"/><circle cx="740" cy="216" r="0.8" fill="#fff" opacity="0.23"/><circle cx="732" cy="215" r="2.1" fill="#fff" opacity="0.21"/><circle cx="386" cy="122" r="0.8" fill="#fff" opacity="0.22"/><circle cx="313" cy="2" r="1.3" fill="#fff" opacity="0.53"/><circle cx="384" cy="144" r="1.6" fill="#fff" opacity="0.50"/><circle cx="176" cy="185" r="1.6" fill="#fff" opacity="0.40"/><circle cx="745" cy="11" r="1.1" fill="#fff" opacity="0.32"/><circle cx="540" cy="115" r="1.7" fill="#fff" opacity="0.50"/><circle cx="648" cy="34" r="0.8" fill="#fff" opacity="0.39"/><circle cx="170" cy="165" r="1.1" fill="#fff" opacity="0.27"/><circle cx="133" cy="53" r="2.0" fill="#fff" opacity="0.50"/><circle cx="735" cy="54" r="1.0" fill="#fff" opacity="0.45"/><circle cx="721" cy="156" r="0.9" fill="#fff" opacity="0.25"/><circle cx="496" cy="110" r="1.8" fill="#fff" opacity="0.34"/><circle cx="170" cy="168" r="1.7" fill="#fff" opacity="0.45"/><circle cx="531" cy="139" r="1.5" fill="#fff" opacity="0.53"/>
+    <path d="M0 358 Q 200 344 400 358 T 800 352 L800 420 L0 420Z" fill="#04191d"/>
+    <!-- cercle de douze étoiles -->
+    <polygon points="400.0,41.0 404.2,52.2 416.2,52.7 406.8,60.2 410.0,71.8 400.0,65.1 390.0,71.8 393.2,60.2 383.8,52.7 395.8,52.2" fill="#ffd93d"/><polygon points="464.0,58.1 468.2,69.4 480.2,69.9 470.8,77.4 474.0,88.9 464.0,82.3 454.0,88.9 457.2,77.4 447.8,69.9 459.8,69.4" fill="#ffd93d"/><polygon points="510.9,105.0 515.0,116.2 527.0,116.7 517.6,124.2 520.8,135.8 510.9,129.1 500.9,135.8 504.1,124.2 494.7,116.7 506.7,116.2" fill="#ffd93d"/><polygon points="528.0,169.0 532.2,180.2 544.2,180.7 534.8,188.2 538.0,199.8 528.0,193.1 518.0,199.8 521.2,188.2 511.8,180.7 523.8,180.2" fill="#ffd93d"/><polygon points="510.9,233.0 515.0,244.2 527.0,244.7 517.6,252.2 520.8,263.8 510.9,257.1 500.9,263.8 504.1,252.2 494.7,244.7 506.7,244.2" fill="#ffd93d"/><polygon points="464.0,279.9 468.2,291.1 480.2,291.6 470.8,299.1 474.0,310.6 464.0,304.0 454.0,310.6 457.2,299.1 447.8,291.6 459.8,291.1" fill="#ffd93d"/><polygon points="400.0,297.0 404.2,308.2 416.2,308.7 406.8,316.2 410.0,327.8 400.0,321.1 390.0,327.8 393.2,316.2 383.8,308.7 395.8,308.2" fill="#ffd93d"/><polygon points="336.0,279.9 340.2,291.1 352.2,291.6 342.8,299.1 346.0,310.6 336.0,304.0 326.0,310.6 329.2,299.1 319.8,291.6 331.8,291.1" fill="#ffd93d"/><polygon points="289.1,233.0 293.3,244.2 305.3,244.7 295.9,252.2 299.1,263.8 289.1,257.1 279.2,263.8 282.4,252.2 273.0,244.7 285.0,244.2" fill="#ffd93d"/><polygon points="272.0,169.0 276.2,180.2 288.2,180.7 278.8,188.2 282.0,199.8 272.0,193.1 262.0,199.8 265.2,188.2 255.8,180.7 267.8,180.2" fill="#ffd93d"/><polygon points="289.1,105.0 293.3,116.2 305.3,116.7 295.9,124.2 299.1,135.8 289.1,129.1 279.2,135.8 282.4,124.2 273.0,116.7 285.0,116.2" fill="#ffd93d"/><polygon points="336.0,58.1 340.2,69.4 352.2,69.9 342.8,77.4 346.0,88.9 336.0,82.3 326.0,88.9 329.2,77.4 319.8,69.9 331.8,69.4" fill="#ffd93d"/>
+    <!-- vingt-sept pays côte à côte, sous le même cercle -->
+    <g transform="translate(232 380) scale(0.74)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(274 380) scale(0.74)" fill="#ffe08a">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(316 380) scale(0.74)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(358 380) scale(0.74)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(400 380) scale(0.74)" fill="#ffe08a">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(442 380) scale(0.74)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(484 380) scale(0.74)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(526 380) scale(0.74)" fill="#ffe08a">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(568 380) scale(0.74)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g>
+    <g transform="translate(150 210)">
+    <rect x="-3" y="-14" width="5" height="112" fill="#2b2b2b"/>
+    <path d="M2 -10 h26 v52 h-26Z" fill="#0d3b8f"/>
+    <path d="M28 -10 h26 v52 h-26Z" fill="#f4f4f4"/>
+    <path d="M54 -10 h26 v52 h-26Z" fill="#d8322b"/>
+  </g>
+    <g transform="translate(628 210)">
+      <rect x="-3" y="-14" width="5" height="112" fill="#2b2b2b"/>
+      <rect x="2" y="-10" width="78" height="52" fill="#003399"/>
+      <polygon points="41.0,-5.5 42.1,-2.5 45.3,-2.4 42.8,-0.4 43.6,2.6 41.0,0.9 38.4,2.6 39.2,-0.4 36.7,-2.4 39.9,-2.5" fill="#ffd93d"/><polygon points="55.7,3.0 56.8,6.0 60.0,6.1 57.5,8.1 58.4,11.1 55.7,9.4 53.1,11.1 53.9,8.1 51.4,6.1 54.6,6.0" fill="#ffd93d"/><polygon points="55.7,20.0 56.8,23.0 60.0,23.1 57.5,25.1 58.4,28.1 55.7,26.4 53.1,28.1 53.9,25.1 51.4,23.1 54.6,23.0" fill="#ffd93d"/><polygon points="41.0,28.5 42.1,31.5 45.3,31.6 42.8,33.6 43.6,36.6 41.0,34.9 38.4,36.6 39.2,33.6 36.7,31.6 39.9,31.5" fill="#ffd93d"/><polygon points="26.3,20.0 27.4,23.0 30.6,23.1 28.1,25.1 28.9,28.1 26.3,26.4 23.6,28.1 24.5,25.1 22.0,23.1 25.2,23.0" fill="#ffd93d"/><polygon points="26.3,3.0 27.4,6.0 30.6,6.1 28.1,8.1 28.9,11.1 26.3,9.4 23.6,11.1 24.5,8.1 22.0,6.1 25.2,6.0" fill="#ffd93d"/>
+    </g>
+</svg>

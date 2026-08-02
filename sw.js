@@ -4,7 +4,7 @@
  * en arrière-plan. Changer CACHE force le rechargement des fichiers.
  */
 
-const CACHE = 'examen-civique-v4';
+const CACHE = 'examen-civique-v5';
 
 const ASSETS = [
   './',
@@ -14,6 +14,28 @@ const ASSETS = [
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/maskable-512.png',
+  './assets/story/ch01.svg',
+  './assets/story/ch02.svg',
+  './assets/story/ch03.svg',
+  './assets/story/ch04.svg',
+  './assets/story/ch05.svg',
+  './assets/story/ch06.svg',
+  './assets/story/ch07.svg',
+  './assets/story/ch08.svg',
+  './assets/story/ch09.svg',
+  './assets/story/ch10.svg',
+  './assets/story/ch11.svg',
+  './assets/story/ch12.svg',
+  './assets/story/ch13.svg',
+  './assets/story/ch14.svg',
+  './assets/story/ch15.svg',
+  './assets/story/ch16.svg',
+  './assets/story/ch17.svg',
+  './assets/story/ch18.svg',
+  './assets/story/ch19.svg',
+  './assets/story/ch20.svg',
+  './assets/story/ch21.svg',
+  './assets/story/ch22.svg',
   './js/app.js',
   './js/store.js',
   './js/engine.js',

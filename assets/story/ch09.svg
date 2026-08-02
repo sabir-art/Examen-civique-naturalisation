@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#123a63"/><stop offset="1" stop-color="#3d7ea6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="52%">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="420" fill="url(#sky)"/>
+  <ellipse cx="400" cy="260.4" rx="330" ry="200" fill="url(#glow)"/><circle cx="761" cy="143" r="2.2" fill="#fff" opacity="0.25"/><circle cx="719" cy="166" r="2.0" fill="#fff" opacity="0.25"/><circle cx="12" cy="29" r="0.9" fill="#fff" opacity="0.26"/><circle cx="408" cy="207" r="2.1" fill="#fff" opacity="0.32"/><circle cx="1" cy="90" r="1.1" fill="#fff" opacity="0.49"/><circle cx="54" cy="113" r="2.0" fill="#fff" opacity="0.30"/><circle cx="381" cy="108" r="1.8" fill="#fff" opacity="0.41"/><circle cx="53" cy="135" r="1.4" fill="#fff" opacity="0.18"/><circle cx="245" cy="60" r="2.1" fill="#fff" opacity="0.28"/><circle cx="413" cy="2" r="0.8" fill="#fff" opacity="0.40"/><circle cx="609" cy="222" r="0.7" fill="#fff" opacity="0.39"/><circle cx="316" cy="25" r="2.1" fill="#fff" opacity="0.47"/><circle cx="238" cy="40" r="1.6" fill="#fff" opacity="0.16"/><circle cx="601" cy="44" r="1.7" fill="#fff" opacity="0.18"/><circle cx="3" cy="160" r="1.6" fill="#fff" opacity="0.33"/><circle cx="389" cy="147" r="2.1" fill="#fff" opacity="0.34"/><circle cx="565" cy="216" r="0.8" fill="#fff" opacity="0.23"/><circle cx="638" cy="159" r="1.5" fill="#fff" opacity="0.53"/><circle cx="599" cy="15" r="2.0" fill="#fff" opacity="0.42"/><circle cx="232" cy="201" r="2.0" fill="#fff" opacity="0.39"/><circle cx="354" cy="174" r="1.3" fill="#fff" opacity="0.54"/><circle cx="602" cy="28" r="2.1" fill="#fff" opacity="0.26"/><circle cx="136" cy="151" r="1.8" fill="#fff" opacity="0.54"/><circle cx="485" cy="130" r="2.1" fill="#fff" opacity="0.23"/><circle cx="131" cy="109" r="2.0" fill="#fff" opacity="0.53"/><circle cx="10" cy="221" r="1.2" fill="#fff" opacity="0.54"/>
+    <path d="M-50 358 Q 400 258 850 358 Z" fill="#1d5480"/>
+    <path d="M0 358 Q 200 344 400 358 T 800 352 L800 420 L0 420Z" fill="#06121f"/>
+    <!-- le Code civil -->
+    <g transform="translate(400 270)">
+      <rect x="-116" y="0" width="232" height="34" rx="4" fill="#06121f"/>
+      <rect x="-108" y="-30" width="216" height="32" rx="4" fill="#e0533c"/>
+      <rect x="-100" y="-58" width="200" height="30" rx="4" fill="#0f2c4d"/>
+      <rect x="-72" y="-49" width="144" height="4" rx="2" fill="#ffd27a" opacity=".9"/>
+      <rect x="-52" y="-40" width="104" height="3" rx="1.5" fill="#ffd27a" opacity=".6"/>
+    </g>
+    <!-- la plume et l'encrier : c'est l'écriture du droit qui compte ici -->
+    <g transform="translate(400 204)">
+      <path d="M18 0 q54 -22 84 -86 q-10 66 -70 96Z" fill="#ffd27a"/>
+      <path d="M22 -4 q46 -22 72 -74" stroke="#0f2c4d" stroke-width="2" fill="none" opacity=".5"/>
+      <path d="M18 0 l-14 11" stroke="#ffd27a" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <!-- l'encrier, posé à côté du code -->
+    <g transform="translate(268 248)">
+      <path d="M-30 22 h60 l-7 -30 h-46Z" fill="#2f6f9e"/>
+      <ellipse cx="0" cy="-8" rx="23" ry="7" fill="#06121f"/>
+      <ellipse cx="0" cy="-9" rx="15" ry="4" fill="#0f2c4d"/>
+    </g>
+    <polygon points="150.0,101.0 153.7,110.9 164.3,111.4 156.0,117.9 158.8,128.1 150.0,122.3 141.2,128.1 144.0,117.9 135.7,111.4 146.3,110.9" fill="#ffd27a"/><polygon points="662.0,81.0 664.7,88.3 672.5,88.6 666.4,93.4 668.5,100.9 662.0,96.6 655.5,100.9 657.6,93.4 651.5,88.6 659.3,88.3" fill="#ffd27a"/>
+</svg>

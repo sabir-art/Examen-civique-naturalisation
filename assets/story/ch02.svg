@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b2a63"/><stop offset="1" stop-color="#7c5aa8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="52%">
+      <stop offset="0" stop-color="#f5c86b" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#f5c86b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="420" fill="url(#sky)"/>
+  <circle cx="400" cy="150" r="240" fill="url(#glow)"/><circle cx="449" cy="27" r="1.1" fill="#fff" opacity="0.33"/><circle cx="405" cy="18" r="2.0" fill="#fff" opacity="0.39"/><circle cx="329" cy="66" r="1.9" fill="#fff" opacity="0.41"/><circle cx="61" cy="115" r="1.1" fill="#fff" opacity="0.42"/><circle cx="126" cy="129" r="1.4" fill="#fff" opacity="0.22"/><circle cx="40" cy="217" r="2.2" fill="#fff" opacity="0.20"/><circle cx="355" cy="221" r="1.0" fill="#fff" opacity="0.32"/><circle cx="440" cy="155" r="1.1" fill="#fff" opacity="0.22"/><circle cx="788" cy="103" r="1.0" fill="#fff" opacity="0.37"/><circle cx="264" cy="35" r="1.9" fill="#fff" opacity="0.29"/><circle cx="280" cy="18" r="2.1" fill="#fff" opacity="0.25"/><circle cx="707" cy="109" r="1.1" fill="#fff" opacity="0.39"/><circle cx="321" cy="175" r="1.7" fill="#fff" opacity="0.20"/><circle cx="179" cy="104" r="0.8" fill="#fff" opacity="0.17"/><circle cx="330" cy="157" r="1.7" fill="#fff" opacity="0.53"/><circle cx="260" cy="101" r="1.4" fill="#fff" opacity="0.33"/><circle cx="671" cy="104" r="1.4" fill="#fff" opacity="0.26"/><circle cx="189" cy="172" r="0.9" fill="#fff" opacity="0.26"/><circle cx="613" cy="198" r="2.2" fill="#fff" opacity="0.52"/><circle cx="688" cy="173" r="1.7" fill="#fff" opacity="0.37"/><circle cx="19" cy="75" r="1.2" fill="#fff" opacity="0.24"/><circle cx="315" cy="158" r="1.8" fill="#fff" opacity="0.26"/><circle cx="765" cy="2" r="1.2" fill="#fff" opacity="0.38"/><circle cx="353" cy="21" r="2.2" fill="#fff" opacity="0.33"/><circle cx="698" cy="136" r="1.4" fill="#fff" opacity="0.20"/><circle cx="635" cy="207" r="1.1" fill="#fff" opacity="0.16"/>
+    <path d="M-80 358 Q 130 248 340 358 Z" fill="#4a3574"/>
+    <path d="M480 358 Q 690 262 900 358 Z" fill="#4a3574"/>
+    <!-- cathédrale de Reims -->
+    <g transform="translate(400 358)" fill="#2b1d49">
+      <rect x="-92" y="-150" width="184" height="150"/>
+      <rect x="-92" y="-210" width="46" height="60"/><path d="M-92 -210 l23 -34 l23 34Z"/>
+      <rect x="46" y="-210" width="46" height="60"/><path d="M46 -210 l23 -34 l23 34Z"/>
+      <path d="M-26 0 l0 -76 a26 26 0 0 1 52 0 l0 76Z" fill="#150d28"/>
+      <circle cx="0" cy="-120" r="22" fill="#150d28"/>
+      <circle cx="0" cy="-120" r="13" fill="#f5c86b" opacity=".75"/>
+    </g>
+    <path d="M0 358 Q 200 344 400 358 T 800 352 L800 420 L0 420Z" fill="#150d28"/>
+    <!-- la colombe et la couronne -->
+    <polygon points="400.0,91.0 403.2,99.6 412.4,100.0 405.2,105.7 407.6,114.5 400.0,109.5 392.4,114.5 394.8,105.7 387.6,100.0 396.8,99.6" fill="#f5c86b"/>
+    <g transform="translate(400 150)" fill="#f5c86b">
+      <path d="M-34 0 l8 -22 l9 12 l9 -18 l9 18 l9 -12 l8 22Z" opacity=".95"/>
+    </g>
+    <g transform="translate(300 374) scale(0.9)" fill="#6b4f9c">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g>
+</svg>

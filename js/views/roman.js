@@ -98,13 +98,16 @@ function acte(key) {
     const m = Math.round(romanMastery(c.key) * 100);
     const lu = store.isRead(c.key);
     return h('a', { class: `item ${lu ? 'item--story' : ''}`, href: `#/histoire/c/${c.key}`, style: 'align-items:flex-start' }, [
-      h('span', { class: 'item__icon', text: String(c.num), style: 'font-weight:700;font-size:14px' }),
+      h('span', { class: 'vignette' }, [
+        h('img', { src: `./assets/story/${c.key}.svg`, alt: '', loading: 'lazy', width: '800', height: '420' }),
+        h('span', { class: 'vignette__num', text: String(c.num) }),
+      ]),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: c.titre }),
-        h('span', { class: 'item__sub', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min de lecture` }),
+        h('span', { class: 'item__sub', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min` }),
         lu ? h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })) : null,
       ].filter(Boolean)),
-      lu ? h('span', { class: 'badge badge--ok', text: 'Lu', style: 'margin-top:8px' }) : null,
+      lu ? h('span', { class: 'badge badge--ok', text: 'Lu', style: 'margin-top:6px' }) : null,
       h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
     ].filter(Boolean));
   }));
@@ -149,15 +152,21 @@ function chapitre(key) {
   }
 
   const node = h('div', { class: 'stack' }, [
-    h('div', { class: 'card' }, [
-      h('p', { class: 'card__sub', text: `Acte ${c.acteNum} — ${c.acteTitre} · chapitre ${c.num}` }),
-      h('h1', { class: 'card__title', style: 'font-size:21px;margin-top:5px', text: c.titre }),
-      h('p', { class: 'card__sub', style: 'margin-top:7px', html: `${c.lieu} — ${c.date} · ${c.minutes} min de lecture` }),
-      dejaLu && nq ? h('div', { class: 'row', style: 'margin-top:10px;gap:8px' }, [
-        h('span', { class: `badge badge--${tone(m)}`, text: `Mémorisé à ${m} %` }),
-        h('span', { class: 'badge', text: `${nq} questions` }),
-      ]) : null,
-    ].filter(Boolean)),
+    h('div', { class: 'card card--illus' }, [
+      h('img', {
+        class: 'illus', src: `./assets/story/${c.key}.svg`, alt: '', loading: 'eager',
+        width: '800', height: '420',
+      }),
+      h('div', { class: 'card__inner' }, [
+        h('p', { class: 'card__sub', text: `Acte ${c.acteNum} — ${c.acteTitre} · chapitre ${c.num}` }),
+        h('h1', { class: 'card__title', style: 'font-size:21px;margin-top:5px', text: c.titre }),
+        h('p', { class: 'card__sub', style: 'margin-top:7px', html: `${c.lieu} — ${c.date} · ${c.minutes} min de lecture` }),
+        dejaLu && nq ? h('div', { class: 'row', style: 'margin-top:10px;gap:8px' }, [
+          h('span', { class: `badge badge--${tone(m)}`, text: `Mémorisé à ${m} %` }),
+          h('span', { class: 'badge', text: `${nq} questions` }),
+        ]) : null,
+      ].filter(Boolean)),
+    ]),
 
     h('div', { class: 'card' }, h('div', { class: 'prose prose--story', html: c.html })),
 

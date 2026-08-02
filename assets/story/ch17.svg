@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d4f57"/><stop offset="1" stop-color="#3fa3a3"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="52%">
+      <stop offset="0" stop-color="#ffe08a" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffe08a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="420" fill="url(#sky)"/>
+  <circle cx="400" cy="150" r="260" fill="url(#glow)"/>
+    <path d="M-80 358 Q 110 282 300 358 Z" fill="#176c73"/><path d="M530 358 Q 720 292 910 358 Z" fill="#176c73"/>
+    <!-- la mairie -->
+    <path d="M250 230 l150 -43.52 l150 43.52Z" fill="#0a373d"/><rect x="250" y="230" width="300" height="17.92" fill="#0a373d"/><rect x="250.0" y="247.92000000000002" width="28.6" height="89.6" fill="#0a373d"/><rect x="317.9" y="247.92000000000002" width="28.6" height="89.6" fill="#0a373d"/><rect x="385.7" y="247.92000000000002" width="28.6" height="89.6" fill="#0a373d"/><rect x="453.6" y="247.92000000000002" width="28.6" height="89.6" fill="#0a373d"/><rect x="521.4" y="247.92000000000002" width="28.6" height="89.6" fill="#0a373d"/><rect x="244" y="337.52" width="312" height="20.48" fill="#0a373d"/>
+    <g transform="translate(400 358)">
+      <rect x="-30" y="-62" width="60" height="62" fill="#04191d"/>
+      <rect x="-142" y="-206" width="284" height="18" rx="4" fill="#ffe08a" opacity=".92"/>
+    </g>
+    <g transform="translate(268 120)">
+    <rect x="-3" y="-14" width="5" height="114" fill="#2b2b2b"/>
+    <path d="M2 -10 h28 v54 h-28Z" fill="#0d3b8f"/>
+    <path d="M30 -10 h28 v54 h-28Z" fill="#f4f4f4"/>
+    <path d="M58 -10 h28 v54 h-28Z" fill="#d8322b"/>
+  </g>
+    <g transform="translate(470 120)">
+    <rect x="-3" y="-14" width="5" height="114" fill="#2b2b2b"/>
+    <path d="M2 -10 h28 v54 h-28Z" fill="#0d3b8f"/>
+    <path d="M30 -10 h28 v54 h-28Z" fill="#f4f4f4"/>
+    <path d="M58 -10 h28 v54 h-28Z" fill="#d8322b"/>
+  </g>
+    <path d="M0 358 Q 200 344 400 358 T 800 352 L800 420 L0 420Z" fill="#04191d"/>
+    <g transform="translate(190 400) scale(0.62)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(296 400) scale(0.62)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(402 400) scale(0.62)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(508 400) scale(0.62)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g><g transform="translate(614 400) scale(0.62)" fill="#2e8d92">
+    <circle cx="0" cy="-46" r="9"/>
+    <path d="M-11 -36 q11 -6 22 0 l4 26 -8 2 -2 26 -5 0 -2 -22 -2 22 -5 0 -2 -26 -8 -2Z"/>
+  </g>
+</svg>

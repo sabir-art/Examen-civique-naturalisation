@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d4f57"/><stop offset="1" stop-color="#3fa3a3"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="52%">
+      <stop offset="0" stop-color="#ffe08a" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffe08a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="420" fill="url(#sky)"/>
+  <ellipse cx="400" cy="260.4" rx="330" ry="200" fill="url(#glow)"/><circle cx="560" cy="17" r="2.0" fill="#fff" opacity="0.37"/><circle cx="739" cy="150" r="1.4" fill="#fff" opacity="0.54"/><circle cx="351" cy="184" r="1.6" fill="#fff" opacity="0.41"/><circle cx="39" cy="67" r="1.7" fill="#fff" opacity="0.39"/><circle cx="327" cy="223" r="2.0" fill="#fff" opacity="0.30"/><circle cx="729" cy="66" r="1.7" fill="#fff" opacity="0.53"/><circle cx="200" cy="134" r="1.4" fill="#fff" opacity="0.22"/><circle cx="507" cy="210" r="1.5" fill="#fff" opacity="0.23"/><circle cx="544" cy="145" r="1.8" fill="#fff" opacity="0.23"/><circle cx="776" cy="141" r="2.0" fill="#fff" opacity="0.53"/><circle cx="214" cy="34" r="2.2" fill="#fff" opacity="0.20"/><circle cx="330" cy="112" r="1.6" fill="#fff" opacity="0.19"/>
+    <path d="M0 358 Q 200 344 400 358 T 800 352 L800 420 L0 420Z" fill="#04191d"/>
+    <!-- la salle -->
+    <rect x="0" y="170" width="800" height="188" fill="#176c73" opacity=".28"/>
+    <rect x="34" y="170" width="16" height="188" fill="#0a373d" opacity=".5"/><rect x="164" y="170" width="16" height="188" fill="#0a373d" opacity=".5"/><rect x="294" y="170" width="16" height="188" fill="#0a373d" opacity=".5"/><rect x="424" y="170" width="16" height="188" fill="#0a373d" opacity=".5"/><rect x="554" y="170" width="16" height="188" fill="#0a373d" opacity=".5"/><rect x="684" y="170" width="16" height="188" fill="#0a373d" opacity=".5"/>
+    <!-- la balance de la justice -->
+    <g transform="translate(400 358)">
+      <rect x="-58" y="-16" width="116" height="16" rx="4" fill="#04191d"/>
+      <rect x="-6" y="-224" width="12" height="212" fill="#04191d"/>
+      <line x1="-150" y1="-216" x2="150" y2="-216" stroke="#04191d" stroke-width="8" stroke-linecap="round"/>
+      <line x1="-150" y1="-216" x2="-150" y2="-176" stroke="#04191d" stroke-width="2.5"/>
+        <path d="M-190 -176 h80 l-20 34 h-40Z" fill="#ffe08a"/><line x1="150" y1="-216" x2="150" y2="-168" stroke="#04191d" stroke-width="2.5"/>
+        <path d="M110 -168 h80 l-20 34 h-40Z" fill="#ffe08a"/>
+      <circle cx="0" cy="-236" r="12" fill="#ffe08a"/>
+    </g>
+</svg>
