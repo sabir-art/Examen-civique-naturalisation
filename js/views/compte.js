@@ -11,8 +11,10 @@ import { LIVRET_QUESTIONS } from '../data/q-livret.js';
 import { ROMAN_QUESTIONS } from '../data/roman.js';
 import { PRATIQUE } from '../data/programme.js';
 import { applyTheme, refresh, navigate, canInstall, promptInstall } from '../app.js';
+import renderReglagesIA from './reglages-ia.js';
 
 export default function renderCompte({ params }) {
+  if (params[0] === 'ia') return renderReglagesIA();
   if (params[0] === 'synchronisation') return cloudView();
   if (params[0] === 'a-propos') return aboutView();
   return mainView();
@@ -73,11 +75,16 @@ function mainView() {
     : sync.isConfigured() ? 'Configurée, non connectée' : 'Non configurée';
 
   const links = h('div', { class: 'list' }, [
-    h('a', { class: 'item', href: '#/assistant/reglages' }, [
+    h('a', { class: 'item item--ai', href: '#/compte/ia' }, [
       h('span', { class: 'item__icon' }, icon('star')),
       h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Assistant IA' }),
-        h('span', { class: 'item__sub', text: ai.isConfigured() ? `Activé — clé ${ai.keyHint()}` : 'Non activé (facultatif)' }),
+        h('span', { class: 'item__title', text: 'Assistant et voix' }),
+        h('span', {
+          class: 'item__sub',
+          text: ai.isConfigured()
+            ? `${ai.PROVIDERS[ai.provider()].label} · ${ai.model()}${ai.hasVoiceKey() ? ' · voix ElevenLabs' : ''}`
+            : 'Brancher une IA et une voix (facultatif)',
+        }),
       ]),
       h('span', { class: 'item__chev' }, icon('chevron')),
     ]),

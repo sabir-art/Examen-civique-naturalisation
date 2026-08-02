@@ -9,6 +9,7 @@
 import { h, icon, confirmDialog } from '../lib/dom.js';
 import { clock, pct } from '../lib/util.js';
 import { THEMES, SUBS } from '../data/programme.js';
+import { createApprofondir } from './approfondir.js';
 import * as store from '../store.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
@@ -114,10 +115,19 @@ export function createQuiz({
         ]),
         h('p', { class: 'feedback__body', text: q.why }),
       ]));
+      // Approfondir : disponible que la réponse ait été juste ou fausse.
+      deepen = createApprofondir(q, chosen === null ? null : card.choices[chosen]);
+      parts.push(deepen);
     }
 
     body.replaceChildren(...parts.filter(Boolean));
     drawFoot();
+  }
+
+  /** Panneau d'approfondissement de la question affichée, s'il est ouvert. */
+  let deepen = null;
+  function closeDeepen() {
+    if (deepen) { deepen.stop?.(); deepen = null; }
   }
 
   function drawFoot() {
@@ -167,6 +177,7 @@ export function createQuiz({
   }
 
   function next() {
+    closeDeepen();
     if (!immediate) {
       store.recordAnswer(cards[index].id, answers[index] === cards[index].correct);
     }
@@ -182,6 +193,7 @@ export function createQuiz({
     if (finished) return;
     finished = true;
     stopTimer();
+    closeDeepen();
 
     // Temps écoulé : les questions non atteintes comptent comme fausses. Celles
     // qui précèdent ont déjà été enregistrées au fil de la série.
@@ -234,7 +246,7 @@ export function createQuiz({
     return ok;
   };
 
-  root.stop = stopTimer;
+  root.stop = () => { stopTimer(); closeDeepen(); };
 
   draw();
   startTimer();
