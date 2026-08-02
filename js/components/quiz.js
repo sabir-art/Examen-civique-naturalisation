@@ -10,6 +10,7 @@ import { h, icon, confirmDialog } from '../lib/dom.js';
 import { clock, pct } from '../lib/util.js';
 import { THEMES, SUBS } from '../data/programme.js';
 import { createApprofondir } from './approfondir.js';
+import * as fx from '../lib/feedback.js';
 import * as store from '../store.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
@@ -126,6 +127,10 @@ export function createQuiz({
     }
 
     body.replaceChildren(...parts.filter(Boolean));
+    // Pendant qu'on choisit, la barre d'action reste collée en bas : « Valider »
+    // doit toujours être sous le pouce. Dès que la correction s'affiche, elle
+    // redescend dans le flux, sinon elle tranche l'explication en deux.
+    root.classList.toggle('is-revealed', revealed);
     drawFoot();
   }
 
@@ -169,6 +174,7 @@ export function createQuiz({
 
   function pick(i) {
     if (revealed) return;
+    if (answers[index] !== i) fx.tap();
     answers[index] = i;
     if (immediate) { draw(); return; }
     // En conditions d'examen, la réponse est enregistrée et l'on passe à la suite.
@@ -177,7 +183,9 @@ export function createQuiz({
 
   function reveal() {
     revealed = true;
-    store.recordAnswer(cards[index].id, answers[index] === cards[index].correct);
+    const juste = answers[index] === cards[index].correct;
+    store.recordAnswer(cards[index].id, juste);
+    if (juste) fx.bonneReponse(); else fx.mauvaiseReponse();
     draw();
   }
 

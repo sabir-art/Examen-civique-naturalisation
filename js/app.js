@@ -3,6 +3,7 @@
  */
 
 import * as store from './store.js';
+import { amorcer } from './lib/feedback.js';
 import { h, icon, toast } from './lib/dom.js';
 
 import renderOnboarding from './views/onboarding.js';
@@ -185,6 +186,7 @@ export async function promptInstall() {
 /* -------------------------------------------------------------- démarrage */
 
 applyTheme();
+amorcer();   // le contexte audio ne peut naître que d'un geste de l'utilisateur
 route();
 
 // Expose l'icône aux vues chargées dynamiquement (confort de débogage).

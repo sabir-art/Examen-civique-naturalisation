@@ -4,7 +4,7 @@
  * en arrière-plan. Changer CACHE force le rechargement des fichiers.
  */
 
-const CACHE = 'examen-civique-v7';
+const CACHE = 'examen-civique-v8';
 
 const ASSETS = [
   './',
@@ -67,6 +67,8 @@ const ASSETS = [
   './js/ai.js',
   './js/ai-context.js',
   './js/lib/dom.js',
+  './js/lib/icons.js',
+  './js/lib/feedback.js',
   './js/lib/util.js',
   './js/components/quiz.js',
   './js/components/results.js',

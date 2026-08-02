@@ -11,6 +11,7 @@ import { buildRomanSet, romanMastery, romanActeMastery, romanOverview, nextUnrea
 import { runQuiz } from './reviser.js';
 import { navigate } from '../app.js';
 import * as store from '../store.js';
+import * as fx from '../lib/feedback.js';
 
 export default function renderRoman({ params }) {
   const target = params[0];
@@ -145,6 +146,7 @@ function chapitre(key) {
     const obs = new IntersectionObserver((entries) => {
       if (entries.some((e) => e.isIntersecting)) {
         store.markRead(key);
+        fx.jalon();
         obs.disconnect();
       }
     }, { rootMargin: '0px 0px -10% 0px' });

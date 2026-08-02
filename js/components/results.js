@@ -3,6 +3,7 @@
  */
 
 import { h, icon } from '../lib/dom.js';
+import * as fx from '../lib/feedback.js';
 import { duration, pct } from '../lib/util.js';
 import { THEMES, EXAM } from '../data/programme.js';
 import { BY_ID } from '../data/questions.js';
@@ -70,6 +71,9 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
   const detailLine = isExam
     ? `Seuil de réussite : ${EXAM.passing}/${EXAM.questions} · Temps : ${duration(result.durationSec)}${result.timedOut ? ' (temps écoulé)' : ''}`
     : `${result.score} bonne${result.score > 1 ? 's' : ''} réponse${result.score > 1 ? 's' : ''} sur ${result.total} · ${duration(result.durationSec)}`;
+
+  // Le verdict s'annonce aussi à l'oreille.
+  (passed ? fx.reussite : fx.echec)();
 
   const head = h('div', { class: `score ${passed ? '' : 'score--fail'}` }, [
     passed ? confettis() : null,

@@ -5,6 +5,7 @@ import { formatDate, formatDateShort } from '../lib/util.js';
 import * as store from '../store.js';
 import * as sync from '../sync.js';
 import * as ai from '../ai.js';
+import * as fx from '../lib/feedback.js';
 import { overview } from '../engine.js';
 import { QUESTIONS } from '../data/questions.js';
 import { LIVRET_QUESTIONS } from '../data/q-livret.js';
@@ -59,6 +60,30 @@ function mainView() {
       text: label,
       onclick: () => { store.setSetting('theme', v); applyTheme(); refresh(); },
     }))),
+  ]);
+
+  const s = p.settings || {};
+  const bascule = (cle, titre, sous, defaut = true) => {
+    const actif = s[cle] !== false && (s[cle] !== undefined || defaut);
+    return h('button', {
+      class: 'switch switchrow', type: 'button', role: 'switch',
+      'aria-checked': actif ? 'true' : 'false',
+      onclick: () => { store.setSetting(cle, !actif); if (!actif) fx.tap(); refresh(); },
+    }, [
+      h('span', { class: 'grow', style: 'text-align:left' }, [
+        h('span', { class: 'item__title', text: titre }),
+        h('span', { class: 'item__sub', text: sous }),
+      ]),
+      h('span', { class: 'toggle' }, h('span', { class: 'toggle__dot' })),
+    ]);
+  };
+
+  const sensations = h('div', { class: 'card stack stack--tight' }, [
+    h('h2', { class: 'card__title', text: 'Sons et vibrations' }),
+    bascule('sound', 'Sons', 'Un petit signal à chaque réponse et à la fin d\'une série'),
+    bascule('haptics', 'Vibration', fx.vibrationDisponible()
+      ? 'Une brève vibration en même temps que le son'
+      : "Non proposé par ce navigateur — sur iPhone, aucune application web n'a accès au moteur haptique"),
   ]);
 
   const backup = h('div', { class: 'card stack stack--tight' }, [
@@ -166,7 +191,7 @@ function mainView() {
   ].filter(Boolean));
 
   return {
-    node: h('div', { class: 'stack' }, [identity, appearance, backup, links, profilesCard, danger]),
+    node: h('div', { class: 'stack' }, [identity, appearance, sensations, backup, links, profilesCard, danger]),
     title: 'Mon compte',
     back: '#/',
   };

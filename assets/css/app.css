@@ -424,8 +424,9 @@ a { color: var(--brand); }
   border-top: 1px solid var(--line);
 }
 .quizfoot--nobar { bottom: 0; }
-/* Panneau « approfondir » ouvert : la barre redescend dans le flux, sous le
-   panneau, au lieu de rester collée par-dessus. */
+/* Correction affichée : la barre redescend dans le flux, sous l'explication et
+   sous le panneau « approfondir », au lieu de rester collée par-dessus. */
+.quiz.is-revealed .quizfoot,
 .quiz.is-deepened .quizfoot {
   position: static; margin: 16px 0 0; padding: 0;
   background: none; backdrop-filter: none; -webkit-backdrop-filter: none; border-top: 0;
@@ -544,6 +545,22 @@ a.themestat__row { min-height: 44px; }
 .chip[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-100); color: var(--brand); }
 
 .switch { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+/* Ligne entière cliquable avec son interrupteur à droite. */
+.switchrow {
+  width: 100%; min-height: 52px; padding: 10px 0; background: none; border: 0;
+  font-family: inherit; font-size: 15px; color: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle {
+  flex: none; width: 48px; height: 29px; border-radius: 999px; padding: 3px;
+  background: var(--line-strong); transition: background .2s ease;
+}
+.toggle__dot {
+  display: block; width: 23px; height: 23px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .2s cubic-bezier(.2, .9, .3, 1);
+}
+.switchrow[aria-checked="true"] .toggle { background: var(--ok); }
+.switchrow[aria-checked="true"] .toggle__dot { transform: translateX(19px); }
 .switch__track {
   width: 50px; height: 30px; border-radius: 999px; background: var(--line-strong); border: 0; padding: 3px;
   cursor: pointer; flex: none; transition: background .18s;
