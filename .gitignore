@@ -14,3 +14,8 @@ secrets.json
 # La skill ui-ux-pro-max est un outil de développement (1,9 Mo de données de
 # référence) : elle n'a pas à être publiée avec le site.
 .claude/skills/
+
+# Captures produites par les contrôles Playwright : elles se régénèrent d'un
+# `node scripts/tests/*.mjs`, et versionner des images d'écran ferait grossir
+# le dépôt sans rien apporter à la relecture.
+scripts/tests/captures/

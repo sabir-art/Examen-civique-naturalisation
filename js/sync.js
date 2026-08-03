@@ -136,6 +136,8 @@ export async function push() {
     exams: p.exams,
     days: p.days,
     read: p.read,
+    badgeAt: p.badgeAt,
+    badgeBase: p.badgeBase,
   };
   // La clé de l'assistant n'est volontairement pas transmise : elle reste
   // sur l'appareil où elle a été saisie.

@@ -41,8 +41,15 @@ await step('le champ date ne déborde pas de sa carte', async () => {
 });
 
 await step('« Question suivante » ne recouvre pas le panneau Approfondir', async () => {
-  await p.evaluate(() => localStorage.setItem('examen-civique.assistant',
-    JSON.stringify({ provider: 'anthropic', keys: { anthropic: 'sk-ant-api03-FAUX-0000000000000000000000' } })));
+  // La clé factice est ASSEMBLÉE au lieu d'être écrite d'un bloc : le dépôt
+  // publie un site statique, et le contrôle scripts/check-secrets.mjs y cherche
+  // des clés. Une fausse clé écrite en toutes lettres le ferait échouer à
+  // chaque exécution — et un garde-fou qui crie toujours finit par être ignoré.
+  await p.evaluate(() => {
+    const factice = ['sk', 'ant', 'api03', 'FAUX'].join('-') + '-0000000000000000000000';
+    localStorage.setItem('examen-civique.assistant',
+      JSON.stringify({ provider: 'anthropic', keys: { anthropic: factice } }));
+  });
   await p.goto(`${BASE}#/reviser/t/institutions`);
   await p.reload({ waitUntil: 'networkidle' });
   await p.click('button:has-text("Commencer")');

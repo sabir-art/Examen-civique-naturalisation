@@ -39,8 +39,9 @@ for (const [scheme, choix] of CAS) {
   // Toutes les familles de boutons doivent être couvertes : les écrans de
   // réglages et la boîte de confirmation sont les seuls à porter les variantes
   // « ghost », « quiet » et « danger ».
-  for (const route of ['#/', '#/reviser', '#/examen', '#/progres', '#/histoire',
-                       '#/compte', '#/compte/ia', '#/livret', '#/cours']) {
+  for (const route of ['#/', '#/reviser', '#/examen', '#/progres', '#/parcours', '#/histoire',
+                       '#/compte', '#/compte/ia', '#/livret', '#/cours',
+                       '#/recherche', '#/activite']) {
     await p.goto(BASE + route);
     await p.waitForTimeout(350);
 

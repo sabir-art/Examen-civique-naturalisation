@@ -6,6 +6,7 @@ import * as store from '../store.js';
 import * as sync from '../sync.js';
 import * as ai from '../ai.js';
 import * as fx from '../lib/feedback.js';
+import * as rappel from '../lib/rappel.js';
 import { overview } from '../engine.js';
 import { QUESTIONS } from '../data/questions.js';
 import { LIVRET_QUESTIONS } from '../data/q-livret.js';
@@ -13,6 +14,13 @@ import { ROMAN_QUESTIONS } from '../data/roman.js';
 import { PRATIQUE } from '../data/programme.js';
 import { applyTheme, refresh, navigate, canInstall, promptInstall } from '../app.js';
 import renderReglagesIA from './reglages-ia.js';
+
+function rappelEtat() {
+  const r = rappel.reglage();
+  if (!rappel.supporte()) return "Journal des évènements — notifications indisponibles ici";
+  if (r.actif && rappel.permission() === 'granted') return `Rappel actif vers ${r.heure}`;
+  return 'Journal des évènements, rappel désactivé';
+}
 
 export default function renderCompte({ params }) {
   if (params[0] === 'ia') return renderReglagesIA();
@@ -110,6 +118,14 @@ function mainView() {
             ? `${ai.PROVIDERS[ai.provider()].label} · ${ai.model()}${ai.hasVoiceKey() ? ' · voix ElevenLabs' : ''}`
             : 'Brancher une IA et une voix (facultatif)',
         }),
+      ]),
+      h('span', { class: 'item__chev' }, icon('chevron')),
+    ]),
+    h('a', { class: 'item', href: '#/activite' }, [
+      h('span', { class: 'item__icon' }, icon('bell')),
+      h('span', { class: 'item__body' }, [
+        h('span', { class: 'item__title', text: 'Activité et rappel quotidien' }),
+        h('span', { class: 'item__sub', text: rappelEtat() }),
       ]),
       h('span', { class: 'item__chev' }, icon('chevron')),
     ]),

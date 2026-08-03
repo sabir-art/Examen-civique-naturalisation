@@ -89,6 +89,29 @@ function choix() {
 
 /* ------------------------------------------------ présentation d'un format */
 
+/**
+ * Grand cadran du temps imparti.
+ *
+ * Il ne tourne pas : c'est une illustration de la contrainte, affichée avant de
+ * lancer l'épreuve. Le chronomètre qui tourne vraiment est dans la barre du
+ * questionnaire, sous forme réduite.
+ */
+function anneauTemps(minutes) {
+  const r = 54;
+  const c = 2 * Math.PI * r;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 128 128');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `${minutes} minutes imparties`);
+  svg.innerHTML = `
+    <circle class="timerring__track" cx="64" cy="64" r="${r}" fill="none" stroke-width="9"/>
+    <circle class="timerring__value" cx="64" cy="64" r="${r}" fill="none" stroke-width="9" stroke-linecap="round"
+            transform="rotate(-90 64 64)" stroke-dasharray="${c}" stroke-dashoffset="0"/>
+    <text class="timerring__time" x="64" y="60" text-anchor="middle" dominant-baseline="middle">${minutes}:00</text>
+    <text class="timerring__sub" x="64" y="88" text-anchor="middle">MINUTES IMPARTIES</text>`;
+  return h('div', { class: 'timerring' }, svg);
+}
+
 function presentation(key) {
   const m = EXAM_MODES[key];
   const history = store.exams().filter((e) => modeOf(e) === key);
@@ -120,6 +143,7 @@ function presentation(key) {
 
       h('div', { class: 'card' }, [
         h('h2', { class: 'card__title', text: "Règles de l'épreuve" }),
+        anneauTemps(EXAM.minutes),
         h('div', { class: 'stack stack--tight mt' }, rules.map(([k, v]) => h('div', { class: 'row' }, [
           h('span', { class: 'item__icon', style: 'width:32px;height:32px;border-radius:9px' }, icon('clock')),
           h('span', { class: 'grow small' }, [

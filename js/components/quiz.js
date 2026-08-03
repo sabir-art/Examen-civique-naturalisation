@@ -34,7 +34,29 @@ export function createQuiz({
 
   /* --------------------------------------------------------- chronomètre */
 
-  const timerEl = h('span', { class: 'timer' }, [icon('clock'), h('span', { text: timeLimitSec ? clock(timeLimitSec) : '' })]);
+  /**
+   * Petit anneau qui se vide, à la place de l'icône d'horloge : on voit la part
+   * de temps restante sans lire les chiffres, ce qui compte quand on est
+   * absorbé par la question.
+   */
+  const RAYON = 9;
+  const TOUR = 2 * Math.PI * RAYON;
+  const anneau = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  anneau.setAttribute('viewBox', '0 0 24 24');
+  anneau.setAttribute('class', 'timer__ring');
+  anneau.setAttribute('aria-hidden', 'true');
+  anneau.innerHTML = `
+    <circle class="timer__ring-track" cx="12" cy="12" r="${RAYON}" fill="none"/>
+    <circle class="timer__ring-value" cx="12" cy="12" r="${RAYON}" fill="none" stroke-linecap="round"
+            transform="rotate(-90 12 12)" stroke-dasharray="${TOUR}" stroke-dashoffset="0"/>`;
+  const anneauTrait = anneau.lastElementChild;
+
+  const timerEl = h('span', {
+    class: 'timer', role: 'timer', 'aria-live': 'off',
+  }, [
+    timeLimitSec ? anneau : icon('clock'),
+    h('span', { text: timeLimitSec ? clock(timeLimitSec) : '' }),
+  ]);
 
   function startTimer() {
     if (!timeLimitSec) return;
@@ -42,6 +64,7 @@ export function createQuiz({
       remaining -= 1;
       timerEl.lastChild.textContent = clock(remaining);
       timerEl.classList.toggle('timer--low', remaining <= 300);
+      anneauTrait.style.strokeDashoffset = String(TOUR * (1 - Math.max(0, remaining) / timeLimitSec));
       if (remaining <= 0) finish(true);
     }, 1000);
   }

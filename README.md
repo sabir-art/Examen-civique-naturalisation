@@ -49,6 +49,9 @@ format de chaque tentative.
 
 - **735 questions** au total, avec une explication pour chacune
 - **Révision espacée** : les questions ratées reviennent, celles qui sont acquises s'espacent
+- **Recherche** dans tout le contenu — les trois banques, les chapitres, les fiches
+- **Niveaux, points et 20 badges**, calculés à partir de la progression (rien de plus n'est stocké)
+- **Journal d'activité** et rappel quotidien facultatif
 - **Livret du citoyen intégral** : 6 parties, 16 chapitres, 97 sections, annexes comprises
 - **Fiches de révision** synthétiques, distinctes du livret
 - **Assistant IA facultatif** (voir plus bas) pour faire réexpliquer une réponse
@@ -82,6 +85,20 @@ deux tombe :
 
 - `scripts/check-secrets.mjs` — recherche de clés d'API dans les fichiers suivis ;
 - `scripts/check-bank.mjs` — cohérence des trois banques et faisabilité du tirage.
+
+## Contrôles automatiques
+
+Huit suites Playwright couvrent les 26 écrans à trois largeurs, les contrastes
+dans les six combinaisons de thème, et les bugs déjà signalés. Chacune a été
+vérifiée en cassant volontairement ce qu'elle surveille — voir
+`scripts/tests/LISEZMOI.md`.
+
+```bash
+npx http-server -p 8099 -c-1 &
+for t in sweep a11y bugs erreurs cartes parcours recherche activite; do
+  node scripts/tests/$t.mjs || echo "échec : $t"
+done
+```
 
 ## Développement local
 
@@ -123,6 +140,11 @@ js/ai.js                appels aux API d'IA et de voix (clés saisies par l'util
 js/ai-context.js        consigne système et contexte d'une question
 js/components/          composant de quiz et écran de résultats
 js/views/               une vue par écran
+js/views/parcours.js    niveau, points d'expérience, badges
+js/views/recherche.js   recherche dans tout le contenu
+js/views/activite.js    journal des évènements et rappel quotidien
+js/lib/xp.js            barème des points, paliers de niveau, définition des badges
+js/lib/rappel.js        rappel quotidien local (limites documentées dans le fichier)
 js/data/programme.js    référentiel officiel et plan de tirage des 40 questions
 js/data/questions.js    agrégation de la banque d'examen + contrôle d'intégrité
 js/data/q-*.js          les questions d'examen, par thème

@@ -16,9 +16,22 @@
 </head>
 <body>
 
-<div id="boot" class="boot">
-  <div class="boot__mark" aria-hidden="true"></div>
-  <p class="boot__text">Chargement…</p>
+<!-- Écran d'ouverture. Il est écrit en dur dans la page, et non construit par
+     JavaScript : il doit s'afficher au premier rendu, avant même que les modules
+     soient chargés. C'est ce qui marque le début d'une session — sans lui, on ne
+     sait pas si l'application vient d'être ouverte ou n'a jamais été fermée. -->
+<div id="boot" class="boot" role="status" aria-live="polite">
+  <div class="boot__inner">
+    <svg class="boot__mark" viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="boot__ring boot__ring--b" cx="60" cy="60" r="50" />
+      <circle class="boot__ring boot__ring--w" cx="60" cy="60" r="34" />
+      <circle class="boot__ring boot__ring--r" cx="60" cy="60" r="18" />
+      <path class="boot__spark" d="M60 44v32M44 60h32" />
+    </svg>
+    <p class="boot__name">Examen civique</p>
+    <p class="boot__text" id="boot-text">Préparation à la naturalisation</p>
+    <span class="boot__load" aria-hidden="true"><i></i></span>
+  </div>
   <noscript><p class="boot__text">Cette application nécessite JavaScript.</p></noscript>
 </div>
 
@@ -27,6 +40,13 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
   </button>
   <h1 class="appbar__title" id="appbar-title">Examen civique</h1>
+  <button class="appbar__action" id="appbar-search" type="button" aria-label="Rechercher">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
+  </button>
+  <button class="appbar__action" id="appbar-bell" type="button" aria-label="Activité">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0" /><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg>
+    <span class="dot" id="appbar-dot" hidden></span>
+  </button>
   <button class="appbar__action" id="appbar-profile" type="button" aria-label="Mon compte">
     <span class="avatar" id="appbar-avatar">?</span>
   </button>

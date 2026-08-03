@@ -18,8 +18,8 @@ const ROUTES = [
   '#/examen', '#/examen/officiel', '#/examen/livret', '#/examen/mixte',
   '#/cours', '#/cours/principes-valeurs',
   '#/livret', '#/livret/p/p1', '#/livret/c/p1-i',
-  '#/progres', '#/compte', '#/compte/ia', '#/compte/synchronisation', '#/compte/a-propos',
-  '#/assistant', '#/cartes',
+  '#/progres', '#/parcours', '#/compte', '#/compte/ia', '#/compte/synchronisation', '#/compte/a-propos',
+  '#/assistant', '#/cartes', '#/recherche', '#/activite',
 ];
 
 const browser = await chromium.launch();
@@ -62,24 +62,44 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
       const doc = document.documentElement;
       if (doc.scrollWidth > doc.clientWidth + 1) out.debordement = `${doc.scrollWidth} > ${doc.clientWidth}`;
 
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+      const nom = (el) => (typeof el.className === 'string' && el.className) || el.getAttribute?.('class') || el.tagName;
+
       for (const el of document.querySelectorAll('.app *')) {
         const cs = getComputedStyle(el);
         if (cs.display === 'none' || cs.visibility === 'hidden') continue;
         const b = el.getBoundingClientRect();
         if (b.width === 0 || b.height === 0) continue;
 
+        if (el.namespaceURI === SVG_NS) {
+          // Dans un SVG, ce qui coupe le texte n'est pas `overflow` mais le
+          // cadre de vue : `scrollWidth` n'y veut rien dire. On compare donc
+          // l'encombrement réel du tracé à la largeur du viewBox.
+          if (el.tagName === 'text') {
+            const racine = el.ownerSVGElement;
+            const vb = racine?.viewBox?.baseVal;
+            if (vb && vb.width) {
+              const boite = el.getBBox();
+              if (boite.x < vb.x - 0.5 || boite.x + boite.width > vb.x + vb.width + 0.5) {
+                out.tronques.push(`${nom(el)} « ${el.textContent.trim().slice(0, 30)} » sort du cadre (${Math.round(boite.x)}…${Math.round(boite.x + boite.width)} pour 0…${vb.width})`);
+              }
+            }
+          }
+          continue;
+        }
+
         // texte coupé horizontalement
         if (el.children.length === 0 && el.scrollWidth > el.clientWidth + 2 && cs.overflowX !== 'auto' && cs.overflowX !== 'scroll') {
-          out.tronques.push(`${el.className || el.tagName} « ${el.textContent.trim().slice(0, 30)} »`);
+          out.tronques.push(`${nom(el)} « ${el.textContent.trim().slice(0, 30)} »`);
         }
         // débordement à droite du cadre de l'application
         if (b.right > doc.clientWidth + 2) {
-          out.recouverts.push(`${el.className || el.tagName} déborde jusqu'à ${Math.round(b.right)}`);
+          out.recouverts.push(`${nom(el)} déborde jusqu'à ${Math.round(b.right)}`);
         }
         // bouton sans libellé ni icône
         if ((el.tagName === 'BUTTON' || (el.tagName === 'A' && el.className.includes('btn')))
             && !el.textContent.trim() && !el.querySelector('svg, img')) {
-          out.vides.push(el.className || el.tagName);
+          out.vides.push(nom(el));
         }
       }
       return out;

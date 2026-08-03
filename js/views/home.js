@@ -5,6 +5,7 @@ import { daysBetween, plural } from '../lib/util.js';
 import * as store from '../store.js';
 import * as ai from '../ai.js';
 import { readiness, overview, advice, themeStats, romanOverview, nextUnread } from '../engine.js';
+import { niveau, badgesObtenus } from '../lib/xp.js';
 import { EXAM, THEMES } from '../data/programme.js';
 
 /** Anneau de progression. `size` en pixels, tracé sur une grille de 128. */
@@ -84,6 +85,22 @@ export default function renderHome() {
     ]),
     streakDays > 0 ? h('span', { class: 'streak' }, [icon('fire'), h('span', { text: String(streakDays) })]) : null,
   ].filter(Boolean));
+
+  /* ------------------------------------------------------- niveau du moment */
+
+  const niv = niveau();
+  const gagnes = badgesObtenus().length;
+
+  const parcours = h('a', { class: 'item', href: '#/parcours' }, [
+    h('span', { class: 'item__icon item__icon--brand' }, icon('award')),
+    h('span', { class: 'item__body' }, [
+      h('span', { class: 'item__title', text: `Niveau ${niv.rang} — ${niv.nom}` }),
+      h('span', { class: 'item__sub', text: `${niv.xp.toLocaleString('fr-FR')} points · ${gagnes} badge${gagnes > 1 ? 's' : ''}` }),
+      h('span', { class: 'bar bar--thin', style: 'margin-top:7px' },
+        h('span', { class: 'bar__fill', style: `width:${niv.pct}%` })),
+    ]),
+    h('span', { class: 'item__chev' }, icon('chevron')),
+  ]);
 
   /* ------------------------------------------------------ carte progression */
 
@@ -168,6 +185,7 @@ export default function renderHome() {
   return h('div', { class: 'stack' }, [
     tete,
     progression,
+    parcours,
     conseil,
     h('div', { class: 'row row--between' }, [
       h('p', { class: 'section-title', style: 'margin:0', text: 'Mes thèmes' }),

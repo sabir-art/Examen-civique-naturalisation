@@ -4,6 +4,7 @@ import { h, icon } from '../lib/dom.js';
 import { formatDateShort, duration, pct, plural } from '../lib/util.js';
 import { EXAM } from '../data/programme.js';
 import { overview, themeStats, readiness, EXAM_MODES, modeOf, livretOverview, romanOverview } from '../engine.js';
+import { niveau, badgesObtenus, badges } from '../lib/xp.js';
 import * as store from '../store.js';
 
 export default function renderProgres() {
@@ -149,9 +150,31 @@ export default function renderProgres() {
     h('p', { class: 'hint mt', text: totalSemaine === 0 ? "Rien cette semaine pour l'instant." : `Moyenne : ${Math.round(totalSemaine / 7)} par jour.` }),
   ]);
 
+  /* ------------------------------------------------------ niveau et badges */
+
+  const n = niveau();
+  const gagnes = badgesObtenus().length;
+  const total = badges().length;
+
+  const parcours = h('a', { class: 'card card--link', href: '#/parcours' }, [
+    h('div', { class: 'row', style: 'gap:13px' }, [
+      h('span', { class: 'lvl__num', style: 'width:38px;height:38px;font-size:15px;background:var(--brand);color:var(--on-brand)', text: String(n.rang) }),
+      h('div', { class: 'grow' }, [
+        h('p', { class: 'card__eyebrow', text: `Niveau ${n.rang} sur ${n.total}` }),
+        h('h2', { class: 'card__title', style: 'margin-top:2px', text: n.nom }),
+      ]),
+    ]),
+    h('div', { class: 'bar bar--thin', style: 'margin-top:12px' },
+      h('span', { class: 'bar__fill', style: `width:${n.pct}%` })),
+    h('p', { class: 'card__sub', style: 'margin-top:7px', text: n.suivant
+      ? `${n.xp.toLocaleString('fr-FR')} points · encore ${n.versLeSuivant.toLocaleString('fr-FR')} pour « ${n.suivant} » · ${gagnes}/${total} badges`
+      : `${n.xp.toLocaleString('fr-FR')} points · ${gagnes}/${total} badges` }),
+  ]);
+
   return {
     node: h('div', { class: 'stack' }, [
       head,
+      parcours,
       h('div', { class: 'card card--pad-sm row', style: 'gap:12px' }, [
         h('span', { class: 'item__icon' }, icon('fire')),
         h('span', { class: 'grow small' }, [

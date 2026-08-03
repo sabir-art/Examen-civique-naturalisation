@@ -47,6 +47,9 @@ function migrate(s) {
     p.days = p.days || {};
     p.read = p.read || {};
     p.settings = { theme: 'auto', ...(p.settings || {}) };
+    // `badgeAt` reste volontairement absent tant qu'il n'a jamais été écrit :
+    // c'est ce qui distingue un profil neuf d'un profil dont les badges ont
+    // déjà été horodatés (voir stampBadges).
   }
   return s;
 }
@@ -92,6 +95,8 @@ export function createProfile(name, goalDate = null) {
     exams: [],      // historique des examens blancs
     days: {},       // 'AAAA-MM-JJ' -> nombre de questions traitées
     read: {},       // clé de chapitre lu -> horodatage
+    badgeAt: {},    // identifiant de badge -> horodatage de l'obtention
+    seenAt: Date.now(), // dernière consultation du journal d'activité
     settings: { theme: 'auto' },
   };
   state.activeProfile = id;
@@ -219,6 +224,64 @@ export function readCount(keys) {
   return keys.filter((k) => read[k]).length;
 }
 
+/* --------------------------------------------------- badges et activité */
+
+/**
+ * Horodate les badges nouvellement obtenus et renvoie ceux qui viennent de
+ * l'être.
+ *
+ * Les badges eux-mêmes restent calculés (js/lib/xp.js) : seule la DATE
+ * d'obtention est conservée, parce qu'elle ne se déduit d'aucune donnée.
+ *
+ * Le premier appel sur un profil existant — ou sur une sauvegarde importée —
+ * horodate en silence : sans cela, quelqu'un qui a déjà beaucoup travaillé
+ * verrait quinze badges « obtenus à l'instant » à la première ouverture.
+ */
+export function stampBadges(ids) {
+  const p = current();
+  if (!p) return [];
+  const premierPassage = p.badgeAt === undefined;
+  p.badgeAt = p.badgeAt || {};
+  const nouveaux = ids.filter((id) => !p.badgeAt[id]);
+  if (!nouveaux.length) return [];
+  const now = Date.now();
+  for (const id of nouveaux) p.badgeAt[id] = now;
+  if (premierPassage) {
+    // Ce lot-là n'a pas été gagné maintenant : il était déjà acquis avant que
+    // l'application ne sache dater les badges. On retient l'instant du
+    // rattrapage pour pouvoir écrire « obtenu » au lieu d'une fausse date.
+    p.badgeBase = now;
+    p.seenAt = now;
+  }
+  persist();
+  return premierPassage ? [] : nouveaux;
+}
+
+export function badgeDates() {
+  return current()?.badgeAt || {};
+}
+
+/**
+ * Vrai si la date enregistrée pour ce badge est celle du rattrapage initial,
+ * donc sans rapport avec le moment où il a réellement été obtenu.
+ */
+export function badgeDateInconnue(id) {
+  const p = current();
+  return Boolean(p?.badgeBase && p.badgeAt?.[id] === p.badgeBase);
+}
+
+/** Horodatage de la dernière consultation du journal d'activité. */
+export function activitySeenAt() {
+  return current()?.seenAt || 0;
+}
+
+export function markActivitySeen() {
+  const p = current();
+  if (!p) return;
+  p.seenAt = Date.now();
+  persist();
+}
+
 /* ------------------------------------------------------------- examens */
 
 export function saveExam(result) {
@@ -289,6 +352,8 @@ export function replaceCurrentProfileData(data) {
   p.exams = data.exams || [];
   p.days = data.days || {};
   p.read = data.read || {};
+  p.badgeAt = data.badgeAt || {};
+  p.badgeBase = data.badgeBase;
   if (data.goalDate !== undefined) p.goalDate = data.goalDate;
   persist();
 }
@@ -311,5 +376,8 @@ export function resetProgress() {
   p.exams = [];
   p.days = {};
   p.read = {};
+  p.badgeAt = {};
+  delete p.badgeBase;
+  p.seenAt = Date.now();
   persist();
 }
