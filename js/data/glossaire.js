@@ -488,6 +488,214 @@ export const GLOSSAIRE = [
     ar: 'القبّعة الفريجية — قلنسوة ليّنة مطوية الرأس تعتمرها ماريان. كانت في العصور القديمة تُمنح للعبيد المحرَّرين، فصارت رمزًا للحرّية المستردّة.',
     voir: ['bonnet phrygien'],
   },
+
+  /* ================================================================== *
+   * Les mots qui bloquent la LECTURE.                                  *
+   *                                                                    *
+   * Ceux-ci ne tombent pas à l'examen. Ils sont là parce qu'un mot     *
+   * inconnu au milieu d'une phrase fait perdre le fil du paragraphe    *
+   * entier — et que les premiers chapitres, très narratifs, en sont    *
+   * pleins sans contenir beaucoup de vocabulaire civique.              *
+   * ================================================================== */
+
+  {
+    terme: 'Gaule',
+    def: "Le nom que les Romains donnaient au territoire correspondant à peu près à la France actuelle, avant la conquête.",
+    ar: 'بلاد الغال — الاسم الذي أطلقه الرومان على الأرض التي تقابل تقريبًا فرنسا اليوم، قبل الفتح.',
+    voir: ['Gaule', 'gauloise', 'gaulois'],
+  },
+  {
+    terme: 'légion',
+    def: "L'unité de base de l'armée romaine, environ cinq mille hommes très entraînés.",
+    ar: 'الفيلق — الوحدة الأساسية في الجيش الروماني، نحو خمسة آلاف رجل مدرَّبين تدريبًا عاليًا.',
+    voir: ['légions', 'légion'],
+  },
+  {
+    terme: 'aqueduc',
+    def: "Un canal, souvent porté par des arches de pierre, qui amenait l'eau jusqu'aux villes romaines. Le pont du Gard en est un.",
+    ar: 'قناة الماء — مجرى محمول غالبًا على أقواس حجرية كان يجلب الماء إلى المدن الرومانية، ومنها جسر الغار.',
+    voir: ['aqueducs', 'aqueduc'],
+  },
+  {
+    terme: 'siège',
+    def: "Encercler une ville pour la couper de tout ravitaillement jusqu'à ce qu'elle se rende. « Lever le siège », c'est le faire cesser.",
+    ar: 'الحصار — تطويق مدينة لقطع الإمداد عنها حتى تستسلم. و«فكّ الحصار» هو إنهاؤه.',
+    voir: ['le siège', 'assiégée', 'assiégé'],
+  },
+  {
+    terme: 'baptême',
+    def: "La cérémonie par laquelle on entre dans la religion chrétienne. Un prêtre verse de l'eau sur la tête de la personne.",
+    ar: 'المعمودية — طقس الدخول في الديانة المسيحية، يسكب فيه الكاهن الماء على رأس الشخص.',
+    voir: ['baptême', 'baptise', 'baptisé'],
+  },
+  {
+    terme: 'évêque',
+    def: "Un responsable religieux chrétien qui dirige les prêtres d'une région. Au Moyen Âge, souvent l'un des rares à savoir lire et écrire.",
+    ar: 'الأسقف — مسؤول ديني مسيحي يشرف على كهنة منطقة ما. وكان في العصور الوسطى من القلائل الذين يعرفون القراءة والكتابة.',
+    voir: ['évêques', 'évêque'],
+  },
+  {
+    terme: 'sacre',
+    def: "La cérémonie religieuse qui faisait d'un homme un roi. Elle avait lieu à Reims et signifiait que son pouvoir venait de Dieu.",
+    ar: 'التتويج المقدَّس — المراسم الدينية التي كانت تجعل من الرجل ملكًا، وتُقام في ريمس، وتعني أنّ سلطته آتية من الله.',
+    voir: ['sacrés à Reims', 'du sacre', 'sacre', 'sacré'],
+  },
+  {
+    terme: 'se convertir',
+    def: "Changer de religion, adopter une autre foi que celle dans laquelle on vivait.",
+    ar: 'اعتناق دين آخر — تغيير الدين والانتقال إلى عقيدة غير التي كان عليها المرء.',
+    voir: ['se convertir', 'se convertit', 'convertit', 'conversion'],
+  },
+  {
+    terme: 'hérésie',
+    def: "Une croyance jugée contraire à la doctrine officielle de l'Église. On pouvait être condamné à mort pour cela.",
+    ar: 'الهرطقة — معتقد يُعدّ مخالفًا للعقيدة الرسمية للكنيسة، وكان يُعاقَب عليه بالإعدام.',
+    voir: ['hérésie'],
+  },
+  {
+    terme: 'protestant',
+    def: "Un chrétien qui suit la Réforme du XVIᵉ siècle et n'obéit pas au pape. En France, on les appelait aussi huguenots.",
+    ar: 'بروتستانتي — مسيحي يتّبع الإصلاح الديني في القرن السادس عشر ولا يخضع للبابا، وكان يُطلق عليهم في فرنسا أيضًا اسم الهوغونوت.',
+    voir: ['protestants', 'protestant', 'protestante'],
+  },
+  {
+    terme: 'catholique',
+    def: "Un chrétien qui reconnaît l'autorité du pape. C'était la religion officielle du royaume de France.",
+    ar: 'كاثوليكي — مسيحي يعترف بسلطة البابا، وكانت الكاثوليكية الدين الرسمي لمملكة فرنسا.',
+    voir: ['catholiques', 'catholique'],
+  },
+  {
+    terme: 'révoquer',
+    def: "Annuler une décision qu'on avait prise. Louis XIV a révoqué l'édit de Nantes : il l'a supprimé.",
+    ar: 'الإلغاء (الرجوع عن قرار) — إبطال قرار سبق اتّخاذه. فقد ألغى لويس الرابع عشر مرسوم نانت أي أبطله.',
+    voir: ['révoque', 'révocation', 'révoqué'],
+  },
+  {
+    terme: 'tolérance',
+    def: "Accepter que d'autres pensent, croient ou vivent autrement que soi, sans chercher à les en empêcher.",
+    ar: 'التسامح — قبول أن يفكّر الآخرون أو يؤمنوا أو يعيشوا على غير ما نعيش، دون السعي إلى منعهم.',
+    voir: ['intolérance', 'tolérance'],
+  },
+  {
+    terme: 'clergé',
+    def: "L'ensemble des religieux : prêtres, évêques, moines. Avant 1789, c'était le premier des trois ordres.",
+    ar: 'رجال الدين — مجموع الإكليروس من كهنة وأساقفة ورهبان، وكانوا قبل 1789 الطبقةَ الأولى من الطبقات الثلاث.',
+    voir: ['clergé'],
+  },
+  {
+    terme: 'noblesse',
+    def: "Les familles qui possédaient des terres et des titres transmis par la naissance : ducs, comtes, marquis. Le deuxième ordre.",
+    ar: 'النبلاء — العائلات التي كانت تملك الأراضي والألقاب المتوارثة بالمولد من دوقات وكونتات وماركيزات، وهم الطبقة الثانية.',
+    voir: ['noblesse', 'noble', 'nobles'],
+  },
+  {
+    terme: 'tiers état',
+    def: "Le troisième ordre : tous ceux qui n'étaient ni clergé ni noblesse — soit 98 % de la population, qui payait presque tout l'impôt.",
+    ar: 'الطبقة الثالثة — من ليسوا من رجال الدين ولا من النبلاء، أي 98 بالمائة من السكّان، وكانوا يدفعون الضريبة كلّها تقريبًا.',
+    voir: ['tiers état'],
+  },
+  {
+    terme: 'privilège',
+    def: "Un avantage attaché à la naissance et non au mérite : ne pas payer tel impôt, être jugé par un tribunal à part. Abolis dans la nuit du 4 août 1789.",
+    ar: 'الامتياز — ميزة مرتبطة بالمولد لا بالاستحقاق: كالإعفاء من ضريبة أو المحاكمة أمام محكمة خاصّة. وقد أُلغيت ليلة 4 أغسطس 1789.',
+    voir: ['privilèges', 'privilège'],
+  },
+  {
+    terme: 'arbitraire',
+    def: "Une décision prise selon le bon vouloir de quelqu'un, sans règle ni justification. Le contraire de l'État de droit.",
+    ar: 'التعسّف — قرار يُتّخذ حسب هوى صاحب السلطة دون قاعدة ولا تبرير، وهو نقيض دولة القانون.',
+    voir: ["l'arbitraire", 'arbitraire'],
+  },
+  {
+    terme: 'guillotine',
+    def: "La machine à décapiter utilisée pendant la Révolution et jusqu'en 1977. « Être guillotiné », c'est être exécuté par elle.",
+    ar: 'المقصلة — آلة قطع الرؤوس التي استُعملت في الثورة وحتى سنة 1977، و«الإعدام بالمقصلة» هو التنفيذ بها.',
+    voir: ['guillotinée', 'guillotiné', 'guillotine'],
+  },
+  {
+    terme: 'superstition',
+    def: "Une croyance sans fondement, transmise par habitude, que les philosophes des Lumières voulaient remplacer par la raison.",
+    ar: 'الخرافة — اعتقاد بلا أساس يتوارثه الناس بالعادة، وقد أراد فلاسفة الأنوار استبداله بالعقل.',
+    voir: ['superstition'],
+  },
+  {
+    terme: 'tyrannie',
+    def: "Un pouvoir qui s'exerce sans limite ni contrôle, au seul profit de celui qui le détient.",
+    ar: 'الطغيان — سلطة تُمارَس بلا حدود ولا رقابة، لمصلحة من يمسك بها وحده.',
+    voir: ['tyrannique', 'tyrannie'],
+  },
+  {
+    terme: 'instituteur',
+    def: "Le maître d'école primaire. Sous la Troisième République, on les appelait les « hussards noirs » à cause de leur blouse sombre.",
+    ar: 'المعلّم الابتدائي — أستاذ المدرسة الابتدائية، وكانوا في الجمهورية الثالثة يُلقَّبون بـ«فرسان الجمهورية السود» بسبب مآزرهم الداكنة.',
+    voir: ['instituteur', 'instituteurs'],
+  },
+  {
+    terme: 'tranchée',
+    def: "Un long fossé creusé dans la terre où les soldats de 1914-1918 vivaient et se battaient, parfois pendant des mois.",
+    ar: 'الخندق — حفرة طويلة في الأرض كان جنود 1914-1918 يعيشون فيها ويقاتلون منها، أحيانًا لأشهر.',
+    voir: ['tranchées', 'tranchée'],
+  },
+  {
+    terme: 'rafle',
+    def: "Une arrestation massive et organisée. Sous l'Occupation, la police française en a mené contre les juifs, dont celle du Vél' d'Hiv en 1942.",
+    ar: 'حملة الاعتقال الجماعي — توقيف واسع منظَّم. وقد نفّذت الشرطة الفرنسية تحت الاحتلال حملات ضدّ اليهود، منها حملة «فيل ديف» سنة 1942.',
+    voir: ['rafles', 'rafle'],
+  },
+  {
+    terme: 'déporter',
+    def: "Emmener de force des personnes loin de chez elles, ici vers les camps de concentration et d'extermination nazis.",
+    ar: 'الترحيل القسري — نقل أشخاص عنوةً بعيدًا عن ديارهم، وهنا إلى معسكرات الاعتقال والإبادة النازية.',
+    voir: ['déportés', 'déporté', 'déportation'],
+  },
+  {
+    terme: 'collaborer',
+    def: "Aider volontairement l'occupant allemand entre 1940 et 1944. C'est ce qu'a fait le régime de Vichy.",
+    ar: 'التعاون مع المحتلّ — مساعدة المحتلّ الألماني طوعًا بين 1940 و1944، وهو ما فعله نظام فيشي.',
+    voir: ['collabore', 'collaboration', 'collaborateur'],
+  },
+  {
+    terme: 'urne',
+    def: "La boîte transparente dans laquelle on dépose son bulletin de vote. On la garde visible pour que personne ne puisse y toucher.",
+    ar: 'صندوق الاقتراع — الصندوق الشفّاف الذي تُوضع فيه ورقة التصويت، ويبقى ظاهرًا للعيان حتى لا يعبث به أحد.',
+    voir: ['urne'],
+  },
+  {
+    terme: 'assesseur',
+    def: "Le bénévole qui tient la table du bureau de vote, vérifie l'identité et prononce le « a voté ».",
+    ar: 'مساعد مكتب الاقتراع — متطوّع يجلس إلى طاولة مكتب التصويت، يتحقّق من الهوية ويعلن «قد صوّت».',
+    voir: ['assesseur'],
+  },
+  {
+    terme: 'bulletin de vote',
+    def: "Le papier au nom d'un candidat ou d'une liste que l'on glisse dans l'enveloppe puis dans l'urne.",
+    ar: 'ورقة التصويت — الورقة التي تحمل اسم مرشّح أو قائمة، تُوضع في الظرف ثمّ في صندوق الاقتراع.',
+    voir: ['bulletin de vote', 'bulletins', 'bulletin'],
+  },
+  {
+    terme: 'hémicycle',
+    def: "La salle en demi-cercle où siègent les députés, avec la tribune au centre pour celui qui parle.",
+    ar: 'القاعة نصف الدائرية — قاعة على شكل نصف دائرة يجلس فيها النوّاب، وفي وسطها المنبر لمن يتكلّم.',
+    voir: ['hémicycle'],
+  },
+  {
+    terme: 'prévenu',
+    def: "La personne poursuivie devant un tribunal correctionnel, qui n'a pas encore été jugée. Elle est présumée innocente.",
+    ar: 'المتّهم (في الجُنح) — الشخص الملاحق أمام محكمة الجنح ولم يُحكم عليه بعد، وهو بريء بحكم القرينة.',
+    voir: ['prévenus', 'prévenu'],
+  },
+  {
+    terme: 'allocation',
+    def: "Une somme versée par l'État ou la CAF pour aider : allocations familiales, aide au logement, allocation chômage.",
+    ar: 'المنحة (الإعانة) — مبلغ تصرفه الدولة أو صندوق المنح العائلية للمساعدة: منح عائلية، ومساعدة سكن، وتعويض بطالة.',
+    voir: ['allocations', 'allocation'],
+  },
+  {
+    terme: 'bail',
+    def: "Le contrat écrit entre un propriétaire et un locataire, qui fixe le loyer, la durée et les obligations de chacun.",
+    ar: 'عقد الإيجار — عقد مكتوب بين المالك والمستأجر يحدّد الكراء والمدّة والتزامات كلّ طرف.',
+    voir: ['un bail', 'bail'],
+  },
 ];
 
 /* --------------------------------------------------------------- index */

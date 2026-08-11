@@ -53,12 +53,25 @@ décalerait les paragraphes en silence.
 
 ### Le glossaire
 
-75 mots difficiles de l'examen — laïcité, suffrage, juridiction, présomption
-d'innocence — expliqués **en une phrase simple**, en français puis en arabe.
-Dans les chapitres, ils sont soulignés en pointillé : il suffit d'appuyer
-dessus. Seule la première occurrence de chaque mot est marquée, sinon le
-soulignement noie le texte. Le glossaire complet est consultable et cherchable
-depuis Histoire et depuis Réviser.
+108 mots difficiles, expliqués **en une phrase simple** — sans autre mot
+difficile dedans — en français puis en arabe. Deux familles :
+
+- le **vocabulaire de l'examen** : laïcité, suffrage, juridiction, présomption
+  d'innocence, ostensible, promulguer ;
+- les **mots qui bloquent la lecture** : aqueduc, hérésie, tiers état, rafle,
+  hémicycle, assesseur. Ils ne tombent pas à l'examen, mais un mot inconnu au
+  milieu d'une phrase fait perdre le fil du paragraphe entier — et les premiers
+  chapitres, très narratifs, en sont pleins.
+
+Dans le texte ils sont soulignés en pointillé : il suffit d'appuyer dessus.
+Seule la première occurrence de chaque mot est marquée, sinon le soulignement
+noie la page.
+
+**Chaque chapitre a son propre glossaire**, sous l'encadré « à retenir » : la
+liste des mots de ce chapitre-là, avec un repère « nouveau » sur ceux qu'il
+introduit pour la première fois. La liste et le soulignement viennent du même
+parcours de texte, ils ne peuvent donc pas diverger. Le glossaire complet reste
+consultable et cherchable depuis Histoire et depuis Réviser.
 
 Chaque chapitre a son illustration. Elles sont **dessinées en SVG** par
 `scripts/make-illustrations.mjs` — environ 4 Ko pièce, nettes sur tous les
@@ -82,7 +95,7 @@ format de chaque tentative.
 - **Révision espacée** : les questions ratées reviennent, celles qui sont acquises s'espacent
 - **Recherche** dans tout le contenu — les trois banques, les chapitres, les fiches
 - **Récit traduit en arabe**, avec un mode bilingue paragraphe par paragraphe
-- **Glossaire** de 75 mots difficiles, en français et en arabe
+- **Glossaire** de 108 mots difficiles, en français et en arabe, avec un glossaire par chapitre
 - **Niveaux, points et 20 badges**, calculés à partir de la progression (rien de plus n'est stocké)
 - **Journal d'activité** et rappel quotidien facultatif
 - **Livret du citoyen intégral** : 6 parties, 16 chapitres, 97 sections, annexes comprises

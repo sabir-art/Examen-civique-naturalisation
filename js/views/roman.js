@@ -15,7 +15,7 @@ import { h, icon, modal } from '../lib/dom.js';
 import { ROMAN, ACTES, ACTE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES, TOTAL_MINUTES, nextChapitre, prevChapitre, questionsOf } from '../data/roman.js';
 import { AR_BY_KEY, ACTE_AR_BY_KEY, blocs, TOTAL_TRADUITS } from '../data/roman-ar.js';
 import { GLOSSAIRE, TOTAL_TERMES } from '../data/glossaire.js';
-import { marquer } from '../lib/gloss.js';
+import { marquer, motsDuChapitre } from '../lib/gloss.js';
 import { buildRomanSet, romanMastery, romanActeMastery, romanOverview, nextUnread } from '../engine.js';
 import { runQuiz } from './reviser.js';
 import { navigate, refresh } from '../app.js';
@@ -35,6 +35,11 @@ export default function renderRoman({ params }) {
 }
 
 const tone = (m) => (m >= 70 ? 'ok' : m >= 35 ? 'warn' : 'bad');
+
+/** Nombre de mots de vocabulaire qu'un chapitre introduit pour la première fois. */
+function motsNouveaux(c) {
+  return motsDuChapitre(CHAPITRES, c.key).nouveaux.size;
+}
 
 /* --------------------------------------------------------------- langue */
 
@@ -82,6 +87,58 @@ function ouvrirTerme(entree) {
   ]);
 }
 
+/** Bloc dépliant d'un terme : le mot, puis les deux définitions. */
+function ligneTerme(entree, { nouveau = false, arDabord = false } = {}) {
+  const fr = h('p', { class: 'glossdef', text: entree.def });
+  const ar = h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: entree.ar }));
+  return h('details', { class: 'card card--pad-sm glossrow' }, [
+    h('summary', { class: 'summary', style: 'padding:0' }, [
+      icon('bulb'),
+      h('span', { class: 'grow', text: entree.terme }),
+      nouveau ? h('span', { class: 'badge badge--brand', text: 'nouveau' }) : null,
+    ].filter(Boolean)),
+    h('div', { class: 'mt' }, arDabord ? [ar, fr] : [fr, ar]),
+  ]);
+}
+
+/**
+ * Glossaire du chapitre en cours.
+ *
+ * Ce sont EXACTEMENT les mots soulignés dans le texte, dans le même ordre :
+ * la liste et le marquage viennent du même parcours (js/lib/gloss.js). On
+ * peut donc lire le chapitre, buter sur un mot, et le retrouver ici sans
+ * remonter le texte.
+ */
+function carteMotsDuChapitre(c, lng) {
+  const { termes, nouveaux } = motsDuChapitre(CHAPITRES, c.key);
+  if (!termes.length) return null;
+
+  const nbNouveaux = termes.filter((t) => nouveaux.has(t.terme)).length;
+  const arDabord = lng === 'ar';
+
+  const detail = h('div', { class: 'stack stack--tight mt' },
+    termes.map((t) => ligneTerme(t, { nouveau: nouveaux.has(t.terme), arDabord })));
+
+  return h('div', { class: 'stack stack--tight' }, [
+    h('div', { class: 'row row--between' }, [
+      h('p', { class: 'section-title', style: 'margin:0', text: 'Les mots de ce chapitre' }),
+      h('span', { class: 'badge', text: `${termes.length}` }),
+    ]),
+    h('div', { class: 'card card--info' }, [
+      h('p', {
+        class: 'small',
+        text: nbNouveaux === termes.length
+          ? `${termes.length} mot${termes.length > 1 ? 's' : ''} à connaître, ${nbNouveaux > 1 ? 'tous nouveaux' : 'nouveau'} dans le récit.`
+          : nbNouveaux === 0
+            ? `${termes.length} mot${termes.length > 1 ? 's' : ''}, tous déjà rencontrés dans les chapitres précédents.`
+            : `${termes.length} mots, dont ${nbNouveaux} ${nbNouveaux > 1 ? 'nouveaux' : 'nouveau'} par rapport aux chapitres précédents.`,
+      }),
+    ]),
+    detail,
+    h('a', { class: 'btn btn--quiet', href: '#/histoire/glossaire', text: `Voir les ${TOTAL_TERMES} mots du glossaire` }),
+  ]);
+}
+
 function glossaire() {
   const champ = h('input', {
     class: 'input search__field', type: 'search', placeholder: 'Chercher un mot…',
@@ -97,16 +154,7 @@ function glossaire() {
       .filter((e) => !q || plie(e.terme).includes(q) || plie(e.def).includes(q) || e.ar.includes(champ.value.trim()))
       .sort((a, b) => a.terme.localeCompare(b.terme, 'fr'));
 
-    liste.replaceChildren(...(vus.length ? vus.map((e) => h('details', { class: 'card card--pad-sm glossrow' }, [
-      h('summary', { class: 'summary', style: 'padding:0' }, [
-        icon('bulb'),
-        h('span', { class: 'grow', text: e.terme }),
-      ]),
-      h('div', { class: 'mt' }, [
-        h('p', { class: 'glossdef', text: e.def }),
-        h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: e.ar })),
-      ]),
-    ])) : [h('div', { class: 'empty' }, [
+    liste.replaceChildren(...(vus.length ? vus.map((e) => ligneTerme(e)) : [h('div', { class: 'empty' }, [
       h('div', { class: 'empty__icon' }, icon('search')),
       h('p', { text: 'Aucun mot ne correspond.' }),
     ])]));
@@ -240,6 +288,7 @@ function acte(key) {
           : h('span', { class: 'item__title', text: c.titre }),
         lng === 'bi' && ar ? h('span', { class: 'item__title arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
         h('span', { class: 'item__sub', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min` }),
+        motsNouveaux(c) ? h('span', { class: 'item__sub', text: `${motsNouveaux(c)} nouveau${motsNouveaux(c) > 1 ? 'x' : ''} mot${motsNouveaux(c) > 1 ? 's' : ''} de vocabulaire` }) : null,
         lu ? h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })) : null,
       ].filter(Boolean)),
       lu ? h('span', { class: 'badge badge--ok', text: 'Lu', style: 'margin-top:6px' }) : null,
@@ -343,12 +392,8 @@ function chapitre(key) {
 
   function draw() {
     const lng = langue();
-    const termes = [];
-    const surTerme = (e) => ouvrirTerme(e);
-
-    const texte = corps(c, ar, lng, (e) => { surTerme(e); });
-    // Liste des mots rencontrés, pour les retrouver après coup sans relire.
-    for (const b of texte.querySelectorAll('.gloss')) termes.push(b.textContent);
+    const texte = corps(c, ar, lng, ouvrirTerme);
+    const mots = motsDuChapitre(CHAPITRES, c.key).termes;
 
     container.replaceChildren(...[
       h('div', { class: 'card card--illus' }, [
@@ -376,14 +421,18 @@ function chapitre(key) {
 
       h('div', { class: 'card' }, texte),
 
-      lng !== 'ar' && termes.length ? h('p', {
+      lng !== 'ar' && mots.length ? h('p', {
         class: 'hint center',
-        text: `${termes.length} mot${termes.length > 1 ? 's' : ''} souligné${termes.length > 1 ? 's' : ''} dans ce chapitre : appuyez dessus pour la définition.`,
+        text: `${mots.length} mot${mots.length > 1 ? 's' : ''} souligné${mots.length > 1 ? 's' : ''} dans le texte : appuyez dessus, ou retrouvez-les tous plus bas.`,
       }) : null,
 
       retenirCarte(c, ar, lng),
 
+      // La sentinelle est AVANT le glossaire : le chapitre est lu quand on a
+      // fini le récit et l'encadré, pas quand on a déroulé la liste de mots.
       sentinel,
+
+      carteMotsDuChapitre(c, lng),
 
       nq ? h('a', { class: 'btn', href: `#/histoire/q/${key}`, onclick: () => store.markRead(key) }, [
         icon('play'), h('span', { text: `Vérifier (${nq} questions)` }),

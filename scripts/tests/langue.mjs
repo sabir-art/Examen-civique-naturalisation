@@ -149,19 +149,81 @@ verifier((await page.locator('.gloss a, a .gloss').count()) === 0, 'aucun mot ma
 await page.locator('.gloss').first().click();
 await page.waitForTimeout(350);
 verifier((await page.locator('.modal__panel').count()) === 1, 'appuyer sur un mot ouvre sa définition');
-verifier((await page.locator('.glossdef').count()) === 1, 'la définition française est là');
-const arDef = await page.textContent('.glossar');
+// Sélecteurs limités au panneau : le glossaire du chapitre, plus bas dans la
+// page, porte les mêmes classes dans ses blocs repliés.
+verifier((await page.locator('.modal__panel .glossdef').count()) === 1, 'la définition française est là');
+const arDef = await page.textContent('.modal__panel .glossar');
 verifier((arDef.match(/[؀-ۿ]/g) || []).length > 10, 'la définition arabe est là');
 await page.click('.modal__panel .btn');
 await page.waitForTimeout(250);
 verifier((await page.locator('.modal__panel').count()) === 0, 'la feuille se referme');
 
-/* ------------------------------------------------ 7. l'écran du glossaire */
+/* --------------------------------- 7. le glossaire propre à chaque chapitre */
+
+await page.goto(BASE + '#/histoire/c/ch12');
+await page.waitForTimeout(600);
+
+/**
+ * Le point qui compte : la liste du chapitre doit contenir EXACTEMENT les mots
+ * soulignés dans le texte, ni plus ni moins. Les deux viennent du même
+ * parcours ; si un jour ils divergeaient, on lirait un mot souligné sans le
+ * retrouver dans la liste, ou l'inverse.
+ */
+async function comparer() {
+  return page.evaluate(() => ({
+    // On compare les TERMES, pas les mots affichés : le texte souligne la forme
+    // rencontrée (« l'État »), la liste montre l'entrée (« État »).
+    soulignes: [...document.querySelectorAll('.gloss')].map((e) => e.dataset.terme),
+    formes: [...document.querySelectorAll('.gloss')].map((e) => e.textContent),
+    listes: [...document.querySelectorAll('.glossrow .summary .grow')].map((e) => e.textContent),
+    neufs: document.querySelectorAll('.glossrow .badge--brand').length,
+  }));
+}
+
+let r = await comparer();
+verifier(r.listes.length > 0, `le chapitre a son propre glossaire (${r.listes.length} mots)`);
+verifier(r.soulignes.length === r.listes.length,
+  `autant de mots listés que soulignés (${r.soulignes.length} soulignés / ${r.listes.length} listés)`);
+verifier(r.neufs > 0 && r.neufs <= r.listes.length, `les mots nouveaux sont repérés (${r.neufs})`);
+
+// Sur les 22 chapitres, la correspondance doit tenir.
+const ecarts = [];
+let totalMots = 0;
+let minMots = 999;
+for (const n of Array.from({ length: 22 }, (_, i) => `ch${String(i + 1).padStart(2, '0')}`)) {
+  await page.goto(`${BASE}#/histoire/c/${n}`);
+  await page.waitForTimeout(220);
+  const x = await comparer();
+  totalMots += x.listes.length;
+  minMots = Math.min(minMots, x.listes.length);
+  if (x.soulignes.join('|') !== x.listes.join('|')) {
+    ecarts.push(`${n} : « ${x.soulignes.join(', ') || '(rien)'} » souligné contre « ${x.listes.join(', ')} » listé`);
+  }
+}
+verifier(ecarts.length === 0,
+  `les 22 chapitres listent exactement leurs mots soulignés, dans le même ordre (${totalMots} au total)${ecarts.length ? ` — ${ecarts.slice(0, 2).join(' ; ')}` : ''}`);
+verifier(minMots >= 3, `aucun chapitre n'a un glossaire vide ou anecdotique (minimum : ${minMots} mots)`);
+
+// Le glossaire du chapitre doit s'ouvrir et montrer les deux langues.
+await page.goto(BASE + '#/histoire/c/ch20');
+await page.waitForTimeout(500);
+await page.locator('.glossrow summary').first().click();
+await page.waitForTimeout(250);
+verifier((await page.locator('.glossrow[open] .glossdef').count()) === 1, 'un mot du chapitre se déplie sur sa définition française');
+const arCh = await page.textContent('.glossrow[open] .glossar');
+verifier((arCh.match(/[؀-ۿ]/g) || []).length > 10, 'et sur sa définition arabe');
+
+// Il reste présent quand on lit en arabe : c'est justement là qu'il sert.
+await choisir('ar');
+verifier((await page.locator('.glossrow').count()) > 0, 'le glossaire du chapitre reste affiché en mode arabe');
+await choisir('fr');
+
+/* ------------------------------------------------ 8. l'écran du glossaire */
 
 await page.goto(BASE + '#/histoire/glossaire');
 await page.waitForTimeout(500);
 const entrees = await page.locator('.glossrow').count();
-verifier(entrees > 50, `le glossaire liste tous les termes (${entrees})`);
+verifier(entrees > 100, `le glossaire complet liste tous les termes (${entrees})`);
 
 await page.fill('.search__field', 'suffrage');
 await page.waitForTimeout(350);
@@ -172,7 +234,7 @@ await page.fill('.search__field', 'laicite');
 await page.waitForTimeout(350);
 verifier((await page.locator('.glossrow').count()) > 0, 'la recherche ignore les accents');
 
-/* ------------------------------- 8. pas de débordement, quelle que soit la langue */
+/* ------------------------------- 9. pas de débordement, quelle que soit la langue */
 
 const debordements = [];
 for (const [w, hh] of [[320, 568], [390, 844], [430, 932]]) {
