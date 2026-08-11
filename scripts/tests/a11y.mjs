@@ -41,7 +41,7 @@ for (const [scheme, choix] of CAS) {
   // « ghost », « quiet » et « danger ».
   for (const route of ['#/', '#/reviser', '#/examen', '#/progres', '#/parcours', '#/histoire',
                        '#/compte', '#/compte/ia', '#/livret', '#/cours',
-                       '#/recherche', '#/activite']) {
+                       '#/recherche', '#/activite', '#/histoire/glossaire']) {
     await p.goto(BASE + route);
     await p.waitForTimeout(350);
 

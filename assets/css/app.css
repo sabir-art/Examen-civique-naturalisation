@@ -759,7 +759,10 @@ a.themestat__row { min-height: 44px; }
 /* Le récit se lit d'une traite : texte un peu plus grand et plus aéré. */
 .prose--story { font-size: 16.5px; line-height: 1.72; }
 .prose--story p { margin: 0 0 14px; }
-.prose--story p:first-child::first-letter {
+/* Le sélecteur d'enfant direct (`>`) est indispensable : en mode bilingue,
+   chaque paragraphe est enveloppé dans un `.paire` dont il est le premier
+   enfant — sans lui, TOUS les paragraphes du chapitre recevaient la lettrine. */
+.prose--story > p:first-child::first-letter {
   float: left; font-size: 46px; line-height: .86; font-weight: 750;
   padding: 4px 8px 0 0; color: var(--brand);
 }
@@ -947,6 +950,88 @@ details[open] > .summary::after { content: '⌃'; }
 .timer__ring-track { stroke: var(--line-strong); stroke-width: 2.6; }
 .timer__ring-value { stroke: var(--brand); stroke-width: 2.6; transition: stroke-dashoffset 1s linear; }
 .timer--low .timer__ring-value { stroke: var(--bad); }
+
+/* ------------------------------------------------- lecture en arabe */
+/*
+ * L'arabe demande plus de hauteur de ligne que le français : les lettres
+ * portent des points au-dessus et au-dessous, et un interligne serré les fait
+ * se toucher. La taille est aussi légèrement supérieure, l'œil de la lettre
+ * arabe étant plus petit à corps égal.
+ */
+:root {
+  --font-ar: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Amiri", "Traditional Arabic", "Segoe UI", serif;
+}
+
+[dir="rtl"], [lang="ar"] { font-family: var(--font-ar); }
+
+.prose--ar {
+  font-size: 17.5px; line-height: 2.05; text-align: right;
+}
+.prose--ar p { margin: 0 0 14px; }
+.prose--ar h4 { margin: 22px 0 9px; font-size: 16px; }
+.prose--ar ul { padding-left: 0; padding-right: 20px; }
+/* La lettrine décorative du premier paragraphe n'a pas de sens en arabe :
+   la lettre isolée perd sa liaison et se lit comme une faute. */
+.prose--ar > p:first-child::first-letter { font-size: inherit; float: none; line-height: inherit; margin: 0; color: inherit; padding: 0; }
+
+.arline { font-family: var(--font-ar); line-height: 1.95; text-align: right; }
+
+/* La forme française gardée entre parenthèses dans le texte arabe. On l'isole
+   du sens de lecture, sinon les parenthèses partent du mauvais côté. */
+.lat {
+  unicode-bidi: isolate; direction: ltr; font-family: var(--font);
+  font-size: .93em; color: var(--muted); white-space: nowrap;
+}
+
+/* Mode bilingue : le paragraphe arabe est rattaché au paragraphe français
+   par un fond commun, pour qu'on voie d'un coup d'œil ce qui va ensemble. */
+.prose--bi .paire {
+  background: var(--surface-2); border-radius: var(--radius-sm);
+  padding: 12px 13px; margin-bottom: 12px;
+}
+.prose--bi .paire > *:first-child { margin-bottom: 8px; }
+.prose--bi .paire > *:last-child {
+  margin: 0; padding-top: 9px; border-top: 1px solid var(--line);
+  font-size: 16.5px;
+}
+.prose--bi .paire blockquote { margin: 0; }
+
+.seg--langue .seg__btn { font-size: 13.5px; }
+
+.card--retenir[dir="rtl"] .retenir { padding-left: 0; padding-right: 19px; }
+
+/* --------------------------------------------------------- glossaire */
+/*
+ * Un mot du glossaire doit se voir sans hurler : il reste dans le fil du
+ * texte, souligné en pointillé, avec la petite ampoule pour dire qu'il y a
+ * quelque chose à ouvrir. Un bouton plein couperait la lecture.
+ */
+.gloss {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  text-decoration: underline dotted var(--brand); text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+}
+.gloss::after {
+  content: ''; display: inline-block; width: 12px; height: 12px;
+  margin-inline-start: 2px; vertical-align: 1px; opacity: .75;
+  background: currentColor;
+  -webkit-mask: var(--gloss-mark) center / contain no-repeat;
+  mask: var(--gloss-mark) center / contain no-repeat;
+  color: var(--brand);
+}
+:root {
+  --gloss-mark: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>');
+}
+.gloss:active { background: var(--brand-100); border-radius: 4px; }
+
+.glossdef { font-size: 15px; line-height: 1.6; }
+.glossar {
+  margin-top: 12px; padding: 11px 13px; border-radius: var(--radius-sm);
+  background: var(--surface-2); font-family: var(--font-ar);
+  font-size: 16px; line-height: 1.95;
+}
+.glossrow > .summary::after { content: none; }
 
 /* ------------------------------------------------------ niveaux et badges */
 .lvl { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--line); }

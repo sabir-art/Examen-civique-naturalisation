@@ -1,18 +1,19 @@
 # Contrôles automatiques de l'interface
 
-Huit scripts Playwright, à lancer avec l'application servie sur le port 8099 :
+Neuf scripts Playwright, à lancer avec l'application servie sur le port 8099 :
 
 ```bash
 npx http-server -p 8099 -c-1 &
 
-node scripts/tests/sweep.mjs      # 26 écrans × 3 largeurs : débordements, textes coupés, boutons vides, erreurs console
-node scripts/tests/a11y.mjs       # contrastes et cibles tactiles, 12 écrans × 6 combinaisons de thème
+node scripts/tests/sweep.mjs      # 27 écrans × 3 largeurs : débordements, textes coupés, boutons vides, erreurs console
+node scripts/tests/a11y.mjs       # contrastes et cibles tactiles, 13 écrans × 6 combinaisons de thème
 node scripts/tests/bugs.mjs       # non-régression des bugs signalés sur iPhone
 node scripts/tests/erreurs.mjs    # « Mes erreurs » se vide quand on répond juste
 node scripts/tests/cartes.mjs     # cartes mémoire et graphique de la semaine
 node scripts/tests/parcours.mjs   # niveau, points d'expérience, badges
 node scripts/tests/recherche.mjs  # recherche : six familles, accents, surlignage
 node scripts/tests/activite.mjs   # journal, pastille, rappel quotidien, écran d'ouverture
+node scripts/tests/langue.mjs     # lecture en arabe, mode bilingue, glossaire
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -36,8 +37,26 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `recherche.mjs` | pliage des accents désactivé | « laicite » ne trouve plus rien |
 | `activite.mjs` | écran d'ouverture qui ne se retire jamais | l'application reste bloquée |
 | `activite.mjs` | journées comptées comme notifications | pastille qui ne s'éteint plus |
+| `langue.mjs` | un paragraphe arabe fusionné avec le suivant | ch07 décalé, appariement rompu |
+| `langue.mjs` | glossaire marquant chaque occurrence | six mots soulignés deux fois |
+| `langue.mjs` | lettrine réactivée sur le texte arabe | signalée (elle coupe la liaison des lettres) |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.
 Le balayage compare donc `getBBox()` au `viewBox` — sans quoi il aurait signalé
 tous les libellés d'anneau, ou aucun.
+
+Trois contrôles de données complètent l'ensemble, sans navigateur :
+
+```bash
+node scripts/check-bank.mjs        # intégrité des trois banques de questions
+node scripts/check-traduction.mjs  # la traduction arabe suit la structure du français
+node scripts/check-secrets.mjs     # aucune clé dans les fichiers suivis par Git
+```
+
+`check-traduction.mjs` mérite un mot : le mode bilingue pose chaque paragraphe
+arabe sous son paragraphe français, en se fiant à l'ordre. Une traduction qui
+fusionnerait deux paragraphes décalerait tout le reste du chapitre **sans rien
+casser** — on lirait la traduction du paragraphe d'à côté. C'est le genre de
+défaut qu'aucun test d'interface ne voit et qu'un lecteur arabophone
+remarquerait immédiatement.

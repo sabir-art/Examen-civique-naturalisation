@@ -29,6 +29,37 @@ chapitre est marqué comme lu dès qu'on en atteint la fin.
 | II — Le temps du peuple | 1789 → 1958 | 10 |
 | III — La France d'aujourd'hui | aujourd'hui | 6 |
 
+### Lire en arabe, ou dans les deux langues
+
+Le récit — et lui seul — est **traduit en arabe** (22 chapitres). Trois modes
+de lecture, choisis une fois pour toutes depuis l'onglet Histoire :
+
+| Mode | Ce qu'on voit |
+|---|---|
+| **Français** | le texte original |
+| **العربية** | le chapitre entier en arabe, en sens droite-à-gauche |
+| **FR + ع** | chaque paragraphe français suivi de sa traduction, appariés |
+
+Le mode bilingue est celui qui sert vraiment : on comprend la scène en arabe,
+puis on relit la même phrase en français. Les noms propres et les termes de
+l'examen gardent leur forme française entre parenthèses, pour faire le pont
+avec ce qu'on lira le jour de l'épreuve.
+
+**Les questions restent en français**, volontairement. L'examen se passe en
+français ; s'entraîner sur des questions traduites donnerait une réussite
+trompeuse. `scripts/check-traduction.mjs` garantit que les deux versions ont
+le même nombre de blocs, dans le même ordre — sans quoi le mode bilingue
+décalerait les paragraphes en silence.
+
+### Le glossaire
+
+75 mots difficiles de l'examen — laïcité, suffrage, juridiction, présomption
+d'innocence — expliqués **en une phrase simple**, en français puis en arabe.
+Dans les chapitres, ils sont soulignés en pointillé : il suffit d'appuyer
+dessus. Seule la première occurrence de chaque mot est marquée, sinon le
+soulignement noie le texte. Le glossaire complet est consultable et cherchable
+depuis Histoire et depuis Réviser.
+
 Chaque chapitre a son illustration. Elles sont **dessinées en SVG** par
 `scripts/make-illustrations.mjs` — environ 4 Ko pièce, nettes sur tous les
 écrans, disponibles hors ligne, et sans aucune image reprise d'ailleurs.
@@ -50,6 +81,8 @@ format de chaque tentative.
 - **735 questions** au total, avec une explication pour chacune
 - **Révision espacée** : les questions ratées reviennent, celles qui sont acquises s'espacent
 - **Recherche** dans tout le contenu — les trois banques, les chapitres, les fiches
+- **Récit traduit en arabe**, avec un mode bilingue paragraphe par paragraphe
+- **Glossaire** de 75 mots difficiles, en français et en arabe
 - **Niveaux, points et 20 badges**, calculés à partir de la progression (rien de plus n'est stocké)
 - **Journal d'activité** et rappel quotidien facultatif
 - **Livret du citoyen intégral** : 6 parties, 16 chapitres, 97 sections, annexes comprises
@@ -88,14 +121,14 @@ deux tombe :
 
 ## Contrôles automatiques
 
-Huit suites Playwright couvrent les 26 écrans à trois largeurs, les contrastes
-dans les six combinaisons de thème, et les bugs déjà signalés. Chacune a été
-vérifiée en cassant volontairement ce qu'elle surveille — voir
-`scripts/tests/LISEZMOI.md`.
+Neuf suites Playwright couvrent les 27 écrans à trois largeurs, les contrastes
+dans les six combinaisons de thème, la lecture dans les trois langues, et les
+bugs déjà signalés. Chacune a été vérifiée en cassant volontairement ce qu'elle
+surveille — voir `scripts/tests/LISEZMOI.md`.
 
 ```bash
 npx http-server -p 8099 -c-1 &
-for t in sweep a11y bugs erreurs cartes parcours recherche activite; do
+for t in sweep a11y bugs erreurs cartes parcours recherche activite langue; do
   node scripts/tests/$t.mjs || echo "échec : $t"
 done
 ```
@@ -155,6 +188,10 @@ js/data/q-livret.js     les 284 questions du livret, par chapitre
 js/views/livret.js      lecture du livret et quiz par chapitre
 js/data/roman.js        assemblage du récit + ses 88 questions
 js/data/roman/*.js      les trois actes, un fichier par acte
+js/data/roman-ar.js     traduction arabe du récit
+js/data/roman-ar/*.js   les trois actes traduits
+js/data/glossaire.js    les mots difficiles, définis en français et en arabe
+js/lib/gloss.js         repérage des mots du glossaire dans un texte rendu
 js/views/roman.js       lecture d'un chapitre et quiz
 js/views/assistant.js   configuration de la clé et conversation
 ```

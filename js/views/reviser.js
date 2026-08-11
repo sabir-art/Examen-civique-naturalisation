@@ -4,6 +4,7 @@ import { h, icon, toast, spot } from '../lib/dom.js';
 import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
 import { CHAPITRES } from '../data/livret.js';
+import { TOTAL_TERMES } from '../data/glossaire.js';
 import { buildTraining, mastery, coverage } from '../engine.js';
 import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
@@ -121,6 +122,14 @@ function hub() {
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: 'Fiches de révision' }),
         h('span', { class: 'item__sub', text: 'Le programme résumé, thème par thème' }),
+      ]),
+      h('span', { class: 'item__chev' }, icon('chevron')),
+    ]),
+    h('a', { class: 'item', href: '#/histoire/glossaire' }, [
+      h('span', { class: 'item__icon item__icon--brand' }, icon('bulb')),
+      h('span', { class: 'item__body' }, [
+        h('span', { class: 'item__title', text: 'Les mots difficiles' }),
+        h('span', { class: 'item__sub', text: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe` }),
       ]),
       h('span', { class: 'item__chev' }, icon('chevron')),
     ]),

@@ -13,7 +13,7 @@ const vu = new Set();
 const note = (m) => { if (!vu.has(m)) { vu.add(m); problemes.push(m); } };
 
 const ROUTES = [
-  '#/', '#/histoire', '#/histoire/a/acte-1', '#/histoire/c/ch01', '#/histoire/c/ch22',
+  '#/', '#/histoire', '#/histoire/a/acte-1', '#/histoire/c/ch01', '#/histoire/c/ch22', '#/histoire/glossaire',
   '#/reviser', '#/reviser/t/institutions', '#/reviser/t/principes-valeurs',
   '#/examen', '#/examen/officiel', '#/examen/livret', '#/examen/mixte',
   '#/cours', '#/cours/principes-valeurs',

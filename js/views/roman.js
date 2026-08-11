@@ -3,19 +3,29 @@
  *
  * On lit un chapitre, on garde l'encadré « à retenir » en tête, puis on répond
  * à quelques questions. Progression suivie à part des deux autres sections.
+ *
+ * Deux aides à la lecture :
+ *  — la LANGUE : français, arabe, ou les deux paragraphe par paragraphe, pour
+ *    comprendre d'abord et revenir au français ensuite ;
+ *  — le GLOSSAIRE : les mots difficiles sont soulignés dans le texte et
+ *    s'expliquent en une phrase, en français et en arabe.
  */
 
-import { h, icon } from '../lib/dom.js';
+import { h, icon, modal } from '../lib/dom.js';
 import { ROMAN, ACTES, ACTE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES, TOTAL_MINUTES, nextChapitre, prevChapitre, questionsOf } from '../data/roman.js';
+import { AR_BY_KEY, ACTE_AR_BY_KEY, blocs, TOTAL_TRADUITS } from '../data/roman-ar.js';
+import { GLOSSAIRE, TOTAL_TERMES } from '../data/glossaire.js';
+import { marquer } from '../lib/gloss.js';
 import { buildRomanSet, romanMastery, romanActeMastery, romanOverview, nextUnread } from '../engine.js';
 import { runQuiz } from './reviser.js';
-import { navigate } from '../app.js';
+import { navigate, refresh } from '../app.js';
 import * as store from '../store.js';
 import * as fx from '../lib/feedback.js';
 
 export default function renderRoman({ params }) {
   const target = params[0];
   if (!target) return sommaire();
+  if (target === 'glossaire') return glossaire();
   if (target.startsWith('a/')) return acte(target.slice(2));
   if (target.startsWith('c/')) return chapitre(target.slice(2));
   if (target.startsWith('q/')) return quiz({ chapitre: target.slice(2) });
@@ -25,6 +35,99 @@ export default function renderRoman({ params }) {
 }
 
 const tone = (m) => (m >= 70 ? 'ok' : m >= 35 ? 'warn' : 'bad');
+
+/* --------------------------------------------------------------- langue */
+
+/** 'fr' (défaut), 'ar' (arabe seul) ou 'bi' (les deux). */
+function langue() {
+  const v = store.current()?.settings?.langueRecit;
+  return v === 'ar' || v === 'bi' ? v : 'fr';
+}
+
+function setLangue(v) {
+  store.setSetting('langueRecit', v);
+}
+
+/**
+ * Sélecteur de langue.
+ * `onChange` permet de redessiner sur place plutôt que de recharger l'écran :
+ * on ne veut pas perdre sa position dans un chapitre en changeant de langue.
+ */
+function choixLangue(onChange) {
+  const actuelle = langue();
+  const CHOIX = [
+    { v: 'fr', court: 'Français' },
+    { v: 'ar', court: 'العربية' },
+    { v: 'bi', court: 'FR + ع' },
+  ];
+  return h('div', { class: 'seg seg--langue' }, CHOIX.map((c) => h('button', {
+    class: 'seg__btn', type: 'button',
+    'aria-pressed': actuelle === c.v ? 'true' : 'false',
+    lang: c.v === 'ar' ? 'ar' : 'fr',
+    text: c.court,
+    onclick: () => { if (langue() !== c.v) { setLangue(c.v); onChange(); } },
+  })));
+}
+
+/* ------------------------------------------------------------- glossaire */
+
+/** Feuille explicative d'un terme, en français puis en arabe. */
+function ouvrirTerme(entree) {
+  modal((close) => [
+    h('p', { class: 'card__eyebrow', text: 'Glossaire' }),
+    h('h2', { class: 'modal__title', style: 'margin-top:4px', text: entree.terme }),
+    h('p', { class: 'glossdef', text: entree.def }),
+    h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: entree.ar })),
+    h('button', { class: 'btn btn--ghost mt', type: 'button', text: 'Fermer', onclick: () => close() }),
+  ]);
+}
+
+function glossaire() {
+  const champ = h('input', {
+    class: 'input search__field', type: 'search', placeholder: 'Chercher un mot…',
+    autocomplete: 'off', 'aria-label': 'Chercher dans le glossaire',
+  });
+  const liste = h('div', { class: 'stack stack--tight' });
+
+  const plie = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  function draw() {
+    const q = plie(champ.value.trim());
+    const vus = GLOSSAIRE
+      .filter((e) => !q || plie(e.terme).includes(q) || plie(e.def).includes(q) || e.ar.includes(champ.value.trim()))
+      .sort((a, b) => a.terme.localeCompare(b.terme, 'fr'));
+
+    liste.replaceChildren(...(vus.length ? vus.map((e) => h('details', { class: 'card card--pad-sm glossrow' }, [
+      h('summary', { class: 'summary', style: 'padding:0' }, [
+        icon('bulb'),
+        h('span', { class: 'grow', text: e.terme }),
+      ]),
+      h('div', { class: 'mt' }, [
+        h('p', { class: 'glossdef', text: e.def }),
+        h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: e.ar })),
+      ]),
+    ])) : [h('div', { class: 'empty' }, [
+      h('div', { class: 'empty__icon' }, icon('search')),
+      h('p', { text: 'Aucun mot ne correspond.' }),
+    ])]));
+  }
+
+  champ.addEventListener('input', draw);
+  draw();
+
+  return {
+    node: h('div', { class: 'stack' }, [
+      h('div', { class: 'card card--info' }, [
+        h('h1', { class: 'card__title', text: 'Les mots difficiles' }),
+        h('p', { class: 'card__sub', text: `${TOTAL_TERMES} mots de l'examen civique, expliqués en une phrase simple, en français et en arabe. Dans les chapitres, ils sont soulignés : il suffit d'appuyer dessus.` }),
+      ]),
+      h('div', { class: 'search' }, [h('span', { class: 'search__icon' }, icon('search')), champ]),
+      liste,
+    ]),
+    title: 'Glossaire',
+    back: '#/histoire',
+  };
+}
 
 /* ------------------------------------------------------------- sommaire */
 
@@ -62,16 +165,32 @@ function sommaire() {
     o.due > 0 ? h('p', { class: 'hint center', text: `${o.due} question${o.due > 1 ? 's' : ''} du récit à revoir aujourd'hui.` }) : null,
   ].filter(Boolean));
 
+  // Langue de lecture, choisie une fois pour tous les chapitres.
+  const carteLangue = h('div', { class: 'card' }, [
+    h('div', { class: 'row', style: 'gap:12px' }, [
+      h('span', { class: 'item__icon item__icon--story' }, icon('chat')),
+      h('div', { class: 'grow' }, [
+        h('h2', { class: 'card__title', text: 'Langue de lecture' }),
+        h('p', { class: 'card__sub', text: `Le récit est traduit en arabe (${TOTAL_TRADUITS} chapitres). Choisissez « FR + ع » pour lire les deux, paragraphe par paragraphe.` }),
+      ]),
+    ]),
+    h('div', { class: 'mt' }, choixLangue(() => refresh())),
+    h('p', { class: 'hint mt', text: "Les questions restent en français : l'examen se passe en français, et s'entraîner dans une autre langue donnerait une réussite trompeuse." }),
+  ]);
+
   const list = h('div', { class: 'list' }, ACTES.map((a) => {
     const m = Math.round(romanActeMastery(a.key) * 100);
     const lus = store.readCount(a.chapitres.map((c) => c.key));
+    const ar = ACTE_AR_BY_KEY.get(a.key);
+    const lng = langue();
     return h('a', { class: 'item item--story', href: `#/histoire/a/${a.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'item__icon' }, icon(a.icon)),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: `Acte ${a.num} — ${a.titre}` }),
+        lng !== 'fr' && ar ? h('span', { class: 'item__title arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
         h('span', { class: 'item__sub', text: `${a.epoque} · ${a.chapitres.length} chapitres · ${lus} lu${lus > 1 ? 's' : ''}` }),
         h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })),
-      ]),
+      ].filter(Boolean)),
       h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
     ]);
   }));
@@ -81,8 +200,17 @@ function sommaire() {
       head,
       kpis,
       actions,
+      carteLangue,
       h('p', { class: 'section-title', text: 'Les trois actes' }),
       list,
+      h('a', { class: 'item', href: '#/histoire/glossaire' }, [
+        h('span', { class: 'item__icon item__icon--brand' }, icon('bulb')),
+        h('span', { class: 'item__body' }, [
+          h('span', { class: 'item__title', text: 'Glossaire des mots difficiles' }),
+          h('span', { class: 'item__sub', text: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe` }),
+        ]),
+        h('span', { class: 'item__chev' }, icon('chevron')),
+      ]),
       h('p', { class: 'hint center mt', text: "Les faits sont ceux du programme officiel et du livret du citoyen ; c'est la façon de les raconter qui change. Les scènes sont écrites pour rendre les dates et les noms plus faciles à retenir." }),
     ]),
     title: 'La France racontée',
@@ -94,17 +222,23 @@ function sommaire() {
 function acte(key) {
   const a = ACTE_BY_KEY.get(key);
   if (!a) return sommaire();
+  const lng = langue();
+  const aAr = ACTE_AR_BY_KEY.get(key);
 
   const list = h('div', { class: 'list' }, a.chapitres.map((c) => {
     const m = Math.round(romanMastery(c.key) * 100);
     const lu = store.isRead(c.key);
+    const ar = AR_BY_KEY.get(c.key);
     return h('a', { class: `item ${lu ? 'item--story' : ''}`, href: `#/histoire/c/${c.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'vignette' }, [
         h('img', { src: `./assets/story/${c.key}.svg`, alt: '', loading: 'lazy', width: '800', height: '420' }),
         h('span', { class: 'vignette__num', text: String(c.num) }),
       ]),
       h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: c.titre }),
+        lng === 'ar' && ar
+          ? h('span', { class: 'item__title', dir: 'rtl', lang: 'ar', text: ar.titre })
+          : h('span', { class: 'item__title', text: c.titre }),
+        lng === 'bi' && ar ? h('span', { class: 'item__title arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
         h('span', { class: 'item__sub', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min` }),
         lu ? h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })) : null,
       ].filter(Boolean)),
@@ -118,8 +252,10 @@ function acte(key) {
       h('div', { class: 'card card--info' }, [
         h('p', { class: 'card__sub', text: `Acte ${a.num} · ${a.epoque}` }),
         h('h1', { class: 'card__title', style: 'font-size:20px;margin-top:4px', text: a.titre }),
+        lng !== 'fr' && aAr ? h('h2', { class: 'card__title arline', style: 'font-size:19px;margin-top:4px', dir: 'rtl', lang: 'ar', text: aAr.titre }) : null,
         h('p', { class: 'card__sub', style: 'margin-top:6px', text: a.sous_titre }),
-      ]),
+      ].filter(Boolean)),
+      choixLangue(() => refresh()),
       list,
       h('a', { class: 'btn btn--ghost', href: `#/histoire/qa/${a.key}`, text: `Quiz sur tout l'acte ${a.num}` }),
     ]),
@@ -130,6 +266,55 @@ function acte(key) {
 
 /* ------------------------------------------------------------- chapitre */
 
+/**
+ * Corps du chapitre dans la langue demandée.
+ *
+ * En mode bilingue, chaque bloc français est suivi de son équivalent arabe :
+ * l'appariement repose sur le fait que les deux versions ont exactement le
+ * même nombre de blocs, dans le même ordre (vérifié par
+ * scripts/check-traduction.mjs). Si jamais l'appariement échouait, on retombe
+ * sur les deux textes l'un après l'autre plutôt que d'afficher n'importe quoi.
+ */
+function corps(c, ar, lng, surTerme) {
+  const prose = h('div', { class: 'prose prose--story' });
+
+  if (lng === 'ar' && ar) {
+    prose.dir = 'rtl';
+    prose.lang = 'ar';
+    prose.classList.add('prose--ar');
+    prose.innerHTML = ar.html;
+    return prose;
+  }
+
+  if (lng === 'bi' && ar) {
+    const fr = blocs(c.html);
+    const tr = blocs(ar.html);
+    if (fr.length === tr.length) {
+      prose.classList.add('prose--bi');
+      fr.forEach((bloc, i) => {
+        const arBloc = tr[i];
+        arBloc.setAttribute('dir', 'rtl');
+        arBloc.setAttribute('lang', 'ar');
+        arBloc.classList.add('arline');
+        prose.append(h('div', { class: 'paire' }, [bloc, arBloc]));
+      });
+      // Le glossaire ne travaille que sur le français : marquer aussi l'arabe
+      // dédoublerait chaque définition sans rien apporter.
+      marquer(prose, surTerme);
+      return prose;
+    }
+    // Repli : les deux versions à la suite, sans appariement.
+    prose.innerHTML = c.html;
+    marquer(prose, surTerme);
+    const bloc = h('div', { class: 'prose prose--story prose--ar', dir: 'rtl', lang: 'ar', html: ar.html });
+    return h('div', {}, [prose, h('div', { class: 'divider' }), bloc]);
+  }
+
+  prose.innerHTML = c.html;
+  marquer(prose, surTerme);
+  return prose;
+}
+
 function chapitre(key) {
   const c = CHAPITRE_BY_KEY.get(key);
   if (!c) return sommaire();
@@ -139,6 +324,9 @@ function chapitre(key) {
   const prev = prevChapitre(key);
   const next = nextChapitre(key);
   const dejaLu = store.isRead(key);
+  const ar = AR_BY_KEY.get(key);
+
+  const container = h('div', { class: 'stack' });
 
   // Le chapitre est marqué comme lu dès que la fin du texte apparaît à l'écran.
   const sentinel = h('div', { style: 'height:1px' });
@@ -153,45 +341,97 @@ function chapitre(key) {
     requestAnimationFrame(() => obs.observe(sentinel));
   }
 
-  const node = h('div', { class: 'stack' }, [
-    h('div', { class: 'card card--illus' }, [
-      h('img', {
-        class: 'illus', src: `./assets/story/${c.key}.svg`, alt: '', loading: 'eager',
-        width: '800', height: '420',
-      }),
-      h('div', { class: 'card__inner' }, [
-        h('p', { class: 'card__sub', text: `Acte ${c.acteNum} — ${c.acteTitre} · chapitre ${c.num}` }),
-        h('h1', { class: 'card__title', style: 'font-size:21px;margin-top:5px', text: c.titre }),
-        h('p', { class: 'card__sub', style: 'margin-top:7px', html: `${c.lieu} — ${c.date} · ${c.minutes} min de lecture` }),
-        dejaLu && nq ? h('div', { class: 'row', style: 'margin-top:10px;gap:8px' }, [
-          h('span', { class: `badge badge--${tone(m)}`, text: `Mémorisé à ${m} %` }),
-          h('span', { class: 'badge', text: `${nq} questions` }),
-        ]) : null,
+  function draw() {
+    const lng = langue();
+    const termes = [];
+    const surTerme = (e) => ouvrirTerme(e);
+
+    const texte = corps(c, ar, lng, (e) => { surTerme(e); });
+    // Liste des mots rencontrés, pour les retrouver après coup sans relire.
+    for (const b of texte.querySelectorAll('.gloss')) termes.push(b.textContent);
+
+    container.replaceChildren(...[
+      h('div', { class: 'card card--illus' }, [
+        h('img', {
+          class: 'illus', src: `./assets/story/${c.key}.svg`, alt: '', loading: 'eager',
+          width: '800', height: '420',
+        }),
+        h('div', { class: 'card__inner' }, [
+          h('p', { class: 'card__sub', text: `Acte ${c.acteNum} — ${c.acteTitre} · chapitre ${c.num}` }),
+          lng === 'ar' && ar
+            ? h('h1', { class: 'card__title', style: 'font-size:21px;margin-top:5px', dir: 'rtl', lang: 'ar', text: ar.titre })
+            : h('h1', { class: 'card__title', style: 'font-size:21px;margin-top:5px', text: c.titre }),
+          lng === 'bi' && ar ? h('h2', { class: 'card__title arline', style: 'font-size:19px;margin-top:4px', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
+          lng === 'ar' && ar
+            ? h('p', { class: 'card__sub', style: 'margin-top:7px', dir: 'rtl', lang: 'ar', text: `${ar.lieu} — ${ar.date}` })
+            : h('p', { class: 'card__sub', style: 'margin-top:7px', html: `${c.lieu} — ${c.date} · ${c.minutes} min de lecture` }),
+          dejaLu && nq ? h('div', { class: 'row', style: 'margin-top:10px;gap:8px' }, [
+            h('span', { class: `badge badge--${tone(m)}`, text: `Mémorisé à ${m} %` }),
+            h('span', { class: 'badge', text: `${nq} questions` }),
+          ]) : null,
+        ].filter(Boolean)),
+      ]),
+
+      ar ? choixLangue(draw) : null,
+
+      h('div', { class: 'card' }, texte),
+
+      lng !== 'ar' && termes.length ? h('p', {
+        class: 'hint center',
+        text: `${termes.length} mot${termes.length > 1 ? 's' : ''} souligné${termes.length > 1 ? 's' : ''} dans ce chapitre : appuyez dessus pour la définition.`,
+      }) : null,
+
+      retenirCarte(c, ar, lng),
+
+      sentinel,
+
+      nq ? h('a', { class: 'btn', href: `#/histoire/q/${key}`, onclick: () => store.markRead(key) }, [
+        icon('play'), h('span', { text: `Vérifier (${nq} questions)` }),
+      ]) : null,
+
+      lng !== 'fr' ? h('p', { class: 'hint center', text: 'Les questions sont en français, comme le jour de l’examen.' }) : null,
+
+      h('div', { class: 'btn-row' }, [
+        prev ? h('a', { class: 'btn btn--ghost', href: `#/histoire/c/${prev.key}`, text: '← Précédent' }) : null,
+        next ? h('a', { class: 'btn btn--ghost', href: `#/histoire/c/${next.key}`, text: 'Suivant →' }) : null,
       ].filter(Boolean)),
-    ]),
 
-    h('div', { class: 'card' }, h('div', { class: 'prose prose--story', html: c.html })),
+      h('a', { class: 'btn btn--quiet', href: `#/histoire/a/${c.acteKey}`, text: `Retour à l'acte ${c.acteNum}` }),
+    ].filter(Boolean));
+  }
 
-    c.retenir?.length ? h('div', { class: 'card card--retenir' }, [
-      h('h2', { class: 'card__title', style: 'font-size:16px', text: 'Ce qu\'il faut retenir' }),
-      h('ul', { class: 'retenir' }, c.retenir.map((r) => h('li', { html: r }))),
-    ]) : null,
+  draw();
+  return { node: container, title: `Chapitre ${c.num}`, back: `#/histoire/a/${c.acteKey}` };
+}
 
-    sentinel,
+/** Encadré « ce qu'il faut retenir », dans la langue choisie. */
+function retenirCarte(c, ar, lng) {
+  if (!c.retenir?.length) return null;
 
-    nq ? h('a', { class: 'btn', href: `#/histoire/q/${key}`, onclick: () => store.markRead(key) }, [
-      icon('play'), h('span', { text: `Vérifier (${nq} questions)` }),
-    ]) : null,
+  const titreFr = "Ce qu'il faut retenir";
+  const titreAr = 'ما ينبغي تذكّره';
 
-    h('div', { class: 'btn-row' }, [
-      prev ? h('a', { class: 'btn btn--ghost', href: `#/histoire/c/${prev.key}`, text: '← Précédent' }) : null,
-      next ? h('a', { class: 'btn btn--ghost', href: `#/histoire/c/${next.key}`, text: 'Suivant →' }) : null,
-    ].filter(Boolean)),
+  if (lng === 'ar' && ar) {
+    return h('div', { class: 'card card--retenir', dir: 'rtl', lang: 'ar' }, [
+      h('h2', { class: 'card__title', style: 'font-size:16px', text: titreAr }),
+      h('ul', { class: 'retenir' }, ar.retenir.map((r) => h('li', { html: r }))),
+    ]);
+  }
 
-    h('a', { class: 'btn btn--quiet', href: `#/histoire/a/${c.acteKey}`, text: `Retour à l'acte ${c.acteNum}` }),
-  ].filter(Boolean));
+  if (lng === 'bi' && ar && ar.retenir.length === c.retenir.length) {
+    return h('div', { class: 'card card--retenir' }, [
+      h('h2', { class: 'card__title', style: 'font-size:16px', text: `${titreFr} · ${titreAr}` }),
+      h('ul', { class: 'retenir' }, c.retenir.map((r, i) => h('li', {}, [
+        h('span', { html: r }),
+        h('span', { class: 'arline', dir: 'rtl', lang: 'ar', style: 'display:block;margin-top:5px', html: ar.retenir[i] }),
+      ]))),
+    ]);
+  }
 
-  return { node, title: `Chapitre ${c.num}`, back: `#/histoire/a/${c.acteKey}` };
+  return h('div', { class: 'card card--retenir' }, [
+    h('h2', { class: 'card__title', style: 'font-size:16px', text: titreFr }),
+    h('ul', { class: 'retenir' }, c.retenir.map((r) => h('li', { html: r }))),
+  ]);
 }
 
 /* ----------------------------------------------------------------- quiz */
