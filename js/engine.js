@@ -176,11 +176,8 @@ export function buildTraining({ mode = 'theme', theme = null, sub = null, count 
   }
 
   if (mode === 'revision') {
-    const due = store.dueIds().map((id) => BY_ID.get(id)).filter(Boolean);
-    if (due.length >= count) return due.slice(0, count).map(toCard);
-    // On complète avec des questions jamais vues, thème le moins travaillé d'abord.
-    const fresh = unseen().sort((a, b) => themeGap(b.theme) - themeGap(a.theme));
-    return due.concat(fresh.slice(0, count - due.length)).map(toCard);
+    const plan = planRevision(count);
+    return [...plan.dues, ...plan.nouvelles].map(toCard);
   }
 
   if (mode === 'erreurs') {
@@ -201,6 +198,50 @@ export function buildTraining({ mode = 'theme', theme = null, sub = null, count 
   }
   const ordered = [...shuffle(never), ...shuffle(due), ...shuffle(rest)];
   return ordered.slice(0, count).map(toCard);
+}
+
+/**
+ * Composition de la « révision du jour », AVANT de la lancer.
+ *
+ * La séance fait toujours la même taille : on reprend d'abord les questions
+ * arrivées à échéance, puis on complète avec des questions jamais vues. C'est
+ * ce qui permet d'avancer dans les 363 questions tout en consolidant.
+ *
+ * Cette fonction existe pour que l'interface puisse ANNONCER ce mélange. Le
+ * bouton d'accueil affichait le nombre de questions dues — 10 — et la séance
+ * en présentait 20 : deux chiffres justes, mais l'un promettait ce que
+ * l'autre ne tenait pas. Un seul calcul sert maintenant à l'annonce et au
+ * tirage, ils ne peuvent plus diverger.
+ */
+export function planRevision(count = 20) {
+  const dues = store.dueIds().map((id) => BY_ID.get(id)).filter(Boolean).slice(0, count);
+  const manque = count - dues.length;
+  const nouvelles = manque > 0
+    ? unseen().sort((a, b) => themeGap(b.theme) - themeGap(a.theme)).slice(0, manque)
+    : [];
+  return {
+    dues,
+    nouvelles,
+    total: dues.length + nouvelles.length,
+    // Ce qui reste dû au-delà de cette séance : utile à dire, trompeur à
+    // afficher sur un bouton qui lance une séance plus courte.
+    resteDu: Math.max(0, store.dueIds().length - dues.length),
+  };
+}
+
+/**
+ * Ce que contient la séance, en une phrase.
+ *
+ * Vit ici, avec le calcul qu'elle décrit : l'accueil et l'écran Réviser
+ * doivent annoncer exactement la même chose, et deux formulations écrites
+ * séparément auraient fini par se contredire.
+ */
+export function compositionSeance(plan) {
+  const d = plan.dues.length;
+  const n = plan.nouvelles.length;
+  if (d && n) return `${d} à revoir + ${n} nouvelle${n > 1 ? 's' : ''}`;
+  if (d) return `${d} question${d > 1 ? 's' : ''} à revoir`;
+  return `${n} nouvelle${n > 1 ? 's' : ''} question${n > 1 ? 's' : ''}`;
 }
 
 function unseen() {

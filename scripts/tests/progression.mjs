@@ -270,6 +270,69 @@ verifier(som.labels.includes('chapitres terminés'),
 verifier(/^6\//.test(som.valeurs[0]), `et il compte les six de l'acte I (${som.valeurs[0]})`);
 verifier(som.explique, 'et il explique la différence entre les deux chiffres');
 
+
+/* ------------------- 8. le nombre annoncé est celui de la séance */
+
+/**
+ * Signalement d'usage : « le bouton dit 10, et je dois répondre à 20 ».
+ *
+ * Le bouton affichait les questions DUES, la séance en fait toujours 20 :
+ * les dues, puis des questions jamais vues pour compléter. Deux chiffres
+ * justes, mais l'un promettait ce que l'autre ne tenait pas.
+ *
+ * On installe donc exactement 10 questions dues et on exige que le nombre
+ * annoncé soit celui auquel on répond réellement.
+ */
+await page.evaluate(() => {
+  const brut = JSON.parse(localStorage.getItem('examen-civique.v1'));
+  const hier = Date.now() - 86400000;
+  for (const prof of Object.values(brut.profiles)) {
+    prof.progress = {};
+    for (let i = 1; i <= 10; i += 1) {
+      prof.progress[`sym${String(i).padStart(2, '0')}`] = {
+        box: 2, seen: 1, ok: 1, ko: 0, lastOk: true, last: hier, due: hier,
+      };
+    }
+  }
+  localStorage.setItem('examen-civique.v1', JSON.stringify(brut));
+});
+await page.goto(`${BASE}#/`);
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForSelector('.greet__hello');
+await page.waitForTimeout(500);
+
+const annonce = await page.evaluate(() => {
+  const btn = [...document.querySelectorAll('.card .btn')].find((b) => /Réviser|révision/i.test(b.textContent));
+  const hint = btn?.parentElement.querySelector('.hint')?.textContent || '';
+  return { bouton: btn?.textContent.trim() || null, detail: hint };
+});
+const annonces = Number((annonce.bouton || '').match(/\d+/)?.[0] || 0);
+verifier(annonces > 0, `l'accueil annonce un nombre (${annonce.bouton})`);
+verifier(/10 à revoir/.test(annonce.detail), `et détaille le mélange (${annonce.detail})`);
+
+await page.goto(`${BASE}#/reviser`);
+await page.waitForTimeout(600);
+const hub = await page.evaluate(() => {
+  const it = [...document.querySelectorAll('.item')].find((x) => /Révision du jour/.test(x.textContent));
+  return {
+    badge: it?.querySelector('.badge')?.textContent || null,
+    sous: [...(it?.querySelectorAll('.item__sub') || [])].map((e) => e.textContent),
+  };
+});
+verifier(Number(hub.badge) === annonces,
+  `Réviser annonce le même nombre que l'accueil (${hub.badge} contre ${annonces})`);
+verifier(hub.sous.some((s) => /10 à revoir/.test(s)), `et le même détail (${hub.sous.join(' | ')})`);
+
+// Le décompte réel, une fois dans la séance.
+await page.goto(`${BASE}#/reviser/revision`);
+await page.waitForSelector('.qtext');
+const reel = await page.evaluate(() => {
+  const m = document.querySelector('.quizbar__count')?.textContent.match(/sur (\d+)/);
+  return m ? Number(m[1]) : 0;
+});
+verifier(reel === annonces,
+  `on répond exactement au nombre annoncé (${reel} questions pour « ${annonce.bouton} »)`);
+
 await browser.close();
 console.log(erreurs.length ? `\n${erreurs.length} erreur(s).` : '\nAucune erreur.');
 process.exit(erreurs.length ? 1 : 0);

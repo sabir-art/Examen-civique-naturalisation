@@ -5,7 +5,7 @@ import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
 import { CHAPITRES } from '../data/livret.js';
 import { TOTAL_TERMES } from '../data/glossaire.js';
-import { buildTraining, mastery, coverage } from '../engine.js';
+import { buildTraining, mastery, coverage, planRevision, compositionSeance } from '../engine.js';
 import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
 import { setGuard, refresh } from '../app.js';
@@ -29,17 +29,23 @@ export default function renderReviser({ params }) {
 /* ------------------------------------------------------------------ hub */
 
 function hub() {
-  const due = store.dueIds().length;
+  const plan = planRevision(20);
   const weak = store.weakIds().length;
 
   const quick = h('div', { class: 'list' }, [
+    // Le badge porte la taille de la SÉANCE, pas le nombre de questions dues :
+    // c'est le nombre auquel on va effectivement répondre. Ce qui reste dû
+    // au-delà est dit en dessous, sans être confondu avec lui.
     h('a', { class: 'item', href: '#/reviser/revision' }, [
       h('span', { class: 'item__icon' }, icon('refresh')),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: 'Révision du jour' }),
-        h('span', { class: 'item__sub', text: due > 0 ? `${due} question${due > 1 ? 's' : ''} à revoir maintenant` : 'Mélange de questions dues et de nouvelles' }),
-      ]),
-      due > 0 ? h('span', { class: 'badge badge--warn', text: String(due) }) : null,
+        h('span', { class: 'item__sub', text: plan.total > 0 ? compositionSeance(plan) : 'Rien à revoir dans l’immédiat' }),
+        plan.resteDu > 0
+          ? h('span', { class: 'item__sub', text: `${plan.resteDu} autre${plan.resteDu > 1 ? 's' : ''} à revoir après cette séance` })
+          : null,
+      ].filter(Boolean)),
+      plan.total > 0 ? h('span', { class: 'badge badge--brand', text: String(plan.total) }) : null,
       h('span', { class: 'item__chev' }, icon('chevron')),
     ].filter(Boolean)),
     h('a', { class: 'item item--revise', href: '#/cartes' }, [

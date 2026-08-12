@@ -15,7 +15,7 @@ node scripts/tests/recherche.mjs  # recherche : six familles, accents, surlignag
 node scripts/tests/activite.mjs   # journal, pastille, rappel quotidien, écran d'ouverture
 node scripts/tests/langue.mjs     # lecture en arabe, mode bilingue, glossaire par chapitre
 node scripts/tests/images.mjs     # illustrations : ancrage, légendes, provenance, poids
-node scripts/tests/progression.mjs # chapitre, acte et livret : la barre se remplit vraiment en une séance
+node scripts/tests/progression.mjs # chapitre, acte, livret, et le nombre annoncé avant une séance
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -50,6 +50,7 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `progression.mjs` | barre du chapitre remise sur la mémorisation | 25 % après une séance complète, jamais verte |
 | `progression.mjs` | barre de l'acte remise sur la maîtrise moyenne | 5 % avec les six chapitres terminés |
 | `progression.mjs` | barre du livret remise sur la maîtrise | chapitre jamais marqué terminé |
+| `progression.mjs` | bouton d'accueil réaffichant les questions dues | annonce 10, séance de 20 |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.

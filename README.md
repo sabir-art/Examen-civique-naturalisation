@@ -71,6 +71,18 @@ nue.
 Les deux ont longtemps été confondus : on avait tout lu, tout répondu juste, et
 la barre restait rouge à 20 %.
 
+### La révision du jour
+
+Une séance fait toujours la même taille : d'abord les questions **arrivées à
+échéance**, puis des questions **jamais vues** pour compléter. C'est ce qui
+permet d'avancer dans les 363 questions tout en consolidant.
+
+Le nombre affiché sur le bouton est donc celui de la **séance** — ce à quoi on
+va répondre — et la composition est écrite juste en dessous : « 10 à revoir +
+10 nouvelles ». Le bouton montrait auparavant les questions dues : il annonçait
+10 et la séance en présentait 20. Un seul calcul (`planRevision`) sert
+maintenant à l'annonce et au tirage, ils ne peuvent plus diverger.
+
 ### Le glossaire
 
 108 mots difficiles, expliqués **en une phrase simple** — sans autre mot
