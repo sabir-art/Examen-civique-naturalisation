@@ -4,7 +4,9 @@
 
 import * as store from './store.js';
 import { amorcer } from './lib/feedback.js';
-import { h, icon, toast } from './lib/dom.js';
+import { h, toast } from './lib/dom.js';
+import { TopBar, BottomNav } from './ds/navigation.js';
+import { Avatar } from './ds/core.js';
 import { badgesObtenus } from './lib/xp.js';
 import * as rappel from './lib/rappel.js';
 
@@ -26,15 +28,86 @@ import renderActivite, { nonLus } from './views/activite.js';
 const appEl = document.getElementById('app');
 const bootEl = document.getElementById('boot');
 const bootTextEl = document.getElementById('boot-text');
-const appbar = document.getElementById('appbar');
-const tabbar = document.getElementById('tabbar');
-const titleEl = document.getElementById('appbar-title');
-const backEl = document.getElementById('appbar-back');
-const avatarEl = document.getElementById('appbar-avatar');
-const profileBtn = document.getElementById('appbar-profile');
-const searchBtn = document.getElementById('appbar-search');
-const bellBtn = document.getElementById('appbar-bell');
-const dotEl = document.getElementById('appbar-dot');
+const hautEl = document.getElementById('chrome-top');
+const basEl = document.getElementById('chrome-bottom');
+
+/* --------------------------------------------------------------- châssis */
+
+/**
+ * Les cinq onglets, jamais plus : au-delà, les cibles tactiles deviennent trop
+ * petites sur un petit téléphone. Les fiches et le livret restent accessibles
+ * depuis Réviser et depuis l'accueil.
+ */
+const ONGLETS = [
+  { value: '/', icon: 'house', label: 'Accueil', href: '#/' },
+  { value: '/histoire', icon: 'star', label: 'Histoire', href: '#/histoire' },
+  { value: '/reviser', icon: 'book-open', label: 'Réviser', href: '#/reviser' },
+  { value: '/examen', icon: 'timer', label: 'Examen', href: '#/examen' },
+  { value: '/progres', icon: 'chart-column', label: 'Progrès', href: '#/progres' },
+];
+
+/**
+ * Dessine la barre du haut avec le composant `TopBar` du système.
+ *
+ * Deux formes, exactement celles qu'il prévoit : `profile` sur un onglet
+ * racine — avatar, salutation, actions — et `title` dans un écran où l'on est
+ * entré. Elle est redessinée à chaque navigation plutôt que modifiée sur
+ * place : un composant se rend, il ne se rafistole pas.
+ */
+function dessinerHaut({ title, back, chrome }) {
+  hautEl.replaceChildren();
+  if (!chrome) return;
+  const profil = store.current();
+  const nom = profil?.name || '';
+  const racine = !back;
+
+  // Recherche et activité n'apparaissent que sur les écrans de premier
+  // niveau : sur une page de détail, quatre boutons ne laisseraient plus la
+  // place au titre, et l'on y vient pour lire, pas pour chercher ailleurs.
+  const actions = [];
+  if (racine) {
+    actions.push({ icon: 'search', label: 'Rechercher', onClick: () => navigate('#/recherche') });
+    let n = 0;
+    try { n = nonLus(); } catch { n = 0; }
+    actions.push({
+      icon: 'bell',
+      label: n > 0 ? `Activité — ${n} nouveauté${n > 1 ? 's' : ''}` : 'Activité',
+      badge: n > 0,
+      onClick: () => navigate('#/activite'),
+    });
+  }
+
+  const avatar = h('button', {
+    class: 'chrome__avatar', type: 'button', 'aria-label': 'Mon compte',
+    onclick: () => navigate('#/compte'),
+  }, Avatar({ name: nom, size: 40 }));
+
+  hautEl.append(TopBar({
+    variant: racine ? 'profile' : 'title',
+    // Sur un onglet racine, la barre porte le nom de la personne sous une
+    // salutation — la forme `profile` du système. Le titre de l'écran serait
+    // redondant avec l'onglet allumé juste en dessous.
+    title: racine ? nom : title,
+    subtitle: racine ? salutation() : null,
+    // Conservé pour les écrans où l'on entre : c'est là que le titre compte.
+    name: nom,
+    avatar,
+    onBack: back ? () => navigate(back) : null,
+    actions,
+  }));
+}
+
+/** « Bonjour » avant 18 h, « Bonsoir » ensuite. */
+function salutation() {
+  return new Date().getHours() < 18 ? 'Bonjour' : 'Bonsoir';
+}
+
+/** Dessine la barre d'onglets avec le composant `BottomNav` du système. */
+function dessinerBas(tab) {
+  basEl.replaceChildren();
+  if (!tab) return;
+  basEl.append(BottomNav({ items: ONGLETS, value: tab }));
+}
 
 /* ------------------------------------------------------------------ thème */
 
@@ -140,53 +213,21 @@ async function route() {
 function show({ node, title, back, tab, chrome = true }) {
   hideSplash();
   appEl.hidden = false;
-  appbar.hidden = !chrome;
-  tabbar.hidden = !chrome || !tab;
+
+  dessinerHaut({ title, back, chrome });
+  dessinerBas(chrome ? tab : null);
+
+  document.title = title ? `${title} — Examen civique` : 'Examen civique';
 
   // Le système de design distingue deux fonds : les onglets racines posent
   // leurs cartes sur un fond teinté, les écrans dans lesquels on entre — quiz,
   // résultat, réglages — sur un fond neutre presque blanc. C'est ce qui fait
   // qu'un quiz se lit comme une feuille et pas comme une page de plus.
-  document.body.classList.toggle('is-plain', !tab);
-
-  titleEl.textContent = title || 'Examen civique';
-  document.title = title ? `${title} — Examen civique` : 'Examen civique';
-
-  if (back) {
-    backEl.hidden = false;
-    backEl.onclick = () => navigate(back);
-  } else {
-    backEl.hidden = true;
-    backEl.onclick = null;
-  }
-
-  for (const a of tabbar.querySelectorAll('.tab')) {
-    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
-    else a.removeAttribute('aria-current');
-  }
-
-  const name = store.current()?.name || '?';
-  avatarEl.textContent = name.trim().slice(0, 1) || '?';
-  profileBtn.hidden = !chrome;
-  // Recherche et activité n'apparaissent que sur les écrans de premier niveau :
-  // sur une page de détail, quatre boutons ne laisseraient plus la place au
-  // titre, et l'on y vient pour lire, pas pour chercher ailleurs.
-  const racine = chrome && !back;
-  searchBtn.hidden = !racine;
-  bellBtn.hidden = !racine;
-  if (racine) majPastille();
+  document.body.classList.toggle('is-plain', !(chrome && tab));
 
   appEl.replaceChildren(node);
   appEl.scrollTop = 0;
   window.scrollTo(0, 0);
-}
-
-/** Pastille du carillon : nombre d'évènements depuis la dernière visite. */
-function majPastille() {
-  let n = 0;
-  try { n = nonLus(); } catch { n = 0; }
-  dotEl.hidden = n === 0;
-  bellBtn.setAttribute('aria-label', n > 0 ? `Activité — ${n} nouveauté${n > 1 ? 's' : ''}` : 'Activité');
 }
 
 /** Redessine la vue courante (après un changement de données). */
@@ -195,9 +236,6 @@ export function refresh() {
   route();
 }
 
-profileBtn.addEventListener('click', () => navigate('#/compte'));
-searchBtn.addEventListener('click', () => navigate('#/recherche'));
-bellBtn.addEventListener('click', () => navigate('#/activite'));
 window.addEventListener('hashchange', route);
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
@@ -316,5 +354,3 @@ if (accueilli) {
 route();
 rappel.verifier().catch(() => { /* notification refusée : sans conséquence */ });
 
-// Expose l'icône aux vues chargées dynamiquement (confort de débogage).
-window.__ec = { icon, store };

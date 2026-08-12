@@ -81,6 +81,11 @@ const MAP = {
   shield: 'shield',
   users: 'users',
   vote: 'vote',
+  // Demandées par la bibliothèque de composants du système de design.
+  circle: 'circle',
+  'circle-dashed': 'circle-dashed',
+  more: 'ellipsis-vertical',
+  timer: 'clock',
 };
 
 /** Extrait le contenu interne d'un SVG Lucide (tout ce qui est entre <svg> et </svg>). */

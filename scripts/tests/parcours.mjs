@@ -23,7 +23,7 @@ page.on('pageerror', (e) => ko(`erreur JS : ${e.message}`));
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.fill('#ob-name', 'Abdellah');
 await page.click('button[type=submit]');
-await page.waitForSelector('.greet__hello');
+await page.waitForSelector('.accueil__hero');
 
 /** Installe une progression donnée et recharge. */
 async function poser(patch) {

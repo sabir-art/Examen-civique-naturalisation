@@ -84,10 +84,14 @@
      du système reste utilisé pour ce qui n'est pas du texte. */
   --text: var(--text-primary);
   --muted: var(--text-secondary);
-  /* `--ink-500` du système vaut #6B7270 et tombe à 4,29:1 sur le fond teinté :
-     sous le seuil AA. On le fonce du strict nécessaire pour passer 4,5:1
-     partout, fond teinté compris, en restant dans la même teinte. */
-  --faint: #656C6A;
+  --faint: var(--gris-lisible);
+  /* Le gris tertiaire du système — `--text-muted`, #8E9694 — tombe à 2,6:1 sur
+     blanc et 3,0:1 sur le fond teinté : sous le seuil AA. On le fonce du
+     strict nécessaire pour passer 4,5:1 partout, en restant dans sa teinte.
+     La redéfinition porte sur le JETON, donc les composants du système en
+     profitent sans qu'aucun d'eux ait à être retouché. */
+  --gris-lisible: #656C6A;
+  --text-muted: var(--gris-lisible);
   --on-brand: var(--text-inverse);
   --on-accent: var(--text-inverse);
   /* Texte et icônes posés sur un aplat pastel. Règle 4 en clair : toujours
@@ -157,6 +161,10 @@
   --nuit-menthe: #17322B;    --nuit-menthe-clair: #9BD5C5;
   --nuit-beurre: #362C10;    --nuit-beurre-clair: #F2D268;
   --nuit-rose: #3A2126;      --nuit-rose-clair: #F2B9C1;
+  /* Neutres complémentaires, demandés par les composants du système. */
+  --nuit-desactive: #6E7876;
+  --nuit-inverse-faible: #8D9793;
+  --nuit-encre-survol: #2F3634;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -225,6 +233,38 @@
     --state-neutral-bg: var(--nuit-surface-2);
     --state-neutral-fg: var(--nuit-muted);
     --piste: var(--nuit-surface-2);
+    /* Les composants du système lisent directement les jetons de surface du
+       système. Comme il n'a pas de déclinaison sombre, on repointe ici ceux
+       qu'ils utilisent : les composants restent écrits tels quels, et c'est la
+       table des valeurs qui change — exactement le contrat annoncé. */
+    --white: var(--nuit-surface);
+    --surface-card: var(--nuit-surface);
+    --surface-sunken: var(--nuit-surface-2);
+    --surface-ink: var(--nuit-surface-2);
+    --text-on-tint: var(--nuit-text);
+    --text-primary: var(--nuit-text);
+    --text-secondary: var(--nuit-muted);
+    --text-muted: var(--nuit-faint);
+    --text-disabled: var(--nuit-desactive);
+    --text-inverse: var(--nuit-text);
+    --text-inverse-muted: var(--nuit-inverse-faible);
+    --border-subtle: var(--nuit-line);
+    --border-default: var(--nuit-line-strong);
+    --border-focus: var(--nuit-text);
+    --ink-50: var(--nuit-surface-2);
+    --ink-700: var(--nuit-encre-survol);
+    --lavender-300: var(--nuit-lavande-clair);
+    --lavender-400: var(--nuit-lavande-clair);
+    --mint-300: var(--nuit-menthe-clair);
+    --mint-400: var(--nuit-menthe-clair);
+    --butter-300: var(--nuit-beurre-clair);
+    --butter-500: var(--nuit-beurre-clair);
+    --surface-butter-soft: var(--nuit-beurre);
+    --state-info-bg: var(--nuit-lavande);
+    --state-info-fg: var(--nuit-lavande-clair);
+    --streak-empty: var(--nuit-surface-2);
+    --streak-day: var(--nuit-beurre);
+    --shadow-inset-track: none;
     --action-disabled-bg: var(--nuit-surface-2);
     --action-disabled-fg: var(--nuit-faint);
     --bloc-sur-pastel: rgba(255, 255, 255, .10);
@@ -292,6 +332,38 @@
   --state-neutral-bg: var(--nuit-surface-2);
   --state-neutral-fg: var(--nuit-muted);
   --piste: var(--nuit-surface-2);
+  /* Les composants du système lisent directement les jetons de surface du
+     système. Comme il n'a pas de déclinaison sombre, on repointe ici ceux
+     qu'ils utilisent : les composants restent écrits tels quels, et c'est la
+     table des valeurs qui change — exactement le contrat annoncé. */
+  --white: var(--nuit-surface);
+  --surface-card: var(--nuit-surface);
+  --surface-sunken: var(--nuit-surface-2);
+  --surface-ink: var(--nuit-surface-2);
+  --text-on-tint: var(--nuit-text);
+  --text-primary: var(--nuit-text);
+  --text-secondary: var(--nuit-muted);
+  --text-muted: var(--nuit-faint);
+  --text-disabled: var(--nuit-desactive);
+  --text-inverse: var(--nuit-text);
+  --text-inverse-muted: var(--nuit-inverse-faible);
+  --border-subtle: var(--nuit-line);
+  --border-default: var(--nuit-line-strong);
+  --border-focus: var(--nuit-text);
+  --ink-50: var(--nuit-surface-2);
+  --ink-700: var(--nuit-encre-survol);
+  --lavender-300: var(--nuit-lavande-clair);
+  --lavender-400: var(--nuit-lavande-clair);
+  --mint-300: var(--nuit-menthe-clair);
+  --mint-400: var(--nuit-menthe-clair);
+  --butter-300: var(--nuit-beurre-clair);
+  --butter-500: var(--nuit-beurre-clair);
+  --surface-butter-soft: var(--nuit-beurre);
+  --state-info-bg: var(--nuit-lavande);
+  --state-info-fg: var(--nuit-lavande-clair);
+  --streak-empty: var(--nuit-surface-2);
+  --streak-day: var(--nuit-beurre);
+  --shadow-inset-track: none;
   --action-disabled-bg: var(--nuit-surface-2);
   --action-disabled-fg: var(--nuit-faint);
   --bloc-sur-pastel: rgba(255, 255, 255, .10);
@@ -402,50 +474,28 @@ a { color: var(--lien); }
   .boot__load i { animation: none; width: 100%; }
 }
 
-/* ---------------------------------------------------------------- appbar */
-/* Chrome opaque, sans flou : « Civica's chrome is opaque ». Le flou coûtait
-   une couche de composition sur toute la largeur à chaque défilement, pour un
-   effet que le fond plat rend inutile. */
-.appbar {
+/* ------------------------------------------------------------- châssis */
+/*
+ * La barre du haut et celle du bas sont les composants `TopBar` et
+ * `BottomNav` du système. Il ne reste ici que ce que le système ne dit pas :
+ * comment elles se placent dans une page qui défile, et l'encoche des
+ * iPhone.
+ */
+#chrome-top {
   position: sticky; top: 0; z-index: 40;
-  display: flex; align-items: center; gap: 6px;
-  height: calc(var(--appbar-h) + var(--safe-t));
-  padding: var(--safe-t) 10px 0;
+  padding-top: var(--safe-t);
   background: var(--bg);
 }
-.appbar__title {
-  flex: 1; font: var(--type-h3); text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-/* Rond et non carré : dans le système, tout ce qui se touche est soit une
-   pilule, soit un cercle. */
-.appbar__back, .appbar__action {
-  width: 40px; height: 40px; flex: none; display: grid; place-items: center;
-  border: 0; background: transparent; color: var(--text); border-radius: var(--radius-circle); cursor: pointer;
+.chrome__avatar {
+  display: inline-flex; padding: 0; border: 0; background: none; cursor: pointer;
+  border-radius: var(--radius-circle);
   -webkit-tap-highlight-color: transparent;
-  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  transition: transform var(--dur-fast) var(--ease-out);
 }
-.appbar__back:active, .appbar__action:active { background: var(--action-ghost-bg-hover); transform: scale(var(--press-scale)); }
-.appbar__back[hidden] { display: none; }
-.appbar__back + .appbar__title { text-align: left; padding-left: 2px; }
-.avatar {
-  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--brand); color: var(--on-brand); font: var(--type-label);
-  text-transform: uppercase; /* initiale */
-}
-/* Les actions de la barre sont plus étroites que la cible tactile : le bouton
-   garde ses 40px, seul le fond du toucher se resserre visuellement. */
-.appbar__action { position: relative; }
-.appbar__action .dot {
-  position: absolute; top: 7px; right: 7px; width: 9px; height: 9px; border-radius: 50%;
-  background: var(--accent); border: 2px solid var(--surface);
-}
-@media (max-width: 359px) {
-  .appbar { gap: 0; padding-left: 4px; padding-right: 4px; }
-  .appbar__back, .appbar__action { width: 36px; }
-}
+.chrome__avatar:active { transform: scale(var(--press-scale)); }
 
 /* ------------------------------------------------------------------- app */
+
 /* La barre flottant à 16px du bas, le contenu doit dégager sa hauteur PLUS son
    décalage, sans quoi la dernière carte finit dessous. */
 .app {
@@ -454,59 +504,13 @@ a { color: var(--lien); }
   max-width: 640px; margin: 0 auto; outline: none;
 }
 .app[hidden] { display: none; }
-.stack { display: grid; gap: var(--stack-section); }
+/* `minmax(0, 1fr)` : une colonne de grille prend par défaut la largeur
+   minimale de son contenu. Un seul libellé un peu long — un bouton en
+   `white-space: nowrap`, par exemple — élargit alors la colonne, donc TOUTES
+   les cartes de l'écran, et la page se met à défiler de côté. Avec cette
+   contrainte, c'est l'élément fautif qui se serre, pas la page. */
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--stack-section); }
 .stack--tight { gap: var(--stack-card); }
-
-/* ---------------------------------------------------------------- tabbar */
-/* Flex et non grid : avec `grid-template-columns`, un onglet ajouté sans mise à
-   jour de la feuille de style bascule sur une ligne implicite, hors de la
-   hauteur fixe — invisible et impossible à toucher. En flex, il se resserre. */
-/* La barre flotte : encre, en pilule, détachée de 16px des trois bords. C'est
-   la pièce la plus reconnaissable du système, et la seule tache d'encre à
-   l'écran tant qu'aucune action principale n'est affichée.
-
-   Flex et non grid : avec `grid-template-columns`, un onglet ajouté sans mise
-   à jour de la feuille de style bascule sur une ligne implicite, hors de la
-   hauteur fixe — invisible et impossible à toucher. En flex, il se resserre. */
-.tabbar {
-  position: fixed; z-index: 45;
-  left: var(--bottomnav-inset); right: var(--bottomnav-inset);
-  bottom: calc(var(--bottomnav-inset) + var(--safe-b));
-  display: flex; align-items: stretch;
-  min-height: var(--tabbar-h);
-  padding: 0 var(--space-3);
-  background: var(--surface-ink);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-lg);
-  /* Sur une tablette, une barre étirée sur 900px sépare les onglets de plus
-     d'un pouce. Elle reste centrée à la largeur du contenu. */
-  max-width: 560px; margin: 0 auto;
-}
-.tab {
-  position: relative; flex: 1 1 0; min-width: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  /* Cible tactile confortable même sur un iPhone SE. */
-  min-height: var(--tabbar-h); padding: 6px 2px;
-  text-decoration: none; color: var(--text-inverse-muted);
-  font: var(--type-micro); font-size: 10.5px; letter-spacing: 0;
-  -webkit-tap-highlight-color: transparent;
-  transition: color var(--dur-fast) var(--ease-out);
-}
-.tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tab svg { width: 22px; height: 22px; flex: none; }
-/* L'onglet actif passe en blanc et son trait s'épaissit — la règle du système
-   pour la navigation. Aucune couleur de section ici : sur l'encre, cinq
-   pastels différents feraient un sapin. */
-.tab[aria-current="page"] { color: var(--text-inverse); }
-.tab[aria-current="page"] svg { stroke-width: 2.25; }
-/* Repère de l'onglet actif : une pastille sous l'intitulé, lisible même quand
-   la couleur ne se distingue pas. */
-.tab[aria-current="page"]::before {
-  content: ''; position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
-  width: 34px; height: 34px; border-radius: var(--radius-circle);
-  background: rgba(255, 255, 255, .13);
-}
-.tab svg, .tab span { position: relative; }
 
 /* ----------------------------------------------------------------- cards */
 /*
@@ -944,109 +948,45 @@ a.themestat__row { min-height: 44px; }
 .empty__icon svg { width: 26px; height: 26px; }
 
 /* ------------------------------------------------------------- accueil */
-.greet { display: flex; align-items: center; gap: 12px; padding: 2px 2px 0; }
-.greet__hello { font: var(--type-h1); letter-spacing: var(--tracking-display); }
-  20%, 40% { transform: rotate(-8deg); }
-}
-.greet__line { font-size: 14px; color: var(--muted); margin-top: 2px; }
-.streak {
-  flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px;
-  border-radius: 999px; background: var(--warn-100); color: var(--warn);
-  font-size: 14px; font-weight: 750; font-variant-numeric: tabular-nums;
-}
-.streak svg { width: 16px; height: 16px; }
+/*
+ * L'accueil est composé de `Card`, `ThemeCard`, `LessonRow`, `ProgressRing` et
+ * `SectionHeader`. Il ne reste ici que la mise en page propre à cet écran :
+ * comment ces composants se placent les uns par rapport aux autres.
+ */
+.accueil__hero { display: grid; gap: 16px; }
+.accueil__herohead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.accueil__titre { font: var(--type-h1); letter-spacing: var(--tracking-heading); max-width: 220px; text-wrap: pretty; }
+.accueil__sub { font: var(--type-body-sm); margin-top: 6px; opacity: .78; }
 
-.progrow { display: flex; align-items: center; gap: 16px; }
-.progrow__stats { flex: 1; min-width: 0; display: grid; gap: 9px; }
-.ministat { display: flex; align-items: baseline; gap: 8px; }
-.ministat__val { font: var(--type-h3); font-size: 20px; font-variant-numeric: tabular-nums; flex: none; }
-.ministat__lab { font: var(--type-caption); font-weight: var(--weight-medium); color: var(--muted); line-height: 1.3; }
-
-/* Bloc de conseil : purement informatif, donc pas d'ombre ni de bordure pleine
-   — un fond teinté très léger et une pastille d'icône ronde. Aucune barre
-   verticale colorée : c'est la pastille qui porte la couleur. */
-.advice {
-  display: flex; gap: 11px; align-items: center;
-  background: var(--brand-50); border: 0; border-radius: var(--radius-sm);
-  padding: 13px 14px;
+.accueil__seance { display: flex; align-items: center; gap: 14px; }
+.accueil__seancetxt { flex: 1; min-width: 0; }
+.accueil__seancetitre { font: var(--type-h3); }
+.accueil__seancemeta { font: var(--type-caption); color: var(--text-inverse-muted); margin-top: 3px; }
+.accueil__go {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; flex: none; border-radius: var(--radius-circle);
+  background: var(--white); color: var(--text-primary);
 }
-.advice--ok { background: var(--ok-100); }
-.advice--warn { background: var(--warn-100); }
-.advice__icon {
-  flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
-  background: color-mix(in srgb, var(--brand) 14%, transparent); color: var(--brand);
-}
-.advice--ok .advice__icon { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
-.advice--warn .advice__icon { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
-.advice__icon svg { width: 17px; height: 17px; }
-.advice p { color: var(--text); }
+.accueil__reste { font: var(--type-caption); opacity: .72; }
 
-/* Liste compacte des thèmes, avec barre et pourcentage. */
-.trows { display: grid; }
-.trow {
-  display: flex; align-items: center; gap: 12px; padding: 11px 2px;
-  text-decoration: none; color: inherit; border-bottom: 1px solid var(--line);
-  -webkit-tap-highlight-color: transparent;
-}
-.trow:last-child { border-bottom: 0; }
-.trow:active { opacity: .6; }
-.trow__icon {
-  width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center;
-  background: var(--brand-100); color: var(--brand);
-}
-.trow__icon svg { width: 19px; height: 19px; }
-.trow__body { flex: 1; min-width: 0; display: grid; gap: 3px; }
-.trow__title { font-size: 14.5px; font-weight: 650; }
-.trow__sub { font-size: 12px; color: var(--faint); }
-.trow__pct { flex: none; font-size: 13.5px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.accueil__prog { display: grid; gap: 14px; }
+.accueil__progline { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.accueil__proglabel { font: var(--type-body-sm); color: var(--text-secondary); }
+.accueil__progval { font: var(--type-h3); font-variant-numeric: tabular-nums; }
+.accueil__chips { display: flex; flex-wrap: wrap; gap: var(--stack-inline); }
+.accueil__tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--stack-card); }
 
-/* Un pastel par thème du programme, repris de `--topic-*` : c'est la
-   correspondance que le système demande de ne jamais rebattre. */
-.trow__icon--principes-valeurs { background: var(--topic-valeurs); }
-.trow__icon--institutions { background: var(--topic-institutions); }
-.trow__icon--droits-devoirs { background: var(--topic-societe); }
-.trow__icon--histoire-geo-culture { background: var(--topic-histoire); }
-.trow__icon--vivre-societe { background: var(--topic-symboles); }
-.trow__icon { color: var(--on-pastel); }
+.accueil__serie { display: flex; }
+.accueil__recittitre { font-size: 17px; margin-top: 3px; }
+.accueil__recitbar { margin-top: 11px; max-width: 62%; }
 
-.bar--thin { height: 6px; display: block; }
-.bar__fill--story { background: var(--story); }
+.accueil__examen { display: grid; gap: 14px; }
+.accueil__examenhead { display: flex; gap: 12px; align-items: flex-start; }
+.accueil__examentitre { font: var(--type-h3); }
+.accueil__examensub { font: var(--type-body-sm); margin-top: 4px; opacity: .78; text-wrap: pretty; }
+.accueil__examenmeta { font: var(--type-caption); opacity: .72; text-align: center; }
 
-.card__eyebrow { font: var(--type-caption); color: var(--muted); }
-
-/* Carte sur laquelle on appuie : relief un peu plus marqué, chevron d'appel,
-   et un enfoncement net au toucher. */
-.card--link {
-  display: block; position: relative; text-decoration: none; color: inherit;
-  border-color: var(--line-strong);
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .1s ease, box-shadow .16s ease, background .16s ease;
-}
-.card--link::after {
-  content: ''; position: absolute; right: 14px; top: 18px; width: 8px; height: 8px;
-  border-right: 2px solid var(--faint); border-top: 2px solid var(--faint);
-  transform: rotate(45deg); opacity: .75;
-}
-.card--link:active { transform: scale(.99); background: var(--surface-2); box-shadow: none; }
-
-.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-.kpi { background: var(--surface); border: 0; border-radius: var(--radius-card-inner); padding: 14px 10px; text-align: center; box-shadow: var(--shadow); }
-.kpi__val { font: var(--type-h2); font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-heading); }
-.kpi__lab { font: var(--type-caption); font-weight: var(--weight-medium); color: var(--muted); margin-top: 3px; line-height: 1.25; }
-
-.prose { font-size: 15.5px; line-height: 1.62; }
-.prose h3 { font-size: 16.5px; margin: 20px 0 7px; }
-.prose h3:first-child { margin-top: 0; }
-.prose h4 { font-size: 14.5px; margin: 15px 0 5px; color: var(--brand); }
-.prose p { margin: 0 0 10px; }
-.prose ul { margin: 0 0 12px; padding-left: 20px; }
-.prose li { margin-bottom: 5px; }
-.prose strong { font-weight: 700; }
-.prose .key { background: var(--brand-100); color: var(--brand); padding: 1px 6px; border-radius: 6px; font-weight: 650; }
-.prose blockquote {
-  margin: 0 0 12px; padding: 13px 15px; background: var(--surface-2);
-  border: 0; border-radius: var(--radius-sm); font-size: 14.5px;
-}
+.ds-lesson__chev { color: var(--text-muted); }
 
 /* ------------------------------------------------------- la France racontée */
 /* Le récit se lit d'une traite : texte un peu plus grand et plus aéré. */
@@ -1466,7 +1406,11 @@ details[open] > *:not(summary) { animation: unfold .28s cubic-bezier(.2, .8, .2,
 details[open] > .summary svg:first-child { transform: rotate(-12deg) scale(1.08); }
 
 /* Correction et explication après une réponse. */
-.feedback { animation: fadeUp .3s cubic-bezier(.2, .8, .2, 1) both; }
+/* Le verdict monte en place : le retour doit se sentir, pas apparaître d'un
+   coup au milieu du texte. Le composant du système ne prévoit pas de
+   mouvement — c'est l'application qui l'ajoute, et il se coupe avec le
+   réglage « mouvement réduit » comme tous les autres. */
+.ds-verdict { animation: fadeUp .3s cubic-bezier(.2, .8, .2, 1) both; }
 .choice { transition: background .16s ease, border-color .16s ease, transform .1s ease; }
 .choice:active:not(:disabled) { transform: scale(.99); }
 .choice.is-correct { animation: pop .34s cubic-bezier(.2, 1.3, .4, 1) both; }

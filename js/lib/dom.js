@@ -1,6 +1,6 @@
 /** Petites aides pour construire l'interface sans dépendance externe. */
 
-import { ICONS } from './icons.js';
+import { ICONS, nomIcone } from './icons.js';
 
 /**
  * Crée un élément. `attrs` accepte class, html, text, dataset, aria-*, on*
@@ -37,7 +37,9 @@ export function icon(name, size) {
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('aria-hidden', 'true');
   if (size) { svg.style.width = `${size}px`; svg.style.height = `${size}px`; }
-  svg.innerHTML = ICONS[name] || ICONS.info;
+  // `nomIcone` accepte les deux vocabulaires : le nôtre et celui de Lucide,
+  // dont se servent les composants du système de design.
+  svg.innerHTML = ICONS[nomIcone(name)] || ICONS.info;
   return svg;
 }
 

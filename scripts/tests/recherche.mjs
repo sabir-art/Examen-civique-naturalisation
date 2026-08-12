@@ -22,7 +22,7 @@ page.on('pageerror', (e) => ko(`erreur JS : ${e.message}`));
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.fill('#ob-name', 'Abdellah');
 await page.click('button[type=submit]');
-await page.waitForSelector('.greet__hello');
+await page.waitForSelector('.accueil__hero');
 
 async function chercher(mot) {
   await page.goto(BASE + '#/recherche');
@@ -43,8 +43,8 @@ async function chercher(mot) {
 
 await page.goto(BASE + '#/');
 await page.waitForTimeout(300);
-verifier(await page.locator('#appbar-search').isVisible(), 'le bouton Rechercher est dans la barre haute');
-await page.click('#appbar-search');
+verifier(await page.locator('[aria-label="Rechercher"]').isVisible(), 'le bouton Rechercher est dans la barre haute');
+await page.click('[aria-label="Rechercher"]');
 await page.waitForTimeout(400);
 verifier((await page.locator('.search__field').count()) === 1, 'il ouvre bien l’écran de recherche');
 

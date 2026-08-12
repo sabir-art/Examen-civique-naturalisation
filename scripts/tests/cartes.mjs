@@ -11,7 +11,7 @@ const step = async (n, f) => { try { await f(); console.log(`  ok  ${n}`); } cat
 
 await p.goto(BASE, { waitUntil: 'networkidle' });
 await p.fill('#ob-name', 'Abdellah'); await p.click('button[type=submit]');
-await p.waitForSelector('.greet__hello');
+await p.waitForSelector('.accueil__hero');
 
 await step('les cartes mémoire sont accessibles depuis Réviser', async () => {
   await p.goto(`${BASE}#/reviser`);

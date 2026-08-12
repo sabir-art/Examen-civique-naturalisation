@@ -1,57 +1,36 @@
-/** Accueil : état de préparation, reprise en un geste, accès aux sections. */
+/**
+ * Accueil : état de préparation, reprise en un geste, accès aux sections.
+ *
+ * Composé avec les composants du système de design, dans l'ordre de son écran
+ * `HomeScreen` : bandeau pastel avec une carte encre imbriquée, carte de
+ * progression, liste de thèmes, bloc d'entretien blanc. S'y ajoute ce que le
+ * système ne connaît pas — le récit, le livret, l'assistant — construit avec
+ * les mêmes composants.
+ */
 
-import { h, icon, spot } from '../lib/dom.js';
+import { h, spot } from '../lib/dom.js';
 import { daysBetween, plural } from '../lib/util.js';
 import * as store from '../store.js';
 import * as ai from '../ai.js';
-import { readiness, overview, advice, themeStats, romanOverview, nextUnread, planRevision, compositionSeance, resteSeance } from '../engine.js';
+import {
+  readiness, overview, advice, themeStats, romanOverview, nextUnread,
+  planRevision, compositionSeance, resteSeance,
+} from '../engine.js';
 import { niveau, badgesObtenus } from '../lib/xp.js';
 import { EXAM, THEMES } from '../data/programme.js';
+import {
+  Card, Button, Chip, Badge, IconTile, SectionHeader, Icon,
+  ProgressBar, StatTile, ThemeCard, LessonRow, ResultBanner,
+} from '../ds/index.js';
 
-/** Anneau de progression. `size` en pixels, tracé sur une grille de 128. */
-function ring(value, { size = 104, stroke = 10, label = null, sub = null } = {}) {
-  const r = 54;
-  const c = 2 * Math.PI * r;
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 128 128');
-  svg.setAttribute('class', 'ring');
-  svg.style.width = `${size}px`;
-  svg.style.height = `${size}px`;
-  svg.innerHTML = `
-    <circle class="ring__track" cx="64" cy="64" r="${r}" fill="none" stroke-width="${stroke}"/>
-    <circle class="ring__value" cx="64" cy="64" r="${r}" fill="none" stroke-width="${stroke}" stroke-linecap="round"
-            transform="rotate(-90 64 64)" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - value / 100)}"/>
-    <text class="ring__label" x="64" y="${sub ? 58 : 64}" text-anchor="middle" dominant-baseline="middle">${label ?? `${value}%`}</text>
-    ${sub ? `<text class="ring__sub" x="64" y="92" text-anchor="middle">${sub}</text>` : ''}`;
-  return svg;
-}
-
-function shortcut({ to, name, title, sub, badge, tone }) {
-  return h('a', { class: `item${tone ? ` item--${tone}` : ''}`, href: to }, [
-    h('span', { class: 'item__icon' }, icon(name)),
-    h('span', { class: 'item__body' }, [
-      h('span', { class: 'item__title', text: title }),
-      h('span', { class: 'item__sub', text: sub }),
-    ]),
-    badge ? h('span', { class: `badge badge--${badge.tone}`, text: badge.text }) : null,
-    h('span', { class: 'item__chev' }, icon('chevron')),
-  ]);
-}
-
-/** Ligne de thème : pastille, intitulé, barre et pourcentage. */
-function themeRow(s) {
-  const m = Math.round(s.mastery * 100);
-  const tone = m >= 70 ? 'ok' : m >= 35 ? 'warn' : 'bad';
-  return h('a', { class: 'trow', href: `#/reviser/t/${s.key}` }, [
-    h('span', { class: `trow__icon trow__icon--${s.key}` }, icon(THEMES[s.key].icon)),
-    h('span', { class: 'trow__body' }, [
-      h('span', { class: 'trow__title', text: s.label }),
-      h('span', { class: 'trow__sub', text: `${s.seen}/${s.total} questions vues` }),
-      h('span', { class: 'bar bar--thin' }, h('span', { class: `bar__fill bar__fill--${tone}`, style: `width:${m}%` })),
-    ]),
-    h('span', { class: 'trow__pct', text: `${m}%` }),
-  ]);
-}
+/** Pastel de chaque thème du programme, fixé une fois pour toutes. */
+const SUJET = {
+  'principes-valeurs': 'valeurs',
+  institutions: 'institutions',
+  'droits-devoirs': 'societe',
+  'histoire-geo-culture': 'histoire',
+  'vivre-societe': 'symboles',
+};
 
 export default function renderHome() {
   const p = store.current();
@@ -65,142 +44,233 @@ export default function renderHome() {
   const days = p.goalDate ? daysBetween(Date.now(), new Date(p.goalDate).getTime()) : null;
   const streakDays = store.streak();
 
-  /* ------------------------------------------------------------- salutation */
+  /* ------------------------------------------------------------- bandeau */
 
-  const heure = new Date().getHours();
-  const salut = heure < 18 ? 'Bonjour' : 'Bonsoir';
+  /*
+   * La composition du système : un aplat lavande, un titre court, et à
+   * l'intérieur une carte encre — la seule tache noire de l'écran, donc la
+   * seule chose à faire ensuite. Les pastels ne s'empilent pas : dans le
+   * lavande, il n'y a que de l'encre et du blanc.
+   */
+  // Des chiffres concrets, jamais « quelques » : c'est une règle de contenu du
+  // système. Sans date d'examen, on rappelle le seuil à atteindre plutôt que
+  // de répéter la question du titre.
+  const echeance = days > 0 ? `Examen dans ${days} ${plural(days, 'jour')}.`
+    : days === 0 ? "C'est aujourd'hui. Bon courage."
+      : `Seuil de réussite : ${EXAM.passing}/${EXAM.questions}.`;
 
-  const tete = h('div', { class: 'greet' }, [
-    h('div', { class: 'grow' }, [
-      // Aucun émoji : le système l'écrit noir sur blanc, et il a raison ici —
-      // l'application prépare un entretien d'État, pas une messagerie.
-      h('p', { class: 'greet__hello', text: `${salut} ${p.name}` }),
-      h('p', {
-        class: 'greet__line',
-        text: days === null ? "Prêt à continuer votre préparation ?"
-          : days > 0 ? `Examen dans ${days} ${plural(days, 'jour')}.`
-            : days === 0 ? "C'est aujourd'hui. Bon courage !"
-              : "Prêt à continuer votre préparation ?",
+  const bandeau = Card({
+    surface: 'lavender',
+    radius: 'hero',
+    padding: 'lg',
+    className: 'accueil__hero',
+    children: [
+      h('div', { class: 'accueil__herohead' }, [
+        h('div', {}, [
+          h('h1', { class: 'accueil__titre', text: "Prêt pour l'examen ?" }),
+          h('p', { class: 'accueil__sub', text: echeance }),
+        ]),
+        IconTile({ icon: 'graduation-cap', tone: 'white', size: 44 }),
+      ]),
+      Card({
+        surface: 'ink',
+        radius: 'inner',
+        padding: 'md',
+        href: '#/reviser/revision',
+        className: 'accueil__seance',
+        children: [
+          h('div', { class: 'accueil__seancetxt' }, [
+            h('div', {
+              class: 'accueil__seancetitre',
+              text: plan.total > 0 ? `Réviser ${plan.total} question${plan.total > 1 ? 's' : ''}` : 'Commencer à réviser',
+            }),
+            h('div', {
+              class: 'accueil__seancemeta',
+              text: plan.total > 0 ? compositionSeance(plan) : 'Découvrir les premières questions',
+            }),
+          ]),
+          h('span', { class: 'accueil__go' }, Icon({ name: 'play', size: 18 })),
+        ],
       }),
-    ]),
-    streakDays > 0 ? h('span', { class: 'streak' }, [icon('fire'), h('span', { text: String(streakDays) })]) : null,
-  ].filter(Boolean));
+      resteSeance(plan) ? h('p', { class: 'accueil__reste', text: resteSeance(plan) }) : null,
+    ].filter(Boolean),
+  });
 
-  /* ------------------------------------------------------- niveau du moment */
+  /* --------------------------------------------------------- progression */
+
+  const progression = h('div', { class: 'stack stack--tight' }, [
+    SectionHeader({ title: 'Ma progression', action: 'Détails', href: '#/progres' }),
+    Card({
+      surface: 'white',
+      elevation: 'xs',
+      className: 'accueil__prog',
+      children: [
+        // La composition exacte de l'écran d'accueil du système : une ligne
+        // « intitulé / valeur », la barre, puis les puces de détail.
+        h('div', { class: 'accueil__progline' }, [
+          h('span', { class: 'accueil__proglabel', text: 'Programme officiel' }),
+          h('span', { class: 'accueil__progval', text: `${r} %` }),
+        ]),
+        ProgressBar({ value: r, height: 10 }),
+        h('div', { class: 'accueil__chips' }, [
+          Chip({ tone: 'mint', icon: 'check', size: 'sm', label: `${o.mastered} acquises` }),
+          o.weak > 0 ? Chip({ tone: 'butter', icon: 'refresh-cw', size: 'sm', label: `${o.weak} à revoir` }) : null,
+          Chip({ tone: 'outline', size: 'sm', label: `${o.bankSize - o.seen} restantes` }),
+        ].filter(Boolean)),
+      ],
+    }),
+  ]);
+
+  /* -------------------------------------------------- les trois chiffres */
+
+  /*
+   * Trois `StatTile` : le composant que le système donne pour « un chiffre et
+   * son intitulé ». Ils remplacent l'anneau, qui vit désormais sur l'écran de
+   * progression — c'est là que le système le place.
+   */
+  const chiffres = h('div', { class: 'accueil__tiles' }, [
+    StatTile({ value: String(o.seen), label: `sur ${o.bankSize} questions`, surface: 'white' }),
+    StatTile({ value: o.accuracy === null ? '—' : `${o.accuracy} %`, label: 'de bonnes réponses', surface: 'white' }),
+    StatTile({ value: o.last ? `${o.last.score}` : '—', label: 'dernier examen blanc', surface: 'white' }),
+  ]);
+
+  /* -------------------------------------------------------------- niveau */
 
   const niv = niveau();
   const gagnes = badgesObtenus().length;
 
-  const parcours = h('a', { class: 'item', href: '#/parcours' }, [
-    h('span', { class: 'item__icon item__icon--brand' }, icon('award')),
-    h('span', { class: 'item__body' }, [
-      h('span', { class: 'item__title', text: `Niveau ${niv.rang} — ${niv.nom}` }),
-      h('span', { class: 'item__sub', text: `${niv.xp.toLocaleString('fr-FR')} points · ${gagnes} badge${gagnes > 1 ? 's' : ''}` }),
-      h('span', { class: 'bar bar--thin', style: 'margin-top:7px' },
-        h('span', { class: 'bar__fill', style: `width:${niv.pct}%` })),
-    ]),
-    h('span', { class: 'item__chev' }, icon('chevron')),
+  const parcours = LessonRow({
+    icon: 'award',
+    title: `Niveau ${niv.rang} — ${niv.nom}`,
+    meta: `${niv.xp.toLocaleString('fr-FR')} points · ${gagnes} badge${gagnes > 1 ? 's' : ''}`,
+    href: '#/parcours',
+    trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+  });
+
+  /* ------------------------------------------------------------ conseil */
+
+  const conseil = ResultBanner({
+    tone: tip.tone === 'ok' ? 'correct' : tip.tone === 'warn' ? 'warning' : 'info',
+    text: tip.text,
+  });
+
+  /* -------------------------------------------------------------- thèmes */
+
+  const themes = h('div', { class: 'stack stack--tight' }, [
+    SectionHeader({ title: 'Mes thèmes', action: 'Tout voir', href: '#/reviser' }),
+    h('div', { class: 'list' }, stats
+      .slice()
+      .sort((a, b) => a.mastery - b.mastery)
+      .slice(0, 4)
+      .map((s) => ThemeCard({
+        title: s.label,
+        topic: SUJET[s.key] || 'histoire',
+        icon: THEMES[s.key].icon,
+        progress: Math.round(s.mastery * 100),
+        meta: `${s.seen}/${s.total} questions vues`,
+        href: `#/reviser/t/${s.key}`,
+      }))),
   ]);
 
-  /* ------------------------------------------------------ carte progression */
+  /* ------------------------------------------------------------- récit */
 
-  const progression = h('div', { class: 'card' }, [
-    h('p', { class: 'section-title', style: 'margin:0 0 12px', text: 'Ma progression' }),
-    h('div', { class: 'progrow' }, [
-      ring(r, { size: 104, label: `${r}%` }),
-      h('div', { class: 'progrow__stats' }, [
-        h('div', { class: 'ministat' }, [
-          h('div', { class: 'ministat__val', text: `${o.seen}` }),
-          h('div', { class: 'ministat__lab', text: `question${o.seen > 1 ? 's' : ''} sur ${o.bankSize}` }),
-        ]),
-        h('div', { class: 'ministat' }, [
-          h('div', { class: 'ministat__val', text: o.accuracy === null ? '—' : `${o.accuracy}%` }),
-          h('div', { class: 'ministat__lab', text: 'de bonnes réponses' }),
-        ]),
-        h('div', { class: 'ministat' }, [
-          h('div', { class: 'ministat__val', text: o.last ? `${o.last.score}/${o.last.total}` : '—' }),
-          h('div', { class: 'ministat__lab', text: 'dernier examen blanc' }),
+  const recit = Card({
+    surface: 'white',
+    elevation: 'xs',
+    href: suite ? `#/histoire/c/${suite.key}` : '#/histoire',
+    className: 'card--spot',
+    children: [
+      spot('histoire'),
+      h('p', { class: 'card__eyebrow', text: 'La France racontée' }),
+      h('h2', { class: 'card__title accueil__recittitre', text: suite ? suite.titre : 'Récit terminé' }),
+      h('p', { class: 'card__sub', text: suite ? `Chapitre ${suite.num} · ${suite.minutes} min de lecture` : `${roman.chapitres} chapitres lus` }),
+      h('div', { class: 'accueil__recitbar' },
+        ProgressBar({ value: Math.round((roman.lus / roman.chapitres) * 100), height: 6 })),
+      h('p', { class: 'card__sub', style: 'margin-top:6px', text: `${roman.lus}/${roman.chapitres} chapitres` }),
+    ],
+  });
+
+  /* ------------------------------------------------------- examen blanc */
+
+  const examen = Card({
+    surface: 'butter',
+    radius: 'hero',
+    padding: 'lg',
+    className: 'accueil__examen',
+    children: [
+      h('div', { class: 'accueil__examenhead' }, [
+        IconTile({ icon: 'timer', tone: 'white', size: 40 }),
+        h('div', { class: 'grow' }, [
+          h('div', { class: 'accueil__examentitre', text: "Se mettre en conditions réelles" }),
+          h('div', {
+            class: 'accueil__examensub',
+            text: `${EXAM.questions} questions · ${EXAM.minutes} min · seuil ${EXAM.passing}/${EXAM.questions}.`,
+          }),
         ]),
       ]),
-    ]),
-    // Le nombre affiché est celui de la SÉANCE : c'est ce à quoi on va
-    // répondre en appuyant, ni plus ni moins. Ce qu'il restera à revoir
-    // ensuite est écrit en dessous, jamais confondu avec lui.
-    h('a', {
-      class: 'btn', style: 'margin-top:14px',
-      href: '#/reviser/revision',
-    }, [icon('play'), h('span', { text: plan.total > 0 ? `Réviser ${plan.total} question${plan.total > 1 ? 's' : ''}` : 'Commencer à réviser' })]),
-    plan.total > 0 ? h('p', { class: 'hint center', style: 'margin-top:8px', text: compositionSeance(plan) }) : null,
-    resteSeance(plan) ? h('p', { class: 'hint center', style: 'margin-top:3px', text: resteSeance(plan) }) : null,
-  ].filter(Boolean));
+      Button({
+        variant: 'secondary',
+        size: 'lg',
+        fullWidth: true,
+        href: '#/examen',
+        iconRight: 'chevron-right',
+        // Libellé court : le système demande quatre mots au plus sur un
+        // bouton, et à 320px de large un intitulé long élargit sa carte.
+        label: o.exams > 0 ? 'Repasser un examen' : 'Lancer un examen',
+      }),
+      o.exams > 0
+        ? h('p', { class: 'accueil__examenmeta', text: `${o.exams} passé${o.exams > 1 ? 's' : ''} · meilleur ${o.best}/${EXAM.questions}` })
+        : null,
+    ].filter(Boolean),
+  });
 
-  /* ------------------------------------------------------------ le conseil */
-
-  const conseil = h('div', { class: `advice advice--${tip.tone}` }, [
-    h('span', { class: 'advice__icon' }, icon(tip.tone === 'ok' ? 'check' : tip.tone === 'warn' ? 'warn' : 'info')),
-    h('p', { class: 'small', text: tip.text }),
-  ]);
-
-  /* ------------------------------------------------------- carte du récit */
-
-  const recit = h('a', { class: 'card card--spot card--link', href: suite ? `#/histoire/c/${suite.key}` : '#/histoire' }, [
-    spot('histoire'),
-    h('p', { class: 'card__eyebrow', text: 'La France racontée' }),
-    h('h2', { class: 'card__title', style: 'font-size:17px;margin-top:3px', text: suite ? suite.titre : 'Récit terminé' }),
-    h('p', { class: 'card__sub', text: suite ? `Chapitre ${suite.num} · ${suite.minutes} min de lecture` : `${roman.chapitres} chapitres lus` }),
-    h('div', { class: 'bar bar--thin', style: 'margin-top:11px;max-width:62%' },
-      h('span', { class: 'bar__fill bar__fill--story', style: `width:${Math.round((roman.lus / roman.chapitres) * 100)}%` })),
-    h('p', { class: 'card__sub', style: 'margin-top:6px', text: `${roman.lus}/${roman.chapitres} chapitres` }),
-  ]);
-
-  /* -------------------------------------------------------- carte examen */
-
-  const examen = h('a', { class: 'card card--spot card--link', href: '#/examen' }, [
-    spot('examen'),
-    h('p', { class: 'card__eyebrow', text: 'Examen blanc' }),
-    h('h2', { class: 'card__title', style: 'font-size:17px;margin-top:3px', text: 'Se mettre en conditions réelles' }),
-    h('p', { class: 'card__sub', text: `${EXAM.questions} questions · ${EXAM.minutes} min · seuil ${EXAM.passing}/${EXAM.questions}` }),
-    h('p', { class: 'card__sub', style: 'margin-top:8px', text: o.exams > 0 ? `${o.exams} passé${o.exams > 1 ? 's' : ''} · meilleur ${o.best}/${EXAM.questions}` : '3 formats disponibles' }),
-  ]);
-
-  /* ------------------------------------------------------------- raccourcis */
+  /* --------------------------------------------------------- raccourcis */
 
   const raccourcis = h('div', { class: 'list' }, [
-    o.weak > 0 ? shortcut({
-      to: '#/reviser/erreurs', name: 'target', title: 'Mes erreurs',
-      sub: `${o.weak} question${o.weak > 1 ? 's' : ''} encore fragile${o.weak > 1 ? 's' : ''}`,
-      badge: { tone: 'bad', text: String(o.weak) },
+    o.weak > 0 ? LessonRow({
+      icon: 'target',
+      title: 'Mes erreurs',
+      meta: `${o.weak} question${o.weak > 1 ? 's' : ''} encore fragile${o.weak > 1 ? 's' : ''}`,
+      href: '#/reviser/erreurs',
+      trailing: Badge({ tone: 'wrong', label: String(o.weak) }),
     }) : null,
-    shortcut({
-      to: '#/livret', name: 'bank', title: 'Livret du citoyen', tone: 'livret',
-      sub: 'Le document officiel, chapitre par chapitre',
+    LessonRow({
+      icon: 'landmark',
+      title: 'Livret du citoyen',
+      meta: 'Le document officiel, chapitre par chapitre',
+      href: '#/livret',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     }),
-    shortcut({
-      to: '#/cours', name: 'flag', title: 'Fiches de révision', tone: 'revise',
-      sub: 'Le programme résumé, thème par thème',
+    LessonRow({
+      icon: 'flag',
+      title: 'Fiches de révision',
+      meta: 'Le programme résumé, thème par thème',
+      href: '#/cours',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     }),
-    shortcut({
-      to: '#/assistant', name: 'info', title: 'Poser une question', tone: 'ai',
-      sub: ai.isConfigured() ? "Demander une explication à l'assistant" : 'Assistant IA — facultatif, à activer',
+    LessonRow({
+      icon: 'sparkles',
+      title: 'Poser une question',
+      meta: ai.isConfigured() ? "Demander une explication à l'assistant" : 'Assistant IA — facultatif, à activer',
+      href: '#/assistant',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     }),
   ].filter(Boolean));
 
   /* ------------------------------------------------------------------ rendu */
 
   return h('div', { class: 'stack' }, [
-    tete,
+    streakDays > 0 ? h('div', { class: 'accueil__serie' },
+      Chip({ tone: 'butter', icon: 'flame', label: `Série de ${streakDays} jour${streakDays > 1 ? 's' : ''}` })) : null,
+    bandeau,
     progression,
+    chiffres,
     parcours,
     conseil,
-    h('div', { class: 'row row--between' }, [
-      h('p', { class: 'section-title', style: 'margin:0', text: 'Mes thèmes' }),
-      h('a', { class: 'linkbtn', href: '#/reviser', text: 'Voir tout' }),
-    ]),
-    h('div', { class: 'card card--pad-sm' }, h('div', { class: 'trows' },
-      stats.slice().sort((a, b) => a.mastery - b.mastery).slice(0, 5).map(themeRow))),
-    h('p', { class: 'section-title', style: 'margin:2px 0 0', text: 'Continuer' }),
+    themes,
+    h('p', { class: 'section-title', text: 'Continuer' }),
     recit,
     examen,
     raccourcis,
-  ]);
+  ].filter(Boolean));
 }

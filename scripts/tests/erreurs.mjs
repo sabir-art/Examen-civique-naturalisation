@@ -10,7 +10,7 @@ const step = async (n, f) => { try { await f(); console.log(`  ok  ${n}`); } cat
 
 await p.goto(BASE, { waitUntil: 'networkidle' });
 await p.fill('#ob-name', 'Abdellah'); await p.click('button[type=submit]');
-await p.waitForSelector('.greet__hello');
+await p.waitForSelector('.accueil__hero');
 
 await step('des réponses fausses remplissent « Mes erreurs »', async () => {
   const n = await p.evaluate(async () => {
@@ -55,14 +55,14 @@ await step('parcours réel : la séance « Mes erreurs » se vide quand on répo
   });
   await p.goto(`${BASE}#/reviser/erreurs`);
   await p.reload({ waitUntil: 'networkidle' });
-  await p.waitForSelector('.qtext');
+  await p.waitForSelector('.ds-qcard__q');
   for (let i = 0; i < 40; i++) {
     if (await p.locator('.score').count()) break;
-    if (await p.locator('.feedback').count()) await p.click('button:has-text("Question suivante"), button:has-text("Terminer")');
+    if (await p.locator('.ds-verdict').count()) await p.click('button:has-text("Question suivante"), button:has-text("Terminer")');
     else {
       // on choisit la bonne réponse à coup sûr
       await p.evaluate(() => {
-        const btns = [...document.querySelectorAll('.choice')];
+        const btns = [...document.querySelectorAll('.ds-answer')];
         const i = window.__correct ?? 0;
         btns[i].click();
       });
@@ -72,7 +72,7 @@ await step('parcours réel : la séance « Mes erreurs » se vide quand on répo
         return true;
       });
       await p.click('button:has-text("Valider")');
-      if (await p.locator('.feedback--bad').count()) {
+      if (await p.locator('.ds-verdict--wrong').count()) {
         // on rejoue la question plus tard : on note qu'elle restera en erreur
       }
     }

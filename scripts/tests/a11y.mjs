@@ -26,7 +26,7 @@ for (const [scheme, choix] of CAS) {
   const p = await ctx.newPage();
   await p.goto(BASE, { waitUntil: 'networkidle' });
   await p.fill('#ob-name', 'Sabir'); await p.click('button[type=submit]');
-  await p.waitForSelector('.greet__hello');
+  await p.waitForSelector('.accueil__hero');
   // Réglage explicite du thème, comme depuis Mon compte → Apparence.
   await p.evaluate((c) => {
     const raw = JSON.parse(localStorage.getItem('examen-civique.v1'));
@@ -34,7 +34,7 @@ for (const [scheme, choix] of CAS) {
     localStorage.setItem('examen-civique.v1', JSON.stringify(raw));
   }, choix);
   await p.reload({ waitUntil: 'networkidle' });
-  await p.waitForSelector('.greet__hello');
+  await p.waitForSelector('.accueil__hero');
 
   // Toutes les familles de boutons doivent être couvertes : les écrans de
   // réglages et la boîte de confirmation sont les seuls à porter les variantes
@@ -83,7 +83,7 @@ for (const [scheme, choix] of CAS) {
     // cibles tactiles
     const petits = await p.evaluate(() => {
       const out = [];
-      for (const el of document.querySelectorAll('.app a, .app button, .tabbar a')) {
+      for (const el of document.querySelectorAll('.app a, .app button, .ds-bottomnav a')) {
         const r = el.getBoundingClientRect();
         if (r.width === 0 || r.height === 0) continue;
         // Un lien au fil du texte n'est pas une cible autonome : la règle de
@@ -100,11 +100,11 @@ for (const [scheme, choix] of CAS) {
   await p.goto(`${BASE}#/reviser/t/institutions`);
   await p.waitForSelector('button:has-text("Commencer")');
   await p.click('button:has-text("Commencer")');
-  await p.waitForSelector('.qtext');
-  await p.click('.choice >> nth=0');
+  await p.waitForSelector('.ds-qcard__q');
+  await p.click('.ds-answer >> nth=0');
   await p.click('button:has-text("Valider")');
-  await p.waitForSelector('.feedback');
-  await p.click('.tab[data-tab="/"]');
+  await p.waitForSelector('.ds-verdict');
+  await p.click('.ds-bottomnav__tab[data-tab="/"]');
   await p.waitForSelector('.modal__panel');
   const boutons = await p.evaluate(() => {
     const out = [];

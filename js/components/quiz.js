@@ -7,6 +7,8 @@
  */
 
 import { h, icon, confirmDialog } from '../lib/dom.js';
+import { QuestionCard, AnswerOption, ResultBanner } from '../ds/learning.js';
+import { Button, Badge, Chip, ProgressBar } from '../ds/index.js';
 import { clock, pct } from '../lib/util.js';
 import { THEMES, SUBS } from '../data/programme.js';
 import { createApprofondir } from './approfondir.js';
@@ -87,14 +89,15 @@ export function createQuiz({
 
   /* ------------------------------------------------------------- rendu */
 
-  const barFill = h('div', { class: 'bar__fill' });
   const countEl = h('span', { class: 'quizbar__count' });
+  const barre = ProgressBar({ value: 0, height: 8 });
+  const barFill = barre.querySelector('.ds-pbar__fill');
   const header = h('div', { class: 'quizbar' }, [
     h('div', { class: 'quizbar__row' }, [
       countEl,
-      timeLimitSec ? timerEl : h('span', { class: 'badge badge--brand', text: label }),
+      timeLimitSec ? timerEl : Chip({ tone: 'lavender', size: 'sm', label }),
     ]),
-    h('div', { class: 'bar' }, barFill),
+    barre,
   ]);
 
   const body = h('div', { class: 'quizbody' });
@@ -113,56 +116,58 @@ export function createQuiz({
       { text: THEMES[q.theme]?.short || 'Question', tone: 'brand' },
       { text: q.type === 'situation' ? 'Mise en situation' : (SUBS[q.sub] || 'Connaissances'), tone: null },
     ];
-    const tags = h('div', { class: 'qtag' }, labels.map((t) => h('span', {
-      class: `badge${t.tone ? ` badge--${t.tone}` : ''}`, text: t.text,
-    })));
+    // Étiquettes sur la carte pastel : des puces blanches, jamais un second
+    // pastel. La première nomme le sujet et n'est plus répétée sous l'énoncé,
+    // puisque `QuestionCard` la porte déjà.
+    const tags = labels.slice(1).length
+      ? h('div', { class: 'qtag' }, labels.slice(1).map((t) => Chip({ tone: 'white', size: 'sm', label: t.text })))
+      : null;
 
-    const choices = h('div', { class: 'choices' }, card.choices.map((text, i) => {
-      const isChosen = chosen === i;
-      const btn = h('button', {
-        class: 'choice',
-        type: 'button',
-        'aria-pressed': isChosen ? 'true' : 'false',
-        disabled: revealed,
-        onclick: () => pick(i),
-      }, [
-        // Pastille ronde façon bouton radio : on voit d'un coup d'œil ce qui
-        // est coché, et la lettre reste pour repérer la réponse à l'oral.
-        h('span', { class: 'choice__key' }, [
-          h('span', { class: 'choice__letter', text: LETTERS[i] }),
-          h('span', { class: 'choice__mark' }, icon('check')),
-        ]),
-        h('span', { class: 'choice__text', text }),
-      ]);
-      if (revealed) {
-        if (i === card.correct) btn.classList.add('is-correct');
-        else if (isChosen) btn.classList.add('is-wrong');
-        else btn.classList.add('is-dim');
-      }
-      return btn;
-    }));
+    // Les cinq états du composant `AnswerOption` : au repos, cochée, juste,
+    // fausse, effacée. Le système ne fait travailler la bordure qu'ici et sur
+    // un champ au focus — la pastille de lettre porte le reste.
+    const etatDe = (i) => {
+      if (!revealed) return chosen === i ? 'selected' : 'idle';
+      if (i === card.correct) return 'correct';
+      if (i === chosen) return 'wrong';
+      return 'muted';
+    };
+    const choices = h('div', { class: 'choices' }, card.choices.map((text, i) => AnswerOption({
+      letter: LETTERS[i],
+      label: text,
+      state: etatDe(i),
+      disabled: revealed,
+      onClick: () => pick(i),
+    })));
 
     // La question vit dans une carte pastel, les réponses en dessous sur le
     // fond neutre : c'est la composition du système, et elle sépare nettement
-    // ce qu'on lit de ce sur quoi on appuie. Le pastel est celui du thème,
+    // ce qu'on lit de ce sur quoi on appuie. Le pastel est celui du sujet,
     // donc on sait de quoi parle la question avant de l'avoir lue.
-    const carte = h('div', { class: `qcard qcard--${sujetDe(card)}` }, [
-      tags,
-      q.scenario ? h('p', { class: 'qscenario', text: q.scenario }) : null,
-      h('h2', { class: 'qtext', text: q.q }),
-    ].filter(Boolean));
+    const carte = QuestionCard({
+      index: index + 1,
+      total: cards.length,
+      question: q.q,
+      topic: labels[0]?.text,
+      surface: sujetDe(card),
+      // Propre à l'application : la mise en situation, qui n'existe pas dans
+      // le système, est posée dans la carte sur un bloc clair — un pastel ne
+      // se pose jamais sur un autre pastel.
+      extra: h('div', { class: 'ds-qcard__extra' }, [
+        tags,
+        q.scenario ? h('p', { class: 'qscenario', text: q.scenario }) : null,
+      ].filter(Boolean)),
+    });
 
     const parts = [carte, choices];
 
     if (revealed) {
       const ok = chosen === card.correct;
-      parts.push(h('div', { class: `feedback feedback--${ok ? 'ok' : 'bad'}` }, [
-        h('div', { class: 'feedback__head' }, [
-          icon(ok ? 'check' : 'cross'),
-          h('span', { text: ok ? 'Bonne réponse' : (chosen === null ? 'Sans réponse' : 'Réponse incorrecte') }),
-        ]),
-        h('p', { class: 'feedback__body', text: q.why }),
-      ]));
+      parts.push(ResultBanner({
+        tone: ok ? 'correct' : 'wrong',
+        title: ok ? 'Bonne réponse' : (chosen === null ? 'Sans réponse' : 'Réponse incorrecte'),
+        text: q.why,
+      }));
       // Approfondir : disponible que la réponse ait été juste ou fausse.
       deepen = createApprofondir(q, chosen === null ? null : card.choices[chosen]);
       parts.push(deepen);
@@ -188,24 +193,24 @@ export function createQuiz({
     const buttons = [];
 
     if (immediate && !revealed) {
-      buttons.push(h('button', {
-        class: 'btn', type: 'button', disabled: chosen === null,
-        text: 'Valider', onclick: () => reveal(),
+      buttons.push(Button({
+        variant: 'primary', size: 'lg', fullWidth: true,
+        disabled: chosen === null, label: 'Valider', onClick: () => reveal(),
       }));
     } else {
-      buttons.push(h('button', {
-        class: `btn ${last ? 'btn--accent' : ''}`,
-        type: 'button',
+      buttons.push(Button({
+        variant: last ? 'tonal' : 'primary', size: 'lg', fullWidth: true,
+        iconRight: last ? null : 'chevron-right',
         disabled: !immediate && chosen === null,
-        text: last ? 'Terminer' : 'Question suivante',
-        onclick: () => next(),
+        label: last ? 'Terminer' : 'Question suivante',
+        onClick: () => next(),
       }));
     }
 
     if (!immediate && !last) {
-      buttons.push(h('button', {
-        class: 'btn btn--quiet', type: 'button',
-        text: 'Passer cette question', onclick: () => next(),
+      buttons.push(Button({
+        variant: 'ghost', size: 'md', fullWidth: true,
+        label: 'Passer cette question', onClick: () => next(),
       }));
     }
 

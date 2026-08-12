@@ -45,7 +45,7 @@ const browser = await chromium.launch();
   // Le nom saisi doit apparaître dans l'écran d'ouverture au rechargement.
   await page.fill('#ob-name', 'Abdellah');
   await page.click('button[type=submit]');
-  await page.waitForSelector('.greet__hello');
+  await page.waitForSelector('.accueil__hero');
   await page.goto(BASE);
   const accueil = await page.textContent('#boot-text');
   verifier(/Abdellah/.test(accueil), `l’écran d’ouverture salue par le prénom (« ${accueil} »)`);
@@ -76,7 +76,7 @@ page.on('pageerror', (e) => ko(`erreur JS : ${e.message}`));
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.fill('#ob-name', 'Abdellah');
 await page.click('button[type=submit]');
-await page.waitForSelector('.greet__hello');
+await page.waitForSelector('.accueil__hero');
 
 await page.goto(BASE + '#/activite');
 await page.waitForTimeout(400);
@@ -112,7 +112,7 @@ verifier(/Badge/.test(journal), 'les badges obtenus figurent au journal');
 await page.goto(BASE + '#/');
 await page.waitForTimeout(400);
 // La visite du journal vient d'éteindre la pastille.
-verifier(await page.locator('#appbar-dot').isHidden(), 'après lecture, la pastille s’éteint');
+verifier(await page.locator('[aria-label^="Activité"] .ds-iconbtn__dot').isHidden(), 'après lecture, la pastille s’éteint');
 
 // Un nouvel évènement la rallume.
 await page.evaluate(() => {
@@ -126,18 +126,18 @@ await page.evaluate(() => {
 await page.reload({ waitUntil: 'networkidle' });
 await page.goto(BASE + '#/');
 await page.waitForTimeout(500);
-verifier(await page.locator('#appbar-dot').isVisible(), 'un évènement récent rallume la pastille');
+verifier(await page.locator('[aria-label^="Activité"] .ds-iconbtn__dot').isVisible(), 'un évènement récent rallume la pastille');
 
-const etiquette = await page.getAttribute('#appbar-bell', 'aria-label');
+const etiquette = await page.getAttribute('[aria-label^="Activité"]', 'aria-label');
 verifier(/nouveaut/.test(etiquette || ''), `le nombre est annoncé aux lecteurs d’écran (« ${etiquette} »)`);
 
-await page.click('#appbar-bell');
+await page.click('[aria-label^="Activité"]');
 await page.waitForTimeout(500);
 verifier(/Activité/.test(await page.title()), 'le carillon mène au journal');
 
 await page.goto(BASE + '#/');
 await page.waitForTimeout(400);
-verifier(await page.locator('#appbar-dot').isHidden(), 'la visite éteint de nouveau la pastille');
+verifier(await page.locator('[aria-label^="Activité"] .ds-iconbtn__dot').isHidden(), 'la visite éteint de nouveau la pastille');
 
 /* ------------------------------------------------ 5. le rappel quotidien */
 
@@ -166,7 +166,7 @@ await page.evaluate(() => {
 await page.reload({ waitUntil: 'networkidle' });
 await page.goto(BASE + '#/');
 await page.waitForTimeout(500);
-verifier(await page.locator('#appbar-dot').isHidden(),
+verifier(await page.locator('[aria-label^="Activité"] .ds-iconbtn__dot').isHidden(),
   'une journée de révision n’allume pas la pastille (sinon elle ne s’éteindrait jamais)');
 
 await browser.close();

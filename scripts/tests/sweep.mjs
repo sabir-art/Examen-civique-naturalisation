@@ -39,7 +39,7 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
   await page.goto(BASE, { waitUntil: 'networkidle' });
   await page.fill('#ob-name', 'Abdellah');
   await page.click('button[type=submit]');
-  await page.waitForSelector('.greet__hello');
+  await page.waitForSelector('.accueil__hero');
 
   // Un peu de progression pour que les écrans ne soient pas tous vides.
   await page.evaluate(() => {
@@ -112,7 +112,7 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
 
     // la barre d'onglets ne doit jamais recouvrir le dernier élément utile
     const cache = await page.evaluate(() => {
-      const tb = document.querySelector('.tabbar');
+      const tb = document.querySelector('.ds-bottomnav__bar');
       if (!tb || tb.hidden) return null;
       const t = tb.getBoundingClientRect();
       window.scrollTo(0, document.body.scrollHeight);

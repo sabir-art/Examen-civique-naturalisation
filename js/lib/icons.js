@@ -61,6 +61,52 @@ export const ICONS = {
   "shield": '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />',
   "users": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><path d="M16 3.128a4 4 0 0 1 0 7.744" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><circle cx="9" cy="7" r="4" />',
   "vote": '<path d="m9 12 2 2 4-4" /><path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z" /><path d="M22 19H2" />',
+  "circle": '<circle cx="12" cy="12" r="10" />',
+  "circle-dashed": '<path d="M10.1 2.182a10 10 0 0 1 3.8 0" /> <path d="M13.9 21.818a10 10 0 0 1-3.8 0" /> <path d="M17.609 3.721a10 10 0 0 1 2.69 2.7" /> <path d="M2.182 13.9a10 10 0 0 1 0-3.8" /> <path d="M20.279 17.609a10 10 0 0 1-2.7 2.69" /> <path d="M21.818 10.1a10 10 0 0 1 0 3.8" /> <path d="M3.721 6.391a10 10 0 0 1 2.7-2.69" /> <path d="M6.391 20.279a10 10 0 0 1-2.69-2.7" />',
+  "more": '<circle cx="12" cy="12" r="1" /> <circle cx="12" cy="5" r="1" /> <circle cx="12" cy="19" r="1" />',
+  "timer": '<circle cx="12" cy="12" r="10" /> <path d="M12 6v6l4 2" />',
 };
 
 export const ICON_NAMES = Object.keys(ICONS);
+
+/**
+ * Les composants du système de design nomment leurs icônes comme Lucide
+ * (`chevron-right`, `circle-check`, `triangle-alert`…), l'application avec des
+ * noms courts hérités de sa première version (`chevron`, `ok`, `warn`).
+ *
+ * Plutôt que de renommer partout — ce qui aurait touché une centaine d'appels
+ * pour aucun gain visible — les deux vocabulaires sont acceptés. La table est
+ * l'inverse de celle du générateur : elle dit, pour un nom Lucide, quelle
+ * entrée de `ICONS` le porte.
+ */
+export const ALIAS = {
+  house: 'home',
+  landmark: 'bank',
+  'book-open': 'book',
+  'chevron-right': 'chevron',
+  'chevron-left': 'back',
+  x: 'cross',
+  'chart-column': 'chart',
+  settings: 'cog',
+  'refresh-cw': 'refresh',
+  flame: 'fire',
+  'triangle-alert': 'warn',
+  'log-out': 'logout',
+  'trash-2': 'trash',
+  'volume-2': 'sound',
+  'volume-x': 'mute',
+  lightbulb: 'bulb',
+  'graduation-cap': 'school',
+  'map-pin': 'pin',
+  'circle-check': 'ok',
+  'circle-x': 'ko',
+  'message-circle': 'chat',
+  'square-pen': 'edit',
+  'list-checks': 'list',
+  zap: 'bolt',
+  'ellipsis-vertical': 'more',
+  clock: 'timer',
+};
+
+/** Nom d'icône résolu dans les deux vocabulaires. */
+export const nomIcone = (nom) => (ICONS[nom] ? nom : ALIAS[nom] || nom);

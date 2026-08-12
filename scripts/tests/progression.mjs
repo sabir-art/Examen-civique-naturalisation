@@ -29,7 +29,7 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForSelector('#boot', { state: 'hidden' });
 await page.fill('#ob-name', 'Abdellah');
 await page.click('button[type=submit]');
-await page.waitForSelector('.greet__hello');
+await page.waitForSelector('.accueil__hero');
 
 /** État affiché d'un chapitre dans la liste de son acte. */
 async function etatDansActe(acte, rang) {
@@ -63,7 +63,7 @@ async function ouvrirQuiz(chapitre) {
   await page.goto(`${BASE}#/histoire/c/${chapitre}`);
   await page.waitForTimeout(350);
   await page.goto(`${BASE}#/histoire/q/${chapitre}`);
-  await page.waitForSelector('.qtext');
+  await page.waitForSelector('.ds-qcard__q');
 }
 
 async function jouer(chapitre, { juste }) {
@@ -71,21 +71,21 @@ async function jouer(chapitre, { juste }) {
   const bonnes = [];
 
   for (let garde = 0; garde < 12; garde += 1) {
-    if (!(await page.locator('.qtext').count())) break;
+    if (!(await page.locator('.ds-qcard__q').count())) break;
 
     if (juste) {
       // On coche, on valide, et si c'est faux on note la bonne pour plus tard.
-      const textes = await page.$$eval('.choice__text', (e) => e.map((x) => x.textContent));
+      const textes = await page.$$eval('.ds-answer__text', (e) => e.map((x) => x.textContent));
       const attendu = bonnes.shift();
       const i = attendu ? Math.max(0, textes.indexOf(attendu)) : 0;
-      await page.locator('.choice').nth(i).click();
+      await page.locator('.ds-answer').nth(i).click();
     } else {
-      await page.locator('.choice').first().click();
+      await page.locator('.ds-answer').first().click();
     }
 
     await page.click('button:has-text("Valider")');
     await page.waitForTimeout(200);
-    const bonne = await page.$eval('.choice.is-correct .choice__text', (e) => e.textContent).catch(() => null);
+    const bonne = await page.$eval('.ds-answer--correct .ds-answer__text', (e) => e.textContent).catch(() => null);
     if (bonne) bonnes.push(bonne);
 
     const suite = page.locator('button:has-text("Question suivante"), button:has-text("Terminer")');
@@ -124,10 +124,10 @@ verifier(bonnes.length >= 4, `les bonnes réponses ont été relevées (${bonnes
 await ouvrirQuiz('ch01');
 let restantes = [...bonnes];
 for (let garde = 0; garde < 12; garde += 1) {
-  if (!(await page.locator('.qtext').count())) break;
-  const textes = await page.$$eval('.choice__text', (x) => x.map((y) => y.textContent));
+  if (!(await page.locator('.ds-qcard__q').count())) break;
+  const textes = await page.$$eval('.ds-answer__text', (x) => x.map((y) => y.textContent));
   const i = textes.findIndex((t) => restantes.includes(t));
-  await page.locator('.choice').nth(i >= 0 ? i : 0).click();
+  await page.locator('.ds-answer').nth(i >= 0 ? i : 0).click();
   if (i >= 0) restantes = restantes.filter((t) => t !== textes[i]);
   await page.click('button:has-text("Valider")');
   await page.waitForTimeout(180);
@@ -309,16 +309,24 @@ async function poserDues(n) {
   if (poses !== n) ko(`le montage n'a posé que ${poses} questions dues sur ${n}`);
   await page.goto(`${BASE}#/`);
   await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForSelector('.greet__hello');
+  await page.waitForSelector('.accueil__hero');
   await page.waitForTimeout(400);
 }
 
-/** Ce qu'annonce l'accueil : le nombre du bouton et les lignes en dessous. */
+/**
+ * Ce qu'annonce l'accueil : l'intitulé de la carte de séance et les lignes
+ * qui l'accompagnent. Depuis le passage aux composants du système, la séance
+ * du jour est la carte encre imbriquée dans le bandeau — c'est elle qui porte
+ * le nombre, et c'est sur elle qu'on appuie.
+ */
 async function annonceAccueil() {
   return page.evaluate(() => {
-    const btn = [...document.querySelectorAll('.card .btn')].find((b) => /Réviser|révision/i.test(b.textContent));
-    const lignes = [...(btn?.parentElement.querySelectorAll('.hint') || [])].map((e) => e.textContent);
-    return { bouton: btn?.textContent.trim() || null, lignes };
+    const carte = document.querySelector('.accueil__seance');
+    const lignes = [
+      carte?.querySelector('.accueil__seancemeta')?.textContent,
+      document.querySelector('.accueil__reste')?.textContent,
+    ].filter(Boolean);
+    return { bouton: carte?.querySelector('.accueil__seancetitre')?.textContent.trim() || null, lignes };
   });
 }
 
@@ -327,7 +335,7 @@ async function tailleSeance(route) {
   await page.goto(`${BASE}#/reviser`);
   await page.waitForTimeout(400);
   await page.goto(`${BASE}${route}`);
-  await page.waitForSelector('.qtext, .empty', { timeout: 5000 });
+  await page.waitForSelector('.ds-qcard__q, .empty', { timeout: 5000 });
   return page.evaluate(() => {
     const m = document.querySelector('.quizbar__count')?.textContent.match(/sur (\d+)/);
     return m ? Number(m[1]) : 0;
@@ -416,7 +424,7 @@ const badgeErr = await page.evaluate(() => {
 verifier(badgeErr === 1, `le badge « Mes erreurs » compte l'erreur (${badgeErr})`);
 
 await page.goto(`${BASE}#/reviser/erreurs`);
-await page.waitForSelector('.qtext, .empty');
+await page.waitForSelector('.ds-qcard__q, .empty');
 const contenu = await page.evaluate(() => ({
   vide: !!document.querySelector('.empty'),
   posees: Number(document.querySelector('.quizbar__count')?.textContent.match(/sur (\d+)/)?.[1] || 0),
@@ -450,7 +458,7 @@ await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 
 await page.goto(`${BASE}#/reviser/erreurs`);
-await page.waitForSelector('.qtext, .empty');
+await page.waitForSelector('.ds-qcard__q, .empty');
 const encoreFausses = await page.evaluate(() => Number(
   document.querySelector('.quizbar__count')?.textContent.match(/sur (\d+)/)?.[1] || 0));
 verifier(encoreFausses === 2,

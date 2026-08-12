@@ -97,10 +97,11 @@ if (!bloc) {
     const m = ligne.match(/#[0-9a-fA-F]{3,8}\b/g);
     if (m) fautives.push(`${APP}:${i + 1} ${m.join(' ')} — ${ligne.trim().slice(0, 70)}`);
   });
-  // La cocarde d'ouverture est la marque du produit : le bleu-blanc-rouge y
-  // est le sujet, pas une décoration. C'est la seule exception admise, et
-  // elle est nommée pour qu'on la voie.
-  const admises = fautives.filter((f) => !/boot__ring|--faint/.test(f));
+  // Deux exceptions, nommées pour qu'on les voie. La cocarde d'ouverture est
+  // la marque du produit : le bleu-blanc-rouge y est le sujet, pas une
+  // décoration. `--gris-lisible` est le gris tertiaire foncé qui remplace
+  // celui du système, trop clair pour le seuil AA.
+  const admises = fautives.filter((f) => !/boot__ring|--gris-lisible/.test(f));
   if (admises.length) {
     admises.forEach((f) => ko(`couleur écrite en dur : ${f}`));
   } else {

@@ -26,7 +26,7 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForSelector('#boot', { state: 'hidden' });
 await page.fill('#ob-name', 'Abdellah');
 await page.click('button[type=submit]');
-await page.waitForSelector('.greet__hello');
+await page.waitForSelector('.accueil__hero');
 
 const LANGUES = { fr: 0, ar: 1, bi: 2 };
 async function choisir(lng) {

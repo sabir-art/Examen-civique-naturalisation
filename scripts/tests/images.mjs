@@ -37,7 +37,7 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForSelector('#boot', { state: 'hidden' });
 await page.fill('#ob-name', 'Abdellah');
 await page.click('button[type=submit]');
-await page.waitForSelector('.greet__hello');
+await page.waitForSelector('.accueil__hero');
 
 const manifeste = await page.evaluate(() => fetch('./assets/photos/manifeste.json').then((r) => r.json()));
 const attendues = manifeste.images.filter((i) => i.chapitre);
