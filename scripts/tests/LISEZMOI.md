@@ -15,7 +15,7 @@ node scripts/tests/recherche.mjs  # recherche : six familles, accents, surlignag
 node scripts/tests/activite.mjs   # journal, pastille, rappel quotidien, écran d'ouverture
 node scripts/tests/langue.mjs     # lecture en arabe, mode bilingue, glossaire par chapitre
 node scripts/tests/images.mjs     # illustrations : ancrage, légendes, provenance, poids
-node scripts/tests/progression.mjs # la barre d'un chapitre se remplit vraiment en une séance
+node scripts/tests/progression.mjs # chapitre, acte et livret : la barre se remplit vraiment en une séance
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -48,6 +48,8 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `images.mjs` | fichier image supprimé du dépôt | 2 images cassées au ch01 |
 | `images.mjs` | mention de provenance masquée | 0/3 images disant d'où elles viennent |
 | `progression.mjs` | barre du chapitre remise sur la mémorisation | 25 % après une séance complète, jamais verte |
+| `progression.mjs` | barre de l'acte remise sur la maîtrise moyenne | 5 % avec les six chapitres terminés |
+| `progression.mjs` | barre du livret remise sur la maîtrise | chapitre jamais marqué terminé |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.
@@ -97,4 +99,5 @@ dépasser 20 % en une séance — chaque palier impose d'attendre un jour, puis
 trois, puis sept. Aucun test ne pouvait le voir : le calcul était juste, c'est
 le sens affiché qui était faux. Le contrôle joue donc un chapitre pour de vrai,
 jusqu'à ce que toutes les réponses soient justes, et exige que la barre soit
-pleine à la fin.
+pleine à la fin — au niveau du chapitre, de l'acte et du livret, car la même
+confusion existait aux trois.

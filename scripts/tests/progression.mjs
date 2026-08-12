@@ -170,7 +170,93 @@ verifier(mem && /1 jour, puis 3, puis 7/.test(mem.texte), 'en donnant les délai
 verifier(mem && /revoir/.test(mem.texte), 'et la date de la prochaine revue');
 verifier(mem && !mem.rouge, 'elle n’est pas peinte en rouge : on n’a rien fait de mal');
 
-/* --------------------------- 5. le sommaire ne mélange plus les deux */
+/* ------------------- 5. l'acte suit ses chapitres, pas la mémorisation */
+
+/**
+ * Le même défaut existait un niveau plus haut : l'acte affichait la maîtrise
+ * moyenne de ses questions. Un acte entièrement terminé se serait retrouvé
+ * avec une barre au quart pleine.
+ *
+ * On termine ici les six chapitres de l'acte I directement dans le stockage —
+ * jouer six quiz à la main n'apprendrait rien de plus que le premier, déjà
+ * joué pour de vrai plus haut.
+ */
+const pose = await page.evaluate(async () => {
+  // `questionsOf` et non `chapitre.questions` : les identifiants sont attribués
+  // à la construction de la banque, pas portés par les questions brutes.
+  const { ACTES, questionsOf } = await import('./js/data/roman.js');
+  const brut = JSON.parse(localStorage.getItem('examen-civique.v1'));
+  let n = 0;
+  for (const prof of Object.values(brut.profiles)) {
+    for (const c of ACTES[0].chapitres) {
+      prof.read[c.key] = Date.now();
+      for (const q of questionsOf(c.key)) {
+        prof.progress[q.id] = { box: 2, seen: 1, ok: 1, ko: 0, lastOk: true, last: Date.now(), due: Date.now() + 86400000 };
+        n += 1;
+      }
+    }
+  }
+  localStorage.setItem('examen-civique.v1', JSON.stringify(brut));
+  return n;
+});
+verifier(pose >= 20, `l'acte I a été rempli dans le stockage (${pose} questions)`);
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+
+await page.goto(`${BASE}#/histoire`);
+await page.waitForTimeout(700);
+const acte = await page.evaluate(() => {
+  const it = document.querySelectorAll('.item')[0];
+  const fill = it.querySelector('.bar__fill');
+  return {
+    sub: [...it.querySelectorAll('.item__sub')].map((e) => e.textContent).join(' | '),
+    badge: it.querySelector('.badge')?.textContent || null,
+    largeur: fill ? parseInt(fill.style.width, 10) : 0,
+    vert: !!it.querySelector('.bar__fill--ok'),
+  };
+});
+verifier(acte.largeur === 100, `un acte dont tous les chapitres sont terminés est plein (${acte.largeur} %)`);
+verifier(acte.vert, 'et vert');
+verifier(acte.badge === 'Terminé', `avec le badge « Terminé » (${acte.badge})`);
+verifier(/chapitres terminés/.test(acte.sub), `et le compte écrit en clair (${acte.sub})`);
+
+/* ------------------------- 6. le livret suit la même règle */
+
+// Un chapitre du livret entièrement juste doit être « Terminé ».
+const chapLivret = await page.evaluate(async () => {
+  const { CHAPITRES } = await import('./js/data/livret.js');
+  const { questionsOf } = await import('./js/data/q-livret.js');
+  const c = CHAPITRES.find((x) => questionsOf(x.key).length > 0);
+  const brut = JSON.parse(localStorage.getItem('examen-civique.v1'));
+  for (const prof of Object.values(brut.profiles)) {
+    for (const q of questionsOf(c.key)) {
+      prof.progress[q.id] = { box: 2, seen: 1, ok: 1, ko: 0, lastOk: true, last: Date.now(), due: Date.now() + 86400000 };
+    }
+  }
+  localStorage.setItem('examen-civique.v1', JSON.stringify(brut));
+  return { cle: c.key, partie: c.partieKey };
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+
+await page.goto(`${BASE}#/livret/p/${chapLivret.partie}`);
+await page.waitForTimeout(700);
+const lv = await page.evaluate(() => {
+  const it = [...document.querySelectorAll('.item')].find((x) => x.querySelector('.bar__fill--ok'));
+  if (!it) return null;
+  const fill = it.querySelector('.bar__fill');
+  return {
+    sub: [...it.querySelectorAll('.item__sub')].map((e) => e.textContent).join(' | '),
+    badge: it.querySelector('.badge')?.textContent || null,
+    largeur: parseInt(fill.style.width, 10),
+  };
+});
+verifier(lv !== null, 'un chapitre du livret entièrement juste est marqué comme terminé');
+verifier(lv && lv.largeur === 100, `sa barre est pleine (${lv?.largeur} %)`);
+verifier(lv && lv.badge === 'Terminé', `avec le badge « Terminé » (${lv?.badge})`);
+verifier(lv && /Chapitre terminé/.test(lv.sub), `et l'état écrit en clair (${lv?.sub})`);
+
+/* --------------------------- 7. le sommaire ne mélange plus les deux */
 
 await page.goto(`${BASE}#/histoire`);
 await page.waitForTimeout(600);
@@ -181,7 +267,7 @@ const som = await page.evaluate(() => ({
 }));
 verifier(som.labels.includes('chapitres terminés'),
   `le sommaire compte les chapitres terminés (${som.labels.join(', ')})`);
-verifier(som.valeurs[0].startsWith('1/'), `et il en compte bien un (${som.valeurs[0]})`);
+verifier(/^6\//.test(som.valeurs[0]), `et il compte les six de l'acte I (${som.valeurs[0]})`);
 verifier(som.explique, 'et il explique la différence entre les deux chiffres');
 
 await browser.close();

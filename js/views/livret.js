@@ -6,7 +6,7 @@
 import { h, icon } from '../lib/dom.js';
 import { LIVRET, PARTIES, PARTIE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES } from '../data/livret.js';
 import { questionsOf, LIVRET_QUESTIONS } from '../data/q-livret.js';
-import { buildLivretSet, livretMastery, livretOverview } from '../engine.js';
+import { buildLivretSet, livretMastery, livretOverview, livretChapitreProgres, livretPartieProgres } from '../engine.js';
 import { runQuiz } from './reviser.js';
 
 export default function renderLivret({ params }) {
@@ -32,9 +32,10 @@ function sommaire() {
     h('p', { class: 'hero__sub', text: `${LIVRET.edition} — le document de référence officiel de l'examen civique, repris ici intégralement : ${PARTIES.length} parties, ${o.chapters} chapitres.` }),
   ]);
 
+  const termines = CHAPITRES.filter((c) => livretChapitreProgres(c.key).termine).length;
   const kpis = h('div', { class: 'kpis' }, [
+    ['chapitres terminés', `${termines}/${o.chapters}`],
     ['maîtrise du livret', `${o.mastery} %`],
-    ['questions vues', `${o.seen}/${o.total}`],
     ['bonnes réponses', o.accuracy === null ? '—' : `${o.accuracy} %`],
   ].map(([lab, val]) => h('div', { class: 'kpi' }, [
     h('div', { class: 'kpi__val', text: val }),
@@ -44,19 +45,28 @@ function sommaire() {
   const actions = h('div', { class: 'stack stack--tight' }, [
     h('a', { class: 'btn', href: '#/livret/quiz' }, [icon('play'), h('span', { text: `Quiz sur tout le livret (${LIVRET_QUESTIONS.length} questions)` })]),
     o.due > 0 ? h('p', { class: 'hint center', text: `${o.due} question${o.due > 1 ? 's' : ''} du livret à revoir aujourd'hui.` }) : null,
+    // Les deux chiffres voisins n'avancent pas à la même vitesse : autant le
+    // dire, sinon la « maîtrise » passe pour un compteur bloqué.
+    o.seen > 0 ? h('p', {
+      class: 'hint center',
+      text: "« Chapitres terminés » se remplit dans la séance : répondre juste à toutes les questions d'un chapitre. La « maîtrise » monte plus lentement, à quelques jours d'intervalle — c'est elle qui fait tenir jusqu'à l'examen.",
+    }) : null,
   ].filter(Boolean));
 
   const list = h('div', { class: 'list' }, PARTIES.map((p) => {
-    const m = Math.round(
-      p.chapters.reduce((s, c) => s + livretMastery(c.key), 0) / p.chapters.length * 100,
-    );
+    const av = livretPartieProgres(p.key);
     return h('a', { class: 'item item--livret', href: `#/livret/p/${p.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'item__icon' }, icon(p.icon)),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: `${p.num === 'A' ? '' : `Partie ${p.num} — `}${p.title}` }),
         h('span', { class: 'item__sub', text: `${p.chapters.length} chapitre${p.chapters.length > 1 ? 's' : ''} · pages ${p.pages}` }),
-        h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })),
-      ]),
+        av.pct === null ? null
+          : h('span', { class: 'item__sub', text: av.termine ? 'Partie terminée' : `${av.termines}/${av.chapitres} chapitres terminés` }),
+        av.pct === null ? null
+          : h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
+            h('div', { class: `bar__fill${av.termine ? ' bar__fill--ok' : ''}`, style: `width:${av.pct}%` })),
+      ].filter(Boolean)),
+      av.termine ? h('span', { class: 'badge badge--ok', text: 'Terminée', style: 'margin-top:6px' }) : null,
       h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
     ]);
   }));
@@ -90,17 +100,22 @@ function partie(key) {
   if (!p) return sommaire();
 
   const list = h('div', { class: 'list' }, p.chapters.map((c) => {
-    const m = Math.round(livretMastery(c.key) * 100);
+    const av = livretChapitreProgres(c.key);
     const nq = questionsOf(c.key).length;
     return h('a', { class: 'item', href: `#/livret/c/${c.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'item__icon', text: c.num, style: 'font-weight:700;font-size:13px' }),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: c.title }),
         h('span', { class: 'item__sub', text: `${c.sections.length} section${c.sections.length > 1 ? 's' : ''} · page${String(c.pages).includes('à') ? 's' : ''} ${c.pages}${nq ? ` · ${nq} questions` : ''}` }),
-        nq ? h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })) : null,
+        av.pct === null ? null
+          : h('span', { class: 'item__sub', text: av.termine ? 'Chapitre terminé' : `${av.justes}/${av.total} questions justes` }),
+        av.pct === null ? null
+          : h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
+            h('div', { class: `bar__fill${av.termine ? ' bar__fill--ok' : ''}`, style: `width:${av.pct}%` })),
       ].filter(Boolean)),
+      av.termine ? h('span', { class: 'badge badge--ok', text: 'Terminé', style: 'margin-top:6px' }) : null,
       h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
-    ]);
+    ].filter(Boolean));
   }));
 
   return {

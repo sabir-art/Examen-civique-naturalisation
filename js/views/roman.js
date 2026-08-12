@@ -19,8 +19,8 @@ import { GLOSSAIRE, TOTAL_TERMES } from '../data/glossaire.js';
 import { marquer, motsDuChapitre } from '../lib/gloss.js';
 import * as images from '../data/images.js';
 import {
-  buildRomanSet, romanMastery, romanActeMastery, romanOverview, nextUnread,
-  romanChapitreProgres, romanProchaineRevue,
+  buildRomanSet, romanMastery, romanOverview, nextUnread,
+  romanChapitreProgres, romanActeProgres, romanProchaineRevue,
 } from '../engine.js';
 import { runQuiz } from './reviser.js';
 import { navigate, refresh } from '../app.js';
@@ -238,8 +238,8 @@ function sommaire() {
     }),
   ]);
 
-  const lecture = Math.round((o.lus / o.chapitres) * 100);
   const termines = CHAPITRES.filter((c) => romanChapitreProgres(c.key).termine).length;
+  const lecture = Math.round((termines / o.chapitres) * 100);
   const kpis = h('div', { class: 'kpis' }, [
     ['chapitres terminés', `${termines}/${o.chapitres}`],
     ['mémorisation', `${o.mastery} %`],
@@ -279,8 +279,7 @@ function sommaire() {
   ]);
 
   const list = h('div', { class: 'list' }, ACTES.map((a) => {
-    const m = Math.round(romanActeMastery(a.key) * 100);
-    const lus = store.readCount(a.chapitres.map((c) => c.key));
+    const p = romanActeProgres(a.key);
     const ar = ACTE_AR_BY_KEY.get(a.key);
     const lng = langue();
     return h('a', { class: 'item item--story', href: `#/histoire/a/${a.key}`, style: 'align-items:flex-start' }, [
@@ -288,11 +287,16 @@ function sommaire() {
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: `Acte ${a.num} — ${a.titre}` }),
         lng !== 'fr' && ar ? h('span', { class: 'item__title arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
-        h('span', { class: 'item__sub', text: `${a.epoque} · ${a.chapitres.length} chapitres · ${lus} lu${lus > 1 ? 's' : ''}` }),
-        h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })),
+        h('span', {
+          class: 'item__sub',
+          text: `${a.epoque} · ${p.termine ? `${p.chapitres} chapitres terminés` : `${p.termines}/${p.chapitres} chapitres terminés`}`,
+        }),
+        h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
+          h('div', { class: `bar__fill${p.termine ? ' bar__fill--ok' : ''}`, style: `width:${p.pct}%` })),
       ].filter(Boolean)),
+      p.termine ? h('span', { class: 'badge badge--ok', text: 'Terminé', style: 'margin-top:6px' }) : null,
       h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
-    ]);
+    ].filter(Boolean));
   }));
 
   return {

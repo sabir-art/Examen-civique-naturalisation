@@ -63,9 +63,13 @@ palier impose d'attendre — 1 jour, puis 3, puis 7, puis 16. Il faut donc
 plusieurs semaines pour atteindre 100 %, et c'est exactement ce qui fait tenir
 la mémoire jusqu'à l'examen.
 
-Les deux ont longtemps été confondus dans une seule barre non étiquetée : on
-avait tout lu, tout répondu juste, et elle restait rouge à 20 %. Elles sont
-désormais séparées, nommées et expliquées.
+La même règle vaut partout : sous un chapitre, sous un acte, sous une partie du
+livret, la barre est un **avancement** — elle se remplit dans la séance et
+passe au vert. La **maîtrise** est toujours un nombre nommé, jamais une barre
+nue.
+
+Les deux ont longtemps été confondus : on avait tout lu, tout répondu juste, et
+la barre restait rouge à 20 %.
 
 ### Le glossaire
 

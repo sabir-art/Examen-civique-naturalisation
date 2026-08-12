@@ -9,9 +9,9 @@
 import { QUESTIONS, BY_ID, pool } from './data/questions.js';
 import { BLUEPRINT, THEMES, EXAM, blueprintCount } from './data/programme.js';
 import { LIVRET_QUESTIONS, LIVRET_BY_ID, questionsOf } from './data/q-livret.js';
-import { CHAPITRES, CHAPITRE_BY_KEY } from './data/livret.js';
+import { CHAPITRES, CHAPITRE_BY_KEY, PARTIES } from './data/livret.js';
 import {
-  ROMAN_QUESTIONS, ROMAN_BY_ID, CHAPITRES as ROMAN_CHAPITRES,
+  ROMAN_QUESTIONS, ROMAN_BY_ID, ACTES as ROMAN_ACTES, CHAPITRES as ROMAN_CHAPITRES,
   CHAPITRE_BY_KEY as ROMAN_BY_KEY, questionsOf as romanQuestionsOf, questionsOfActe,
 } from './data/roman.js';
 import { shuffle, sample, pct } from './lib/util.js';
@@ -397,23 +397,73 @@ export function romanMastery(chapitre = null) {
  * Celle-ci se remplit dans la séance : lire le chapitre, puis répondre juste à
  * ses questions. C'est elle qui s'affiche sous un chapitre.
  */
+/** Questions dont la DERNIÈRE réponse est juste. Règle commune à tout. */
+function comptesJustes(qs) {
+  return {
+    total: qs.length,
+    vues: qs.filter((q) => store.progressOf(q.id)).length,
+    justes: qs.filter((q) => store.progressOf(q.id)?.lastOk === true).length,
+  };
+}
+
 export function romanChapitreProgres(key) {
-  const qs = romanQuestionsOf(key);
+  const c = comptesJustes(romanQuestionsOf(key));
   const lu = store.isRead(key);
-  const justes = qs.filter((q) => store.progressOf(q.id)?.lastOk === true).length;
-  const vues = qs.filter((q) => store.progressOf(q.id)).length;
 
   const PART_LECTURE = 40;
-  const partQuestions = qs.length ? 60 * (justes / qs.length) : 60;
+  const partQuestions = c.total ? 60 * (c.justes / c.total) : 60;
   const pct = Math.round((lu ? PART_LECTURE : 0) + partQuestions);
 
+  return { ...c, lu, pct, termine: lu && c.justes === c.total };
+}
+
+/**
+ * Avancement d'un acte : la moyenne de ses chapitres.
+ *
+ * Surtout pas la maîtrise moyenne de ses questions — c'est la même confusion
+ * qu'au niveau du chapitre, en pire : un acte entièrement terminé afficherait
+ * une barre au quart pleine, uniquement parce que les délais de révision n'ont
+ * pas encore couru.
+ */
+export function romanActeProgres(acteKey) {
+  const acte = ROMAN_ACTES.find((a) => a.key === acteKey);
+  const chapitres = acte ? acte.chapitres : [];
+  if (!chapitres.length) return { chapitres: 0, termines: 0, lus: 0, pct: 0, termine: false };
+
+  const etats = chapitres.map((c) => romanChapitreProgres(c.key));
+  const termines = etats.filter((e) => e.termine).length;
   return {
-    lu,
-    total: qs.length,
-    vues,
-    justes,
-    pct,
-    termine: lu && justes === qs.length,
+    chapitres: chapitres.length,
+    termines,
+    lus: etats.filter((e) => e.lu).length,
+    pct: Math.round(etats.reduce((s, e) => s + e.pct, 0) / chapitres.length),
+    termine: termines === chapitres.length,
+  };
+}
+
+/**
+ * Avancement d'un chapitre du livret.
+ * Il n'y a pas de lecture suivie ici : seules les questions comptent. Un
+ * chapitre sans question n'a rien à avancer, d'où `pct: null` — mieux vaut
+ * n'afficher aucune barre qu'une barre pleine sans raison.
+ */
+export function livretChapitreProgres(key) {
+  const c = comptesJustes(questionsOf(key));
+  if (!c.total) return { ...c, pct: null, termine: false };
+  const pct = Math.round(100 * (c.justes / c.total));
+  return { ...c, pct, termine: c.justes === c.total };
+}
+
+export function livretPartieProgres(key) {
+  const partie = PARTIES.find((p) => p.key === key);
+  const chapitres = (partie?.chapters || []).map((c) => livretChapitreProgres(c.key));
+  const mesurables = chapitres.filter((c) => c.pct !== null);
+  if (!mesurables.length) return { chapitres: chapitres.length, termines: 0, pct: null, termine: false };
+  return {
+    chapitres: mesurables.length,
+    termines: mesurables.filter((c) => c.termine).length,
+    pct: Math.round(mesurables.reduce((s, c) => s + c.pct, 0) / mesurables.length),
+    termine: mesurables.every((c) => c.termine),
   };
 }
 

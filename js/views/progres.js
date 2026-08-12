@@ -3,7 +3,12 @@
 import { h, icon } from '../lib/dom.js';
 import { formatDateShort, duration, pct, plural } from '../lib/util.js';
 import { EXAM } from '../data/programme.js';
-import { overview, themeStats, readiness, EXAM_MODES, modeOf, livretOverview, romanOverview } from '../engine.js';
+import { CHAPITRES as ROMAN_CHAPITRES } from '../data/roman.js';
+import { CHAPITRES as LIVRET_CHAPITRES } from '../data/livret.js';
+import {
+  overview, themeStats, readiness, EXAM_MODES, modeOf, livretOverview, romanOverview,
+  romanChapitreProgres, livretChapitreProgres,
+} from '../engine.js';
 import { niveau, badgesObtenus, badges } from '../lib/xp.js';
 import * as store from '../store.js';
 
@@ -61,21 +66,34 @@ export default function renderProgres() {
   // la préparation globale ni la maîtrise par thème affichées plus haut.
   const lv = livretOverview();
   const rm = romanOverview();
+  // La barre montre l'AVANCEMENT (chapitres terminés), pas la maîtrise : celle-ci
+  // ne peut pas se remplir en une séance, et une barre qui reste au quart alors
+  // que tout est fait se lit comme un compteur cassé. La maîtrise reste
+  // affichée, mais nommée.
+  const romanTermines = ROMAN_CHAPITRES.filter((c) => romanChapitreProgres(c.key).termine).length;
+  const livretTermines = LIVRET_CHAPITRES.filter((c) => livretChapitreProgres(c.key).termine).length;
+
   const autres = h('div', { class: 'card' }, [
     h('h2', { class: 'card__title', text: 'Les autres sections' }),
     h('p', { class: 'card__sub', text: "Suivies à part : elles n'entrent pas dans l'estimation de préparation à l'épreuve." }),
     h('div', { class: 'themestat mt' }, [
-      { href: '#/histoire', name: 'La France racontée', m: rm.mastery, sub: `${rm.lus}/${rm.chapitres} chapitres lus · ${rm.seen}/${rm.total} questions vues` },
-      { href: '#/livret', name: 'Livret du citoyen', m: lv.mastery, sub: `${lv.seen}/${lv.total} questions vues` },
+      {
+        href: '#/histoire', name: 'La France racontée',
+        faits: romanTermines, sur: rm.chapitres, m: rm.mastery,
+      },
+      {
+        href: '#/livret', name: 'Livret du citoyen',
+        faits: livretTermines, sur: LIVRET_CHAPITRES.length, m: lv.mastery,
+      },
     ].map((s) => {
-      const t = s.m >= 70 ? 'ok' : s.m >= 35 ? 'warn' : 'bad';
+      const p = s.sur ? Math.round((s.faits / s.sur) * 100) : 0;
       return h('a', { class: 'themestat__row', href: s.href, style: 'text-decoration:none;color:inherit' }, [
         h('div', { class: 'themestat__head' }, [
           h('span', { class: 'themestat__name', text: s.name }),
-          h('span', { class: 'themestat__val', text: `${s.m} %` }),
+          h('span', { class: 'themestat__val', text: `${s.faits}/${s.sur} chapitres` }),
         ]),
-        h('div', { class: 'bar' }, h('div', { class: `bar__fill bar__fill--${t}`, style: `width:${s.m}%` })),
-        h('p', { class: 'hint', style: 'margin-top:5px', text: s.sub }),
+        h('div', { class: 'bar' }, h('div', { class: `bar__fill${p === 100 ? ' bar__fill--ok' : ''}`, style: `width:${p}%` })),
+        h('p', { class: 'hint', style: 'margin-top:5px', text: `Chapitres terminés. Mémorisation à long terme : ${s.m} %.` }),
       ]);
     })),
   ]);
