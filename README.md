@@ -217,6 +217,7 @@ Scripts utiles :
 ```bash
 node scripts/check-secrets.mjs      # aucune clé d'API dans les fichiers suivis par Git
 node scripts/check-bank.mjs         # intégrité des banques + couverture du plan de tirage
+node scripts/check-design.mjs       # aucun écart au système de design
 node scripts/make-icons.mjs         # régénère les icônes PNG de l'application
 node scripts/make-illustrations.mjs # régénère les 22 illustrations du récit
 npm run check                       # les deux contrôles à la suite
@@ -233,7 +234,9 @@ git config core.hooksPath .githooks
 ```
 index.html              coquille de l'application
 sw.js                   service worker (mode hors ligne)
-assets/css/app.css      feuille de style unique, thème clair et sombre
+assets/css/civica.css   jetons du système de design, copiés tels quels
+assets/css/app.css      feuille de l'application, branchée sur ces jetons
+assets/fonts/           Plus Jakarta Sans et JetBrains Mono, servies en local
 js/app.js               routeur et chargement des vues
 js/store.js             comptes locaux, progression, révision espacée (Leitner)
 js/engine.js            tirage des examens, calcul de la maîtrise et de la préparation
@@ -387,6 +390,41 @@ create policy "mise à jour de sa propre progression"
 Les boutons **Envoyer** et **Récupérer** transfèrent la progression. Les règles de
 sécurité ci-dessus font que chaque utilisateur ne peut lire et écrire que ses
 propres données.
+
+## Le système de design
+
+L'apparence suit **Civica**, un système de design livré sous forme de jetons,
+de composants et de règles écrites. Il n'est pas réinterprété : sa couche de
+jetons est recopiée telle quelle dans `assets/css/civica.css`, et
+`assets/css/app.css` ne fait que brancher les noms de l'application dessus.
+Pour changer une couleur, on change le jeton — jamais la règle qui l'utilise.
+
+Les cinq règles dont découle presque tout :
+
+1. **Un seul élément noir encre par écran.** C'est l'action principale. Deux
+   noirs et la hiérarchie s'effondre.
+2. **Les pastels ne s'empilent pas.** Dans une carte pastel : du blanc ou de
+   l'encre, jamais un second pastel.
+3. **Chaque thème garde son pastel à vie.** C'est ce qui permet de reconnaître
+   une section avant de l'avoir lue.
+4. **Le texte est encre sur tout**, y compris sur les quatre pastels.
+5. **Presque pas d'ombre.** C'est la surface colorée qui sépare, pas le relief.
+
+### Les trois écarts assumés
+
+Le système est suivi à la lettre sauf sur trois points, tous documentés à
+l'endroit où ils sont pris :
+
+| Écart | Pourquoi |
+| --- | --- |
+| `--text-muted` foncé de #8E9694 à #656C6A | Le gris du système tient 2,6:1 sur blanc, sous le seuil AA. L'application s'adresse à des gens qui lisent dans une deuxième langue, souvent dehors. |
+| Une déclinaison sombre a été écrite | Le système n'en contient pas. Elle garde sa logique : quatre familles pastel, un seul élément tranché par écran — mais clair au lieu d'encre. |
+| Les vignettes de section sont conservées | Le système dit n'avoir aucune imagerie. Les nôtres existaient déjà ; elles ont été recolorées dans les quatre familles plutôt que supprimées. |
+
+`scripts/check-design.mjs` refuse toute couleur écrite en dur hors de la couche
+de jetons, toute capitale forcée, tout dégradé, et signale la moindre dérive du
+fichier vendorisé. Chacun de ces contrôles a été vérifié en plantant le défaut
+qu'il traque.
 
 ## Sources
 

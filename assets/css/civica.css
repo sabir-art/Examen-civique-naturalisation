@@ -1,0 +1,293 @@
+/* =========================================================================
+   Civica — couche de jetons
+   -------------------------------------------------------------------------
+   Copie conforme des fichiers `tokens/*.css` du système de design fourni
+   (Civica_Design_System.zip). Ne rien inventer ici : toute valeur ajoutée par
+   l'application vit dans `app.css`, qui rebranche ses propres noms sur
+   ceux-ci. Ainsi on voit d'un coup d'œil ce qui vient du système et ce qui
+   vient de nous.
+
+   Seule adaptation : `fonts.css` chargeait Plus Jakarta Sans depuis le CDN
+   Google. L'application doit fonctionner hors ligne, donc les fichiers sont
+   servis depuis `assets/fonts/` — c'est exactement la marche à suivre décrite
+   par le système lui-même (« For offline or self-hosted delivery, drop
+   .woff2 files into assets/fonts/ »).
+   ========================================================================= */
+
+/* ------------------------------------------------------------- fonts.css */
+/* Variables : poids 400 à 800 dans un seul fichier par jeu de caractères. */
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../fonts/plus-jakarta-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../fonts/plus-jakarta-sans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: italic;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../fonts/plus-jakarta-sans-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: italic;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../fonts/plus-jakarta-sans-italic-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+/* Le système réserve la mono aux chronomètres et aux codes. C'est exactement
+   l'usage qu'en fait l'application : le compte à rebours de l'examen blanc. */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../fonts/jetbrains-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+:root{
+  --font-sans:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-display:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+/* ------------------------------------------------------------ colors.css */
+:root{
+  /* ── Base palette ─────────────────────────────────────── */
+  --lavender-50:#F6F0FE;--lavender-100:#EDE1FC;--lavender-200:#DEC9F9;--lavender-300:#CDAEF5;--lavender-400:#B98FEE;--lavender-500:#9E6BE3;--lavender-600:#7F4BC7;--lavender-700:#5E3596;
+  --mint-50:#F0F7F5;--mint-100:#DFEFEA;--mint-200:#C9E7DF;--mint-300:#A9D7CB;--mint-400:#83C2B2;--mint-500:#5AA795;--mint-600:#3E8574;--mint-700:#2C6154;
+  --butter-50:#FEFAE9;--butter-100:#FDF3C8;--butter-200:#FAE79A;--butter-300:#F6D964;--butter-400:#EEC531;--butter-500:#D3A712;--butter-600:#A47F0C;--butter-700:#6F5507;
+  --blush-50:#FEF5F6;--blush-100:#FDEBED;--blush-200:#F8D7DC;--blush-300:#F0B4BC;--blush-400:#E28792;--blush-500:#C95F6C;--blush-600:#A34450;
+  --ink-900:#141414;--ink-800:#1F1F1F;--ink-700:#2E2E2E;--ink-600:#4A4A4A;--ink-500:#6B7270;--ink-400:#8E9694;--ink-300:#B4BAB8;--ink-200:#DCE0DF;--ink-100:#ECEFEE;--ink-50:#F6F7F7;
+  --white:#FFFFFF;
+
+  /* ── Surfaces ─────────────────────────────────────────── */
+  --bg-app:#F6F7F7;
+  --bg-app-tinted:#E9F1EF;
+  --surface-card:#FFFFFF;
+  --surface-sunken:#F2F4F3;
+  --surface-ink:#1F1F1F;
+  --surface-lavender:#DEC9F9;
+  --surface-lavender-soft:#EDE1FC;
+  --surface-mint:#C9E7DF;
+  --surface-mint-soft:#DFEFEA;
+  --surface-butter:#FAE79A;
+  --surface-butter-soft:#FDF3C8;
+  --surface-blush:#F8D7DC;
+  --surface-overlay:rgba(20,20,20,.42);
+
+  /* ── Text ─────────────────────────────────────────────── */
+  --text-primary:#141414;
+  --text-secondary:#4A4A4A;
+  --text-muted:#8E9694;
+  --text-disabled:#B4BAB8;
+  --text-inverse:#FFFFFF;
+  --text-inverse-muted:#9CA3A1;
+  --text-on-tint:#141414;
+  --text-link:#5E3596;
+  --text-link-hover:#7F4BC7;
+
+  /* ── Borders ──────────────────────────────────────────── */
+  --border-subtle:#ECEFEE;
+  --border-default:#DCE0DF;
+  --border-strong:#B4BAB8;
+  --border-focus:#141414;
+  --border-ink-inset:rgba(255,255,255,.10);
+
+  /* ── Actions ──────────────────────────────────────────── */
+  --action-primary-bg:#141414;
+  --action-primary-bg-hover:#2E2E2E;
+  --action-primary-bg-active:#000000;
+  --action-primary-fg:#FFFFFF;
+  --action-secondary-bg:#FFFFFF;
+  --action-secondary-bg-hover:#F6F7F7;
+  --action-secondary-fg:#141414;
+  --action-tonal-bg:#DEC9F9;
+  --action-tonal-bg-hover:#CDAEF5;
+  --action-tonal-fg:#141414;
+  --action-ghost-bg:transparent;
+  --action-ghost-bg-hover:rgba(20,20,20,.05);
+  --action-disabled-bg:#ECEFEE;
+  --action-disabled-fg:#B4BAB8;
+
+  /* ── Semantic / quiz states ───────────────────────────── */
+  --state-correct-bg:#DFEFEA;--state-correct-fg:#2C6154;--state-correct-border:#83C2B2;--state-correct-solid:#3E8574;
+  --state-wrong-bg:#FDEBED;--state-wrong-fg:#A34450;--state-wrong-border:#E28792;--state-wrong-solid:#C95F6C;
+  --state-warning-bg:#FDF3C8;--state-warning-fg:#6F5507;--state-warning-border:#F6D964;--state-warning-solid:#EEC531;
+  --state-info-bg:#EDE1FC;--state-info-fg:#5E3596;--state-info-border:#CDAEF5;--state-info-solid:#9E6BE3;
+  --state-neutral-bg:#ECEFEE;--state-neutral-fg:#4A4A4A;--state-neutral-border:#DCE0DF;
+
+  /* ── Data / progress ──────────────────────────────────── */
+  --progress-track:#ECEFEE;
+  --progress-track-on-tint:rgba(255,255,255,.65);
+  --progress-fill:#141414;
+  --progress-fill-alt:#9E6BE3;
+  --streak-day:#FAE79A;
+  --streak-today:#141414;
+  --streak-empty:#F2F4F3;
+
+  /* ── Theme accents (one per exam topic) ───────────────── */
+  --topic-histoire:#DEC9F9;
+  --topic-institutions:#C9E7DF;
+  --topic-valeurs:#FAE79A;
+  --topic-symboles:#F8D7DC;
+  --topic-geographie:#DFEFEA;
+  --topic-societe:#EDE1FC;
+}
+
+/* ------------------------------------------------------------ typography.css */
+:root{
+  /* Sizes — mobile-first; the app is the primary surface */
+  --text-display:32px;
+  --text-h1:26px;
+  --text-h2:22px;
+  --text-h3:18px;
+  --text-body-lg:16px;
+  --text-body:15px;
+  --text-body-sm:14px;
+  --text-label:13px;
+  --text-caption:12px;
+  --text-micro:11px;
+
+  /* Line heights */
+  --leading-display:1.12;
+  --leading-heading:1.22;
+  --leading-body:1.5;
+  --leading-tight:1.3;
+
+  /* Weights */
+  --weight-regular:400;
+  --weight-medium:500;
+  --weight-semibold:600;
+  --weight-bold:700;
+  --weight-extrabold:800;
+
+  /* Tracking */
+  --tracking-display:-0.02em;
+  --tracking-heading:-0.015em;
+  --tracking-body:0em;
+  --tracking-micro:0.08em;
+
+  /* Composed roles */
+  --type-display:var(--weight-extrabold) var(--text-display)/var(--leading-display) var(--font-display);
+  --type-h1:var(--weight-bold) var(--text-h1)/var(--leading-heading) var(--font-display);
+  --type-h2:var(--weight-bold) var(--text-h2)/var(--leading-heading) var(--font-display);
+  --type-h3:var(--weight-bold) var(--text-h3)/var(--leading-tight) var(--font-sans);
+  --type-body-lg:var(--weight-medium) var(--text-body-lg)/var(--leading-body) var(--font-sans);
+  --type-body:var(--weight-medium) var(--text-body)/var(--leading-body) var(--font-sans);
+  --type-body-sm:var(--weight-medium) var(--text-body-sm)/var(--leading-body) var(--font-sans);
+  --type-label:var(--weight-semibold) var(--text-label)/var(--leading-tight) var(--font-sans);
+  --type-caption:var(--weight-semibold) var(--text-caption)/var(--leading-tight) var(--font-sans);
+  --type-micro:var(--weight-bold) var(--text-micro)/var(--leading-tight) var(--font-sans);
+}
+
+/* ------------------------------------------------------------ spacing.css */
+:root{
+  --space-0:0px;--space-1:2px;--space-2:4px;--space-3:6px;--space-4:8px;--space-5:10px;--space-6:12px;--space-7:14px;--space-8:16px;--space-10:20px;--space-12:24px;--space-14:28px;--space-16:32px;--space-20:40px;--space-24:48px;--space-32:64px;
+
+  /* Layout rules */
+  --gutter-screen:16px;      /* left/right padding of every app screen */
+  --gutter-card:16px;        /* inner padding of a standard card */
+  --gutter-card-lg:20px;     /* inner padding of a hero / feature card */
+  --stack-section:24px;      /* vertical rhythm between screen sections */
+  --stack-card:12px;         /* vertical rhythm between cards in a list */
+  --stack-inline:8px;        /* gap between chips / inline items */
+
+  /* Fixed chrome */
+  --topbar-height:56px;
+  --bottomnav-height:64px;
+  --bottomnav-inset:16px;    /* floating nav sits this far off the bottom */
+  --safe-bottom:34px;
+  --tap-target-min:44px;
+}
+
+/* ------------------------------------------------------------ radius.css */
+:root{
+  --radius-xs:6px;
+  --radius-sm:10px;
+  --radius-md:14px;
+  --radius-lg:18px;
+  --radius-xl:24px;
+  --radius-2xl:28px;
+  --radius-3xl:36px;
+  --radius-pill:999px;
+  --radius-circle:50%;
+
+  /* Role aliases */
+  --radius-card:24px;
+  --radius-card-inner:18px;
+  --radius-hero:28px;
+  --radius-chip:999px;
+  --radius-button:999px;
+  --radius-input:16px;
+  --radius-tile:14px;
+  --radius-sheet:32px;
+  --radius-phone:44px;
+}
+
+/* ------------------------------------------------------------ elevation.css */
+:root{
+  --shadow-none:none;
+  --shadow-xs:0 1px 2px rgba(20,20,20,.04);
+  --shadow-sm:0 2px 8px rgba(20,20,20,.05);
+  --shadow-card:0 6px 20px rgba(20,20,20,.06);
+  --shadow-raised:0 12px 32px rgba(20,20,20,.10);
+  --shadow-nav:0 10px 30px rgba(20,20,20,.20);
+  --shadow-sheet:0 -8px 40px rgba(20,20,20,.12);
+  --shadow-inset-track:inset 0 1px 2px rgba(20,20,20,.06);
+  --shadow-focus:0 0 0 3px rgba(20,20,20,.14);
+
+  /* Blur / transparency — used only for floating chrome and overlays */
+  --blur-chrome:saturate(140%) blur(18px); /* @kind other */
+  --blur-overlay:blur(6px); /* @kind other */
+  --scrim-top:linear-gradient(to bottom,rgba(246,247,247,1) 0%,rgba(246,247,247,0) 100%); /* @kind other */
+  --scrim-bottom:linear-gradient(to top,rgba(246,247,247,1) 12%,rgba(246,247,247,0) 100%); /* @kind other */
+}
+
+/* ------------------------------------------------------------ motion.css */
+:root{
+  --dur-instant:80ms; /* @kind other */
+  --dur-fast:140ms; /* @kind other */
+  --dur-base:220ms; /* @kind other */
+  --dur-slow:340ms; /* @kind other */
+  --dur-celebrate:600ms; /* @kind other */
+
+  --ease-out:cubic-bezier(.2,.8,.3,1); /* @kind other */
+  --ease-in-out:cubic-bezier(.5,0,.2,1); /* @kind other */
+  --ease-spring:cubic-bezier(.34,1.42,.64,1); /* @kind other */
+
+  --press-scale:.965; /* @kind other */
+  --hover-lift:-1px; /* @kind other */
+
+  --transition-control:background-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out); /* @kind other */
+  --transition-surface:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out); /* @kind other */
+}
+@media (prefers-reduced-motion:reduce){:root{
+  --dur-instant:0ms; /* @kind other */
+  --dur-fast:0ms; /* @kind other */
+  --dur-base:0ms; /* @kind other */
+  --dur-slow:0ms; /* @kind other */
+  --dur-celebrate:0ms; /* @kind other */
+  --press-scale:1; /* @kind other */
+  --hover-lift:0px; /* @kind other */
+}}

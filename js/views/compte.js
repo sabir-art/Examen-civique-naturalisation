@@ -62,7 +62,9 @@ function mainView() {
   const appearance = h('div', { class: 'card stack stack--tight' }, [
     h('h2', { class: 'card__title', text: 'Apparence' }),
     h('div', { class: 'seg' }, [
-      ['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre'],
+      // « Auto » et non « Automatique » : à 320px de large, le mot long ne
+      // tient pas dans un tiers de la carte et se faisait couper.
+      ['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre'],
     ].map(([v, label]) => h('button', {
       class: 'seg__btn', type: 'button', 'aria-pressed': themePref === v ? 'true' : 'false',
       text: label,

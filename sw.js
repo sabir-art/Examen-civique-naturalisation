@@ -4,13 +4,19 @@
  * en arrière-plan. Changer CACHE force le rechargement des fichiers.
  */
 
-const CACHE = 'examen-civique-v13';
+const CACHE = 'examen-civique-v14';
 
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './assets/css/civica.css',
   './assets/css/app.css',
+  './assets/fonts/plus-jakarta-sans-latin.woff2',
+  './assets/fonts/plus-jakarta-sans-latin-ext.woff2',
+  './assets/fonts/plus-jakarta-sans-italic-latin.woff2',
+  './assets/fonts/plus-jakarta-sans-italic-latin-ext.woff2',
+  './assets/fonts/jetbrains-mono-latin.woff2',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/maskable-512.png',

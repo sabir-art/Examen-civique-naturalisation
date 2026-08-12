@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" fill="none" role="img" aria-hidden="true">
-    <path d="M150 148 Q 250 56 350 148Z" fill="#1b2743"/>
-    <rect x="0" y="148" width="300" height="4" rx="2" fill="#2b3b60"/>
+    <path d="M150 148 Q 250 56 350 148Z" fill="#302846"/>
+    <rect x="0" y="148" width="300" height="4" rx="2" fill="#4A3A6B"/>
     <!-- un livre de droit ouvert -->
     <g transform="translate(142 106)">
-      <path d="M-92 0 q46 -20 92 -4 q46 -16 92 4 l0 44 q-46 -20 -92 -4 q-46 -16 -92 4Z" fill="#7d9cf5"/>
-      <path d="M0 -4 l0 44" stroke="#1b2743" stroke-width="3"/>
-      <rect x="-80" y="6" width="66" height="3.5" rx="1.75" fill="#1b2743" opacity=".6"/><rect x="-80" y="16" width="54" height="3.5" rx="1.75" fill="#1b2743" opacity=".6"/><rect x="-80" y="26" width="42" height="3.5" rx="1.75" fill="#1b2743" opacity=".6"/><rect x="14" y="6" width="66" height="3.5" rx="1.75" fill="#1b2743" opacity=".6"/><rect x="14" y="16" width="54" height="3.5" rx="1.75" fill="#1b2743" opacity=".6"/><rect x="14" y="26" width="42" height="3.5" rx="1.75" fill="#1b2743" opacity=".6"/>
+      <path d="M-92 0 q46 -20 92 -4 q46 -16 92 4 l0 44 q-46 -20 -92 -4 q-46 -16 -92 4Z" fill="#D3B8F7"/>
+      <path d="M0 -4 l0 44" stroke="#302846" stroke-width="3"/>
+      <rect x="-80" y="6" width="66" height="3.5" rx="1.75" fill="#302846" opacity=".6"/><rect x="-80" y="16" width="54" height="3.5" rx="1.75" fill="#302846" opacity=".6"/><rect x="-80" y="26" width="42" height="3.5" rx="1.75" fill="#302846" opacity=".6"/><rect x="14" y="6" width="66" height="3.5" rx="1.75" fill="#302846" opacity=".6"/><rect x="14" y="16" width="54" height="3.5" rx="1.75" fill="#302846" opacity=".6"/><rect x="14" y="26" width="42" height="3.5" rx="1.75" fill="#302846" opacity=".6"/>
     </g>
     <!-- le sceau -->
-    <circle cx="238" cy="128" r="20" fill="#f4756d"/>
-    <circle cx="238" cy="128" r="12" fill="none" stroke="#1b2743" stroke-width="2.5" opacity=".7"/>
-    <polygon points="60.0,28.0 62.0,33.3 67.6,33.5 63.2,37.0 64.7,42.5 60.0,39.4 55.3,42.5 56.8,37.0 52.4,33.5 58.0,33.3" fill="#2b3b60"/>
+    <circle cx="238" cy="128" r="20" fill="#F2B9C1"/>
+    <circle cx="238" cy="128" r="12" fill="none" stroke="#302846" stroke-width="2.5" opacity=".7"/>
+    <polygon points="60.0,28.0 62.0,33.3 67.6,33.5 63.2,37.0 64.7,42.5 60.0,39.4 55.3,42.5 56.8,37.0 52.4,33.5 58.0,33.3" fill="#4A3A6B"/>
 </svg>

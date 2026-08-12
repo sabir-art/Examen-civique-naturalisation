@@ -143,6 +143,12 @@ function show({ node, title, back, tab, chrome = true }) {
   appbar.hidden = !chrome;
   tabbar.hidden = !chrome || !tab;
 
+  // Le système de design distingue deux fonds : les onglets racines posent
+  // leurs cartes sur un fond teinté, les écrans dans lesquels on entre — quiz,
+  // résultat, réglages — sur un fond neutre presque blanc. C'est ce qui fait
+  // qu'un quiz se lit comme une feuille et pas comme une page de plus.
+  document.body.classList.toggle('is-plain', !tab);
+
   titleEl.textContent = title || 'Examen civique';
   document.title = title ? `${title} — Examen civique` : 'Examen civique';
 

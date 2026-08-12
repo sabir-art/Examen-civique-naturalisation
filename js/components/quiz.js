@@ -15,6 +15,20 @@ import * as store from '../store.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
+/**
+ * Pastel de la carte de question.
+ *
+ * Le système attribue une couleur à chaque sujet, et demande qu'elle ne change
+ * jamais : c'est ce qui permet de reconnaître un domaine avant de lire. Les
+ * questions du livret et du récit prennent la couleur de leur section, celles
+ * de l'examen la couleur de leur thème.
+ */
+function sujetDe(card) {
+  if (card.q.source === 'livret') return 'livret';
+  if (card.q.source === 'roman') return 'histoire';
+  return card.q.theme || 'principes-valeurs';
+}
+
 export function createQuiz({
   cards,
   immediate = true,
@@ -128,12 +142,17 @@ export function createQuiz({
       return btn;
     }));
 
-    const parts = [
+    // La question vit dans une carte pastel, les réponses en dessous sur le
+    // fond neutre : c'est la composition du système, et elle sépare nettement
+    // ce qu'on lit de ce sur quoi on appuie. Le pastel est celui du thème,
+    // donc on sait de quoi parle la question avant de l'avoir lue.
+    const carte = h('div', { class: `qcard qcard--${sujetDe(card)}` }, [
       tags,
       q.scenario ? h('p', { class: 'qscenario', text: q.scenario }) : null,
       h('h2', { class: 'qtext', text: q.q }),
-      choices,
-    ];
+    ].filter(Boolean));
+
+    const parts = [carte, choices];
 
     if (revealed) {
       const ok = chosen === card.correct;

@@ -34,6 +34,8 @@ jobs:
         run: node scripts/check-traduction.mjs
       - name: Syntaxe des workflows
         run: node scripts/check-workflows.mjs
+      - name: Respect du système de design
+        run: node scripts/check-design.mjs
 
   deployer:
     name: Publication

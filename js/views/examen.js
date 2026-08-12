@@ -56,7 +56,7 @@ function choix() {
 
   return {
     node: h('div', { class: 'stack' }, [
-      h('div', { class: 'hero' }, [
+      h('div', { class: 'hero hero--exam' }, [
         h('p', { class: 'hero__eyebrow', text: 'Conditions réelles' }),
         h('h1', { class: 'hero__title', text: 'Examen blanc' }),
         h('p', { class: 'hero__sub', text: `Trois formats, tous en ${EXAM.questions} questions et ${EXAM.minutes} minutes, avec le même seuil de réussite : ${EXAM.passing}/${EXAM.questions}.` }),
@@ -126,7 +126,7 @@ function presentation(key) {
 
   return {
     node: h('div', { class: 'stack' }, [
-      h('div', { class: 'hero' }, [
+      h('div', { class: 'hero hero--exam' }, [
         h('p', { class: 'hero__eyebrow', text: 'Format choisi' }),
         h('h1', { class: 'hero__title', text: m.title }),
         h('p', { class: 'hero__sub', text: m.blurb }),
