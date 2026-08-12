@@ -5,11 +5,10 @@ import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
 import { CHAPITRES } from '../data/livret.js';
 import { TOTAL_TERMES } from '../data/glossaire.js';
-import { buildTraining, mastery, coverage, planRevision, compositionSeance } from '../engine.js';
+import { buildTraining, mastery, coverage, planRevision, planErreurs, compositionSeance, resteSeance } from '../engine.js';
 import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
 import { setGuard, refresh } from '../app.js';
-import * as store from '../store.js';
 
 const COUNTS = [10, 20, 40];
 
@@ -30,20 +29,20 @@ export default function renderReviser({ params }) {
 
 function hub() {
   const plan = planRevision(20);
-  const weak = store.weakIds().length;
+  // Le même calcul que la séance : le badge ne peut plus annoncer une erreur
+  // que l'écran suivant ne trouve pas.
+  const err = planErreurs(20);
 
   const quick = h('div', { class: 'list' }, [
-    // Le badge porte la taille de la SÉANCE, pas le nombre de questions dues :
-    // c'est le nombre auquel on va effectivement répondre. Ce qui reste dû
-    // au-delà est dit en dessous, sans être confondu avec lui.
+    // Le badge porte la taille de la SÉANCE : le nombre auquel on va
+    // effectivement répondre en appuyant. Ce qui reste à revoir au-delà est
+    // écrit en dessous, sur sa propre ligne, sans être confondu avec lui.
     h('a', { class: 'item', href: '#/reviser/revision' }, [
       h('span', { class: 'item__icon' }, icon('refresh')),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: 'Révision du jour' }),
         h('span', { class: 'item__sub', text: plan.total > 0 ? compositionSeance(plan) : 'Rien à revoir dans l’immédiat' }),
-        plan.resteDu > 0
-          ? h('span', { class: 'item__sub', text: `${plan.resteDu} autre${plan.resteDu > 1 ? 's' : ''} à revoir après cette séance` })
-          : null,
+        resteSeance(plan) ? h('span', { class: 'item__sub', text: resteSeance(plan) }) : null,
       ].filter(Boolean)),
       plan.total > 0 ? h('span', { class: 'badge badge--brand', text: String(plan.total) }) : null,
       h('span', { class: 'item__chev' }, icon('chevron')),
@@ -56,13 +55,16 @@ function hub() {
       ]),
       h('span', { class: 'item__chev' }, icon('chevron')),
     ]),
-    weak > 0 ? h('a', { class: 'item', href: '#/reviser/erreurs' }, [
+    err.total > 0 ? h('a', { class: 'item', href: '#/reviser/erreurs' }, [
       h('span', { class: 'item__icon' }, icon('target')),
       h('span', { class: 'item__body' }, [
         h('span', { class: 'item__title', text: 'Mes erreurs' }),
-        h('span', { class: 'item__sub', text: `${weak} question${weak > 1 ? 's' : ''} pas encore acquise${weak > 1 ? 's' : ''}` }),
-      ]),
-      h('span', { class: 'badge badge--bad', text: String(weak) }),
+        h('span', { class: 'item__sub', text: `${err.total} question${err.total > 1 ? 's' : ''} pas encore acquise${err.total > 1 ? 's' : ''}` }),
+        err.reste > 0
+          ? h('span', { class: 'item__sub', text: `${err.questions.length} dans cette séance, ${err.reste} après` })
+          : null,
+      ].filter(Boolean)),
+      h('span', { class: 'badge badge--bad', text: String(err.total) }),
       h('span', { class: 'item__chev' }, icon('chevron')),
     ]) : null,
   ].filter(Boolean));

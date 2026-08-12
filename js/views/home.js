@@ -4,7 +4,7 @@ import { h, icon, spot } from '../lib/dom.js';
 import { daysBetween, plural } from '../lib/util.js';
 import * as store from '../store.js';
 import * as ai from '../ai.js';
-import { readiness, overview, advice, themeStats, romanOverview, nextUnread, planRevision, compositionSeance } from '../engine.js';
+import { readiness, overview, advice, themeStats, romanOverview, nextUnread, planRevision, compositionSeance, resteSeance } from '../engine.js';
 import { niveau, badgesObtenus } from '../lib/xp.js';
 import { EXAM, THEMES } from '../data/programme.js';
 
@@ -124,14 +124,15 @@ export default function renderHome() {
         ]),
       ]),
     ]),
-    // Le nombre affiché est celui de la SÉANCE, pas celui des questions dues :
-    // c'est ce à quoi on va répondre en appuyant. Le détail du mélange est
-    // écrit juste en dessous, et le reste dû est dit dans le conseil.
+    // Le nombre affiché est celui de la SÉANCE : c'est ce à quoi on va
+    // répondre en appuyant, ni plus ni moins. Ce qu'il restera à revoir
+    // ensuite est écrit en dessous, jamais confondu avec lui.
     h('a', {
       class: 'btn', style: 'margin-top:14px',
       href: '#/reviser/revision',
-    }, [icon('play'), h('span', { text: plan.total > 0 ? `Réviser ${plan.total} questions` : 'Commencer à réviser' })]),
+    }, [icon('play'), h('span', { text: plan.total > 0 ? `Réviser ${plan.total} question${plan.total > 1 ? 's' : ''}` : 'Commencer à réviser' })]),
     plan.total > 0 ? h('p', { class: 'hint center', style: 'margin-top:8px', text: compositionSeance(plan) }) : null,
+    resteSeance(plan) ? h('p', { class: 'hint center', style: 'margin-top:3px', text: resteSeance(plan) }) : null,
   ].filter(Boolean));
 
   /* ------------------------------------------------------------ le conseil */
