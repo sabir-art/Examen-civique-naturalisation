@@ -1,6 +1,6 @@
 # Contrôles automatiques de l'interface
 
-Dix scripts Playwright, à lancer avec l'application servie sur le port 8099 :
+Onze scripts Playwright, à lancer avec l'application servie sur le port 8099 :
 
 ```bash
 npx http-server -p 8099 -c-1 &
@@ -15,6 +15,7 @@ node scripts/tests/recherche.mjs  # recherche : six familles, accents, surlignag
 node scripts/tests/activite.mjs   # journal, pastille, rappel quotidien, écran d'ouverture
 node scripts/tests/langue.mjs     # lecture en arabe, mode bilingue, glossaire par chapitre
 node scripts/tests/images.mjs     # illustrations : ancrage, légendes, provenance, poids
+node scripts/tests/progression.mjs # la barre d'un chapitre se remplit vraiment en une séance
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -46,6 +47,7 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `images.mjs` | une phrase retouchée périme l'ancre d'une image | ch01/aqueduc absente |
 | `images.mjs` | fichier image supprimé du dépôt | 2 images cassées au ch01 |
 | `images.mjs` | mention de provenance masquée | 0/3 images disant d'où elles viennent |
+| `progression.mjs` | barre du chapitre remise sur la mémorisation | 25 % après une séance complète, jamais verte |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.
@@ -87,3 +89,12 @@ l'analyse à un vrai parseur.
 `check-images.mjs` garde l'autre défaut silencieux : les illustrations sont
 ancrées à un fragment de texte, et retoucher une phrase suffit à faire
 disparaître une image sans le moindre signe.
+
+`progression.mjs` vient d'un signalement d'usage, et c'est le genre le plus
+utile : « je finis le chapitre, je réponds correctement, la barre n'est jamais
+complète ». Elle affichait la mémorisation à long terme, qui ne PEUT PAS
+dépasser 20 % en une séance — chaque palier impose d'attendre un jour, puis
+trois, puis sept. Aucun test ne pouvait le voir : le calcul était juste, c'est
+le sens affiché qui était faux. Le contrôle joue donc un chapitre pour de vrai,
+jusqu'à ce que toutes les réponses soient justes, et exige que la barre soit
+pleine à la fin.

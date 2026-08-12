@@ -51,6 +51,22 @@ trompeuse. `scripts/check-traduction.mjs` garantit que les deux versions ont
 le même nombre de blocs, dans le même ordre — sans quoi le mode bilingue
 décalerait les paragraphes en silence.
 
+### Deux chiffres qui ne mesurent pas la même chose
+
+Sous chaque chapitre, la barre montre l'**avancement** : lire le chapitre
+(40 %) puis répondre juste à ses questions (60 %). Elle se remplit dans la
+séance, et le chapitre passe à « Terminé ».
+
+La **mémorisation**, elle, est affichée à part, sur la page du chapitre. C'est
+de la répétition espacée : elle monte d'un cran par bonne réponse, mais chaque
+palier impose d'attendre — 1 jour, puis 3, puis 7, puis 16. Il faut donc
+plusieurs semaines pour atteindre 100 %, et c'est exactement ce qui fait tenir
+la mémoire jusqu'à l'examen.
+
+Les deux ont longtemps été confondus dans une seule barre non étiquetée : on
+avait tout lu, tout répondu juste, et elle restait rouge à 20 %. Elles sont
+désormais séparées, nommées et expliquées.
+
 ### Le glossaire
 
 108 mots difficiles, expliqués **en une phrase simple** — sans autre mot
@@ -158,14 +174,14 @@ deux tombe :
 
 ## Contrôles automatiques
 
-Dix suites Playwright couvrent les 27 écrans à trois largeurs, les contrastes
+Onze suites Playwright couvrent les 27 écrans à trois largeurs, les contrastes
 dans les six combinaisons de thème, la lecture dans les trois langues, et les
 bugs déjà signalés. Chacune a été vérifiée en cassant volontairement ce qu'elle
 surveille — voir `scripts/tests/LISEZMOI.md`.
 
 ```bash
 npx http-server -p 8099 -c-1 &
-for t in sweep a11y bugs erreurs cartes parcours recherche activite langue images; do
+for t in sweep a11y bugs erreurs cartes parcours recherche activite langue images progression; do
   node scripts/tests/$t.mjs || echo "échec : $t"
 done
 ```

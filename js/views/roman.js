@@ -12,12 +12,16 @@
  */
 
 import { h, icon, modal } from '../lib/dom.js';
+import { daysBetween } from '../lib/util.js';
 import { ROMAN, ACTES, ACTE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES, TOTAL_MINUTES, nextChapitre, prevChapitre, questionsOf } from '../data/roman.js';
 import { AR_BY_KEY, ACTE_AR_BY_KEY, blocs, TOTAL_TRADUITS } from '../data/roman-ar.js';
 import { GLOSSAIRE, TOTAL_TERMES } from '../data/glossaire.js';
 import { marquer, motsDuChapitre } from '../lib/gloss.js';
 import * as images from '../data/images.js';
-import { buildRomanSet, romanMastery, romanActeMastery, romanOverview, nextUnread } from '../engine.js';
+import {
+  buildRomanSet, romanMastery, romanActeMastery, romanOverview, nextUnread,
+  romanChapitreProgres, romanProchaineRevue,
+} from '../engine.js';
 import { runQuiz } from './reviser.js';
 import { navigate, refresh } from '../app.js';
 import * as store from '../store.js';
@@ -235,8 +239,9 @@ function sommaire() {
   ]);
 
   const lecture = Math.round((o.lus / o.chapitres) * 100);
+  const termines = CHAPITRES.filter((c) => romanChapitreProgres(c.key).termine).length;
   const kpis = h('div', { class: 'kpis' }, [
-    ['chapitres lus', `${o.lus}/${o.chapitres}`],
+    ['chapitres terminés', `${termines}/${o.chapitres}`],
     ['mémorisation', `${o.mastery} %`],
     ['bonnes réponses', o.accuracy === null ? '—' : `${o.accuracy} %`],
   ].map(([lab, val]) => h('div', { class: 'kpi' }, [
@@ -252,6 +257,12 @@ function sommaire() {
     ]),
     o.lus > 0 ? h('a', { class: 'btn btn--ghost', href: '#/histoire/quiz', text: `Quiz sur toute l'histoire (${o.total} questions)` }) : null,
     o.due > 0 ? h('p', { class: 'hint center', text: `${o.due} question${o.due > 1 ? 's' : ''} du récit à revoir aujourd'hui.` }) : null,
+    // Deux chiffres voisins qui ne mesurent pas la même chose : mieux vaut le
+    // dire que laisser croire à un compteur bloqué.
+    o.lus > 0 ? h('p', {
+      class: 'hint center',
+      text: "« Chapitres terminés » se remplit dans la séance : lire, puis répondre juste. La « mémorisation » monte plus lentement, à quelques jours d'intervalle — c'est elle qui fait tenir jusqu'à l'examen.",
+    }) : null,
   ].filter(Boolean));
 
   // Langue de lecture, choisie une fois pour tous les chapitres.
@@ -315,10 +326,19 @@ function acte(key) {
   const aAr = ACTE_AR_BY_KEY.get(key);
 
   const list = h('div', { class: 'list' }, a.chapitres.map((c) => {
-    const m = Math.round(romanMastery(c.key) * 100);
-    const lu = store.isRead(c.key);
+    const p = romanChapitreProgres(c.key);
     const ar = AR_BY_KEY.get(c.key);
-    return h('a', { class: `item ${lu ? 'item--story' : ''}`, href: `#/histoire/c/${c.key}`, style: 'align-items:flex-start' }, [
+
+    // Ce qui reste à faire, en toutes lettres. Une barre nue sous un chapitre
+    // se lit comme un avancement : autant qu'elle en soit vraiment un, et
+    // qu'elle dise de quoi il s'agit.
+    const etat = p.termine ? 'Chapitre terminé'
+      : !p.lu && !p.vues ? null
+        : !p.lu ? `${p.justes}/${p.total} questions justes · à lire`
+          : p.total === 0 ? 'Lu'
+            : `Lu · ${p.justes}/${p.total} questions justes`;
+
+    return h('a', { class: `item ${p.termine ? 'item--story' : ''}`, href: `#/histoire/c/${c.key}`, style: 'align-items:flex-start' }, [
       h('span', { class: 'vignette' }, [
         h('img', { src: `./assets/story/${c.key}.svg`, alt: '', loading: 'lazy', width: '800', height: '420' }),
         h('span', { class: 'vignette__num', text: String(c.num) }),
@@ -330,9 +350,13 @@ function acte(key) {
         lng === 'bi' && ar ? h('span', { class: 'item__title arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
         h('span', { class: 'item__sub', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min` }),
         motsNouveaux(c) ? h('span', { class: 'item__sub', text: `${motsNouveaux(c)} nouveau${motsNouveaux(c) > 1 ? 'x' : ''} mot${motsNouveaux(c) > 1 ? 's' : ''} de vocabulaire` }) : null,
-        lu ? h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', { class: `bar__fill bar__fill--${tone(m)}`, style: `width:${m}%` })) : null,
+        etat ? h('span', { class: 'item__sub', text: etat }) : null,
+        p.pct > 0 ? h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
+          h('div', { class: `bar__fill${p.termine ? ' bar__fill--ok' : ''}`, style: `width:${p.pct}%` })) : null,
       ].filter(Boolean)),
-      lu ? h('span', { class: 'badge badge--ok', text: 'Lu', style: 'margin-top:6px' }) : null,
+      p.termine
+        ? h('span', { class: 'badge badge--ok', text: 'Terminé', style: 'margin-top:6px' })
+        : p.lu ? h('span', { class: 'badge', text: 'Lu', style: 'margin-top:6px' }) : null,
       h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
     ].filter(Boolean));
   }));
@@ -469,6 +493,7 @@ function chapitre(key) {
     const lng = langue();
     const texte = corps(c, ar, lng, ouvrirTerme);
     const mots = motsDuChapitre(CHAPITRES, c.key).termes;
+    const progres = romanChapitreProgres(key);
 
     container.replaceChildren(...[
       h('div', { class: 'card card--illus' }, [
@@ -485,8 +510,10 @@ function chapitre(key) {
           lng === 'ar' && ar
             ? h('p', { class: 'card__sub', style: 'margin-top:7px', dir: 'rtl', lang: 'ar', text: `${ar.lieu} — ${ar.date}` })
             : h('p', { class: 'card__sub', style: 'margin-top:7px', html: `${c.lieu} — ${c.date} · ${c.minutes} min de lecture` }),
-          dejaLu && nq ? h('div', { class: 'row', style: 'margin-top:10px;gap:8px' }, [
-            h('span', { class: `badge badge--${tone(m)}`, text: `Mémorisé à ${m} %` }),
+          nq ? h('div', { class: 'row', style: 'margin-top:10px;gap:8px;flex-wrap:wrap' }, [
+            progres.termine
+              ? h('span', { class: 'badge badge--ok', text: 'Chapitre terminé' })
+              : h('span', { class: 'badge', text: `${progres.justes}/${nq} questions justes` }),
             h('span', { class: 'badge', text: `${nq} questions` }),
           ]) : null,
         ].filter(Boolean)),
@@ -510,10 +537,12 @@ function chapitre(key) {
       carteMotsDuChapitre(c, lng),
 
       nq ? h('a', { class: 'btn', href: `#/histoire/q/${key}`, onclick: () => store.markRead(key) }, [
-        icon('play'), h('span', { text: `Vérifier (${nq} questions)` }),
+        icon('play'), h('span', { text: progres.justes ? `Refaire les ${nq} questions` : `Vérifier (${nq} questions)` }),
       ]) : null,
 
       lng !== 'fr' ? h('p', { class: 'hint center', text: 'Les questions sont en français, comme le jour de l’examen.' }) : null,
+
+      carteMemorisation(key, nq, progres),
 
       h('div', { class: 'btn-row' }, [
         prev ? h('a', { class: 'btn btn--ghost', href: `#/histoire/c/${prev.key}`, text: '← Précédent' }) : null,
@@ -531,6 +560,44 @@ function chapitre(key) {
   images.charger().then(() => { if (container.isConnected) draw(); });
 
   return { node: container, title: `Chapitre ${c.num}`, back: `#/histoire/a/${c.acteKey}` };
+}
+
+/**
+ * Encadré de mémorisation.
+ *
+ * Il existe pour répondre à une question légitime : « cette barre est basée
+ * sur quelle métrique ? » La mémorisation ne PEUT PAS atteindre 100 % en une
+ * séance — chaque palier impose d'attendre un jour, puis trois, puis sept,
+ * puis seize. Afficher ce chiffre sans le dire donnait l'impression d'un
+ * compteur cassé : on avait tout lu, tout répondu juste, et il restait à 20 %.
+ *
+ * Il est donc affiché à part de l'avancement du chapitre, nommé, expliqué, et
+ * accompagné de la date de la prochaine revue — la seule chose qui le fera
+ * monter.
+ */
+function carteMemorisation(key, nq, progres) {
+  if (!nq || !progres.vues) return null;
+
+  const m = Math.round(romanMastery(key) * 100);
+  const revue = romanProchaineRevue(key);
+  const jours = revue === null ? null : daysBetween(Date.now(), revue);
+
+  const quand = jours === null ? null
+    : jours <= 0 ? 'à revoir dès maintenant'
+      : jours === 1 ? 'à revoir demain'
+        : `à revoir dans ${jours} jours`;
+
+  return h('div', { class: 'card card--info' }, [
+    h('div', { class: 'row row--between' }, [
+      h('p', { class: 'card__title', style: 'font-size:15px', text: 'Mémorisation' }),
+      h('span', { class: 'badge badge--brand', text: `${m} %` }),
+    ]),
+    h('div', { class: 'bar bar--thin mt' }, h('div', { class: 'bar__fill', style: `width:${m}%` })),
+    h('p', {
+      class: 'hint mt',
+      text: `Ce chiffre n'est pas l'avancement du chapitre : c'est ce qui reste en mémoire dans la durée. Il monte d'un cran à chaque fois que vous répondez juste, mais seulement après un délai qui s'allonge — 1 jour, puis 3, puis 7, puis 16. Il faut donc plusieurs semaines pour atteindre 100 %, et c'est justement ce qui fait tenir la mémoire jusqu'à l'examen.${quand ? ` Ces questions sont ${quand}.` : ''}`,
+    }),
+  ]);
 }
 
 /** Encadré « ce qu'il faut retenir », dans la langue choisie. */

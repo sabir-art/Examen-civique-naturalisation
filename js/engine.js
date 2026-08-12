@@ -385,6 +385,46 @@ export function romanMastery(chapitre = null) {
   return qs.reduce((s, q) => s + scoreOf(q.id), 0) / qs.length;
 }
 
+/**
+ * Avancement d'un chapitre : ce qui est FAIT, pas ce qui est mémorisé.
+ *
+ * La distinction a son importance. `romanMastery` mesure la mémorisation à
+ * long terme : elle ne peut pas dépasser 20 % en une séance, parce que chaque
+ * palier impose d'attendre un jour, puis trois, puis sept. C'est juste pour
+ * réviser, mais illisible comme barre d'avancement : on a lu le chapitre, on a
+ * répondu juste à tout, et la barre reste presque vide.
+ *
+ * Celle-ci se remplit dans la séance : lire le chapitre, puis répondre juste à
+ * ses questions. C'est elle qui s'affiche sous un chapitre.
+ */
+export function romanChapitreProgres(key) {
+  const qs = romanQuestionsOf(key);
+  const lu = store.isRead(key);
+  const justes = qs.filter((q) => store.progressOf(q.id)?.lastOk === true).length;
+  const vues = qs.filter((q) => store.progressOf(q.id)).length;
+
+  const PART_LECTURE = 40;
+  const partQuestions = qs.length ? 60 * (justes / qs.length) : 60;
+  const pct = Math.round((lu ? PART_LECTURE : 0) + partQuestions);
+
+  return {
+    lu,
+    total: qs.length,
+    vues,
+    justes,
+    pct,
+    termine: lu && justes === qs.length,
+  };
+}
+
+/** Date de la prochaine revue prévue pour un chapitre, ou null. */
+export function romanProchaineRevue(key) {
+  const dates = romanQuestionsOf(key)
+    .map((q) => store.progressOf(q.id)?.due)
+    .filter((d) => typeof d === 'number' && d > 0);
+  return dates.length ? Math.min(...dates) : null;
+}
+
 export function romanActeMastery(acteKey) {
   const qs = questionsOfActe(acteKey);
   if (!qs.length) return 0;
