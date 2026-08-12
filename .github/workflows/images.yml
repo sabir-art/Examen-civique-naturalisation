@@ -1,0 +1,67 @@
+name: Télécharger les illustrations
+
+# Les images du récit sont générées chez Runware, qui ne les sert que sur une
+# adresse temporaire. Ce workflow les rapatrie DANS le dépôt : c'est le fichier
+# versionné qui fait foi, jamais l'adresse de livraison. Sans cela, une
+# application censée fonctionner hors ligne dépendrait d'un serveur tiers et
+# d'une adresse qui expire.
+#
+# Il tourne sur un runner GitHub, qui a un accès réseau ouvert.
+
+on:
+  workflow_dispatch:
+    inputs:
+      refaire:
+        description: 'Retélécharger même les images déjà présentes'
+        type: boolean
+        default: false
+  push:
+    paths:
+      - 'assets/photos/manifeste.json'
+      - '.github/workflows/images.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  telecharger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Outils d'image
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq webp imagemagick
+
+      - name: Rapatrier les images du manifeste
+        id: fetch
+        env:
+          REFAIRE: ${{ inputs.refaire }}
+        run: node scripts/fetch-images.mjs
+
+      - name: Publier les images récupérées
+        run: |
+          if [ -z "$(git status --porcelain assets/photos)" ]; then
+            echo "Rien de neuf à publier."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/photos
+          git commit -m "Rapatrier les illustrations du récit dans le dépôt
+
+Images téléchargées depuis leur adresse de livraison temporaire, redimensionnées
+et versionnées. L'application doit fonctionner hors ligne : elle ne peut pas
+dépendre d'une adresse qui expire."
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Récapitulatif
+        if: always()
+        run: cat "$GITHUB_STEP_SUMMARY" 2>/dev/null || true

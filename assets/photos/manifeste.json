@@ -1,0 +1,29 @@
+{
+  "_lisezmoi": [
+    "Manifeste des illustrations du récit.",
+    "",
+    "Chaque entrée décrit une image : d'où elle vient, ce qu'elle montre, et",
+    "où elle se place dans le texte. Le champ `url` est une adresse de",
+    "livraison TEMPORAIRE (Runware) : elle expire. C'est le workflow",
+    ".github/workflows/images.yml qui la télécharge, la redimensionne et la",
+    "dépose dans assets/photos/<cle>.jpg — c'est le fichier du dépôt qui fait",
+    "foi, jamais l'adresse.",
+    "",
+    "Une entrée déjà téléchargée peut garder une `url` morte : le workflow",
+    "saute les fichiers présents, sauf si on lui demande de tout refaire.",
+    "",
+    "`source` : 'ia' pour une image générée, 'libre' pour une image libre de",
+    "droits. Elle est affichée sous chaque image — on ne fait pas passer une",
+    "image générée pour une photographie."
+  ],
+  "images": [
+    {
+      "cle": "aqueduc",
+      "titre": "Un aqueduc romain",
+      "source": "ia",
+      "modele": "google:4@1",
+      "url": "https://im.runware.ai/image/os/a03d21/ws/3/ii/95e9b0ff-dc69-482a-aea9-d85cbe3c3e7f.webp",
+      "alt": "Un aqueduc romain à trois étages d'arches de pierre traversant une vallée fluviale."
+    }
+  ]
+}
