@@ -1,6 +1,28 @@
 /** Entraînement : choix du thème, révision espacée, reprise des erreurs. */
 
-import { h, icon, toast, spot } from '../lib/dom.js';
+import { h, toast, spot } from '../lib/dom.js';
+import {
+  Card, Button, Chip, Badge, SectionHeader, Icon,
+  SegmentedControl, ThemeCard, LessonRow,
+} from '../ds/index.js';
+
+/** Aplat de la carte d'en-tête d'un thème, dans la famille de ce thème. */
+const SURFACE = {
+  'principes-valeurs': 'butter',
+  institutions: 'mint',
+  'droits-devoirs': 'lavender-soft',
+  'histoire-geo-culture': 'lavender',
+  'vivre-societe': 'blush',
+};
+
+/** Pastel de chaque thème du programme, fixé une fois pour toutes. */
+const SUJET = {
+  'principes-valeurs': 'valeurs',
+  institutions: 'institutions',
+  'droits-devoirs': 'societe',
+  'histoire-geo-culture': 'histoire',
+  'vivre-societe': 'symboles',
+};
 import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
 import { CHAPITRES } from '../data/livret.js';
@@ -33,41 +55,43 @@ function hub() {
   // que l'écran suivant ne trouve pas.
   const err = planErreurs(20);
 
+  /* --------------------------------------------- séances recommandées */
+
   const quick = h('div', { class: 'list' }, [
     // Le badge porte la taille de la SÉANCE : le nombre auquel on va
     // effectivement répondre en appuyant. Ce qui reste à revoir au-delà est
-    // écrit en dessous, sur sa propre ligne, sans être confondu avec lui.
-    h('a', { class: 'item', href: '#/reviser/revision' }, [
-      h('span', { class: 'item__icon' }, icon('refresh')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Révision du jour' }),
-        h('span', { class: 'item__sub', text: plan.total > 0 ? compositionSeance(plan) : 'Rien à revoir dans l’immédiat' }),
-        resteSeance(plan) ? h('span', { class: 'item__sub', text: resteSeance(plan) }) : null,
-      ].filter(Boolean)),
-      plan.total > 0 ? h('span', { class: 'badge badge--brand', text: String(plan.total) }) : null,
-      h('span', { class: 'item__chev' }, icon('chevron')),
-    ].filter(Boolean)),
-    h('a', { class: 'item item--revise', href: '#/cartes' }, [
-      h('span', { class: 'item__icon' }, icon('list')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Cartes mémoire' }),
-        h('span', { class: 'item__sub', text: 'Répondre de tête, puis retourner la carte' }),
-      ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
-    ]),
-    err.total > 0 ? h('a', { class: 'item', href: '#/reviser/erreurs' }, [
-      h('span', { class: 'item__icon' }, icon('target')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Mes erreurs' }),
-        h('span', { class: 'item__sub', text: `${err.total} question${err.total > 1 ? 's' : ''} pas encore acquise${err.total > 1 ? 's' : ''}` }),
-        err.reste > 0
-          ? h('span', { class: 'item__sub', text: `${err.questions.length} dans cette séance, ${err.reste} après` })
-          : null,
-      ].filter(Boolean)),
-      h('span', { class: 'badge badge--bad', text: String(err.total) }),
-      h('span', { class: 'item__chev' }, icon('chevron')),
-    ]) : null,
+    // écrit sous l'intitulé, sans être confondu avec lui.
+    LessonRow({
+      icon: 'refresh-cw',
+      title: 'Révision du jour',
+      meta: [
+        plan.total > 0 ? compositionSeance(plan) : 'Rien à revoir dans l’immédiat',
+        resteSeance(plan),
+      ].filter(Boolean).join(' · '),
+      href: '#/reviser/revision',
+      trailing: plan.total > 0
+        ? Badge({ tone: 'info', label: String(plan.total) })
+        : Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+    }),
+    LessonRow({
+      icon: 'list-checks',
+      title: 'Cartes mémoire',
+      meta: 'Répondre de tête, puis retourner la carte',
+      href: '#/cartes',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+    }),
+    err.total > 0 ? LessonRow({
+      icon: 'target',
+      title: 'Mes erreurs',
+      meta: err.reste > 0
+        ? `${err.questions.length} dans cette séance, ${err.reste} après`
+        : `${err.total} question${err.total > 1 ? 's' : ''} pas encore acquise${err.total > 1 ? 's' : ''}`,
+      href: '#/reviser/erreurs',
+      trailing: Badge({ tone: 'wrong', label: String(err.total) }),
+    }) : null,
   ].filter(Boolean));
+
+  /* ------------------------------------------ thèmes du programme */
 
   // Filtres repris des maquettes : on ne veut pas relire toute la liste pour
   // retrouver le thème qu'on a commencé.
@@ -79,7 +103,7 @@ function hub() {
   ];
   let filtre = 'tous';
 
-  const themes = h('div', { class: 'card card--pad-sm' });
+  const themes = h('div', { class: 'list' });
   const chips = h('div', { class: 'chips' });
 
   function drawThemes() {
@@ -92,74 +116,74 @@ function hub() {
     const f = FILTRES.find((x) => x.key === filtre);
     const visibles = lignes.filter(f.match);
 
-    chips.replaceChildren(...FILTRES.map((x) => h('button', {
-      class: 'chip', type: 'button', 'aria-pressed': filtre === x.key ? 'true' : 'false',
-      text: `${x.label} (${lignes.filter(x.match).length})`,
-      onclick: () => { filtre = x.key; drawThemes(); },
+    chips.replaceChildren(...FILTRES.map((x) => Chip({
+      label: `${x.label} (${lignes.filter(x.match).length})`,
+      pressed: filtre === x.key,
+      onClick: () => { filtre = x.key; drawThemes(); },
     })));
 
+    // `ThemeCard` : le composant que le système donne pour un thème de
+    // révision, avec son pastel, son glyphe et son avancement.
     themes.replaceChildren(visibles.length
-      ? h('div', { class: 'trows' }, visibles.map((s) => {
-        const tone = s.m >= 70 ? 'ok' : s.m >= 35 ? 'warn' : 'bad';
-        return h('a', { class: 'trow', href: `#/reviser/t/${s.key}` }, [
-          h('span', { class: `trow__icon trow__icon--${s.key}` }, icon(s.t.icon)),
-          h('span', { class: 'trow__body' }, [
-            h('span', { class: 'trow__title', text: s.t.short }),
-            h('span', { class: 'trow__sub', text: `${s.n} questions · ${s.t.count} tirées à l'examen` }),
-            h('span', { class: 'bar bar--thin' }, h('span', { class: `bar__fill bar__fill--${tone}`, style: `width:${s.m}%` })),
-          ]),
-          h('span', { class: 'trow__pct', text: `${s.m}%` }),
-        ]);
-      }))
+      ? h('div', { class: 'list' }, visibles.map((s) => ThemeCard({
+        title: s.t.short,
+        topic: SUJET[s.key] || 'histoire',
+        icon: s.t.icon,
+        progress: s.m,
+        meta: `${s.n} questions · ${s.t.count} tirées à l'examen`,
+        href: `#/reviser/t/${s.key}`,
+      })))
       : h('p', { class: 'hint center', style: 'padding:14px 0', text: 'Aucun thème dans cette catégorie.' }));
   }
 
   drawThemes();
 
+  /* ------------------------------------------------------------ à lire */
+
   const lire = h('div', { class: 'list' }, [
-    h('a', { class: 'item item--livret', href: '#/livret' }, [
-      h('span', { class: 'item__icon' }, icon('bank')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Livret du citoyen' }),
-        h('span', { class: 'item__sub', text: `Le document officiel du ministère, ${CHAPITRES.length} chapitres` }),
-      ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
-    ]),
-    h('a', { class: 'item', href: '#/cours' }, [
-      h('span', { class: 'item__icon' }, icon('flag')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Fiches de révision' }),
-        h('span', { class: 'item__sub', text: 'Le programme résumé, thème par thème' }),
-      ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
-    ]),
-    h('a', { class: 'item', href: '#/histoire/glossaire' }, [
-      h('span', { class: 'item__icon item__icon--brand' }, icon('bulb')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Les mots difficiles' }),
-        h('span', { class: 'item__sub', text: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe` }),
-      ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
-    ]),
+    LessonRow({
+      icon: 'landmark',
+      title: 'Livret du citoyen',
+      meta: `Le document officiel du ministère, ${CHAPITRES.length} chapitres`,
+      href: '#/livret',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+    }),
+    LessonRow({
+      icon: 'flag',
+      title: 'Fiches de révision',
+      meta: 'Le programme résumé, thème par thème',
+      href: '#/cours',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+    }),
+    LessonRow({
+      icon: 'lightbulb',
+      title: 'Les mots difficiles',
+      meta: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe`,
+      href: '#/histoire/glossaire',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+    }),
   ]);
 
   return {
     node: h('div', { class: 'stack' }, [
-      h('div', { class: 'banner' }, [
-        h('div', { class: 'banner__text' }, [
-          h('p', { class: 'banner__title', text: 'Réviser' }),
-          h('p', { class: 'banner__sub', text: `${pool({}).length} questions, reprises quand il le faut` }),
-        ]),
-        spot('revision'),
-      ]),
-      h('p', { class: 'section-title', text: 'Séances recommandées' }),
+      Card({
+        surface: 'mint', radius: 'hero', padding: 'lg', className: 'banner',
+        children: [
+          h('div', { class: 'banner__text' }, [
+            h('p', { class: 'banner__title', text: 'Réviser' }),
+            h('p', { class: 'banner__sub', text: `${pool({}).length} questions, reprises quand il le faut` }),
+          ]),
+          spot('revision'),
+        ],
+      }),
+      SectionHeader({ title: 'Séances recommandées' }),
       quick,
-      h('p', { class: 'section-title', text: 'Thèmes du programme officiel' }),
+      SectionHeader({ title: 'Thèmes du programme officiel' }),
       chips,
       themes,
-      h('p', { class: 'section-title', text: 'À lire' }),
+      SectionHeader({ title: 'À lire' }),
       lire,
-      h('p', { class: 'hint center mt', text: "La maîtrise augmente quand vous répondez juste plusieurs fois à intervalles croissants." }),
+      h('p', { class: 'hint center', text: "La maîtrise augmente quand vous répondez juste plusieurs fois à intervalles croissants." }),
     ]),
     title: 'Réviser',
   };
@@ -182,40 +206,44 @@ function themeSetup(theme, preSub) {
     if (!counts.includes(count)) count = counts[counts.length - 1] || available;
 
     container.replaceChildren(
-      h('div', { class: 'card' }, [
-        h('h2', { class: 'card__title', text: t.label }),
-        h('p', { class: 'card__sub', text: t.blurb }),
-        h('p', { class: 'card__sub', style: 'margin-top:8px', text: `${t.count} des 40 questions de l'examen portent sur ce thème.` }),
-      ]),
+      Card({
+        surface: SURFACE[theme] || 'lavender', radius: 'hero', padding: 'lg',
+        children: [
+          h('h2', { class: 'card__title', text: t.label }),
+          h('p', { class: 'card__sub', text: t.blurb }),
+          h('p', { class: 'card__sub', style: 'margin-top:8px', text: `${t.count} des 40 questions de l'examen portent sur ce thème.` }),
+        ],
+      }),
 
       subs.length > 1 ? h('div', { class: 'stack stack--tight' }, [
-        h('p', { class: 'section-title', text: 'Sous-thème' }),
+        SectionHeader({ title: 'Sous-thème' }),
         h('div', { class: 'chips' }, [
-          h('button', {
-            class: 'chip', type: 'button', 'aria-pressed': chosenSub === null ? 'true' : 'false',
-            text: `Tout le thème (${all.length})`,
-            onclick: () => { chosenSub = null; draw(); },
+          Chip({
+            label: `Tout le thème (${all.length})`,
+            pressed: chosenSub === null,
+            onClick: () => { chosenSub = null; draw(); },
           }),
-          ...subs.map((s) => h('button', {
-            class: 'chip', type: 'button', 'aria-pressed': chosenSub === s ? 'true' : 'false',
-            text: `${SUBS[s] || s} (${pool({ theme, sub: s }).length})`,
-            onclick: () => { chosenSub = s; draw(); },
+          ...subs.map((x) => Chip({
+            label: `${SUBS[x] || x} (${pool({ theme, sub: x }).length})`,
+            pressed: chosenSub === x,
+            onClick: () => { chosenSub = x; draw(); },
           })),
         ]),
       ]) : null,
 
       h('div', { class: 'stack stack--tight' }, [
-        h('p', { class: 'section-title', text: 'Nombre de questions' }),
-        h('div', { class: 'seg' }, counts.map((c) => h('button', {
-          class: 'seg__btn', type: 'button', 'aria-pressed': count === c ? 'true' : 'false',
-          text: String(c), onclick: () => { count = c; draw(); },
-        }))),
+        SectionHeader({ title: 'Nombre de questions' }),
+        SegmentedControl({
+          options: counts.map((c) => ({ value: c, label: String(c) })),
+          value: count,
+          onChange: (c) => { count = c; draw(); },
+        }),
       ]),
 
-      h('button', {
-        class: 'btn', type: 'button',
-        onclick: () => start(),
-      }, [icon('play'), h('span', { text: `Commencer (${count} questions)` })]),
+      Button({
+        variant: 'primary', size: 'lg', fullWidth: true, iconLeft: 'play',
+        label: `Commencer (${count} questions)`, onClick: () => start(),
+      }),
 
       h('p', { class: 'hint center', text: 'Correction et explication après chaque réponse.' }),
     );
@@ -246,9 +274,9 @@ function session({ mode, count, label }) {
 
   if (!cards.length) {
     container.append(h('div', { class: 'empty' }, [
-      h('div', { class: 'empty__icon' }, icon('check')),
+      h('div', { class: 'empty__icon' }, Icon({ name: 'check', size: 26 })),
       h('p', { text: mode === 'erreurs' ? "Aucune erreur en attente. Tout est acquis pour l'instant." : "Rien à réviser dans l'immédiat." }),
-      h('a', { class: 'btn mt', href: '#/reviser', text: 'Choisir un thème' }),
+      Button({ variant: 'primary', size: 'lg', href: '#/reviser', label: 'Choisir un thème', className: 'mt' }),
     ]));
     return { node: container, title: label, back: '#/reviser' };
   }
@@ -285,7 +313,7 @@ export function runQuiz({ container, cards, immediate, label, backTo, onRestart,
         },
         actions: [
           ...extraActions,
-          h('a', { class: 'btn btn--ghost', href: backTo || '#/', text: 'Retour' }),
+          Button({ variant: 'secondary', size: 'lg', fullWidth: true, href: backTo || '#/', label: 'Retour' }),
         ],
       }));
       window.scrollTo(0, 0);

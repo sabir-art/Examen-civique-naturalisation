@@ -11,6 +11,7 @@
  */
 
 import { h, icon } from '../lib/dom.js';
+import { Button, Badge, ProgressBar } from '../ds/index.js';
 import * as store from '../store.js';
 import * as fx from '../lib/feedback.js';
 import { THEMES } from '../data/programme.js';
@@ -48,7 +49,7 @@ function serie(theme) {
     container.append(h('div', { class: 'empty' }, [
       h('div', { class: 'empty__icon' }, icon('list')),
       h('p', { text: 'Aucune carte disponible ici.' }),
-      h('a', { class: 'btn mt', href: '#/reviser', text: 'Retour' }),
+      Button({ variant: 'primary', size: 'lg', href: '#/reviser', label: 'Retour', className: 'mt' }),
     ]));
     return { node: container, title: 'Cartes mémoire', back: '#/reviser' };
   }
@@ -69,11 +70,10 @@ function serie(theme) {
           h('h1', { class: 'card__title', style: 'font-size:19px', text: titre }),
           h('p', { class: 'card__sub', text: `${restantes} carte${restantes > 1 ? 's' : ''} restante${restantes > 1 ? 's' : ''}` }),
         ]),
-        h('span', { class: 'badge badge--brand', text: `${index + 1}/${cartes.length}` }),
+        Badge({ tone: 'info', label: `${index + 1}/${cartes.length}` }),
       ]),
 
-      h('div', { class: 'bar bar--thin' },
-        h('span', { class: 'bar__fill', style: `width:${(index / cartes.length) * 100}%` })),
+      ProgressBar({ value: (index / cartes.length) * 100, height: 6 }),
 
       // La carte elle-même : un seul bloc, qu'on retourne.
       h('button', {
@@ -125,7 +125,7 @@ function serie(theme) {
         h('p', { class: 'score__verdict', text: pc >= 70 ? 'Paquet bien maîtrisé' : 'Paquet à revoir' }),
         h('p', { class: 'score__detail', text: `${faciles} carte${faciles > 1 ? 's' : ''} jugée${faciles > 1 ? 's' : ''} facile${faciles > 1 ? 's' : ''} sur ${cartes.length}` }),
       ]),
-      h('button', { class: 'btn', type: 'button', onclick: () => refresh() },
+      h('button', { class: 'ds-btn ds-btn--primary ds-btn--lg ds-btn--full', type: 'button', onclick: () => refresh() },
         [icon('refresh'), h('span', { text: 'Nouveau paquet' })]),
       h('a', { class: 'btn btn--ghost', href: '#/reviser', text: 'Retour' }),
     );

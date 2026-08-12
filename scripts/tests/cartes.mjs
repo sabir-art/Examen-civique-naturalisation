@@ -33,10 +33,10 @@ await step('retourner la carte montre la réponse et les deux jugements', async 
 await p.screenshot({ path: `${SHOT}/C2-carte-verso.png`, fullPage: true });
 
 await step('« Facile » enregistre et passe à la suivante', async () => {
-  const avant = await p.textContent('.badge--brand');
+  const avant = await p.textContent('.ds-badge--info');
   await p.click('button:has-text("Facile")');
   await p.waitForTimeout(350);
-  const apres = await p.textContent('.badge--brand');
+  const apres = await p.textContent('.ds-badge--info');
   if (avant === apres) throw new Error(`compteur inchangé (${avant})`);
   if (await p.locator('.flash__a').isVisible().catch(() => false)) throw new Error('la nouvelle carte est déjà retournée');
 });

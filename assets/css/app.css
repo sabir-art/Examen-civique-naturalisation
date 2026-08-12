@@ -602,7 +602,9 @@ a { color: var(--lien); }
 @media (max-width: 359px) { .btn-row .btn { padding: 0 12px; } }
 
 /* ------------------------------------------------------------ list items */
-.list { display: grid; gap: var(--stack-card); }
+/* Même contrainte que `.stack` : une ligne de liste ne doit jamais élargir
+   sa colonne, sans quoi c'est toute la page qui défile de côté. */
+.list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--stack-card); }
 .item {
   display: flex; align-items: center; gap: 13px; width: 100%; text-align: left;
   background: var(--surface); border: 0; border-radius: var(--radius-card);
@@ -946,6 +948,15 @@ a.themestat__row { min-height: 44px; }
 .empty { text-align: center; padding: 34px 18px; color: var(--muted); }
 .empty__icon { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: var(--radius-tile); background: var(--surface-2); display: grid; place-items: center; color: var(--muted); }
 .empty__icon svg { width: 26px; height: 26px; }
+
+/* --------------------------------------------------------------- examen */
+/* Le choix d'un format est une `LessonRow` dont le contenu tient sur trois
+   lignes : elle s'aligne donc en haut, et non au centre. */
+.examen__mode { align-items: flex-start; }
+/* L'intitulé d'un format tient sur deux lignes si besoin : la troncature de
+   `LessonRow` est faite pour des titres courts. */
+.examen__titre { white-space: normal; }
+.examen__mode .ds-lesson__chev { margin-top: 10px; }
 
 /* ------------------------------------------------------------- accueil */
 /*

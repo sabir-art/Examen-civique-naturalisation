@@ -354,10 +354,10 @@ verifier(!annonce.lignes.some((l) => /nouvelle/.test(l)),
 await page.goto(`${BASE}#/reviser`);
 await page.waitForTimeout(600);
 let hub = await page.evaluate(() => {
-  const it = [...document.querySelectorAll('.item')].find((x) => /Révision du jour/.test(x.textContent));
+  const it = [...document.querySelectorAll('.ds-lesson')].find((x) => /Révision du jour/.test(x.textContent));
   return {
-    badge: it?.querySelector('.badge')?.textContent || null,
-    sous: [...(it?.querySelectorAll('.item__sub') || [])].map((e) => e.textContent),
+    badge: it?.querySelector('.ds-badge')?.textContent || null,
+    sous: [...(it?.querySelectorAll('.ds-lesson__meta') || [])].map((e) => e.textContent),
   };
 });
 verifier(Number(hub.badge) === annonces,
@@ -418,8 +418,8 @@ await page.waitForTimeout(500);
 await page.goto(`${BASE}#/reviser`);
 await page.waitForTimeout(600);
 const badgeErr = await page.evaluate(() => {
-  const it = [...document.querySelectorAll('.item')].find((x) => /Mes erreurs/.test(x.textContent));
-  return it ? Number(it.querySelector('.badge')?.textContent) : 0;
+  const it = [...document.querySelectorAll('.ds-lesson')].find((x) => /Mes erreurs/.test(x.textContent));
+  return it ? Number(it.querySelector('.ds-badge')?.textContent) : 0;
 });
 verifier(badgeErr === 1, `le badge « Mes erreurs » compte l'erreur (${badgeErr})`);
 

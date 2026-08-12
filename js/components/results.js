@@ -3,6 +3,7 @@
  */
 
 import { h, icon } from '../lib/dom.js';
+import { Card, Button, Badge, SectionHeader, ProgressBar, StatTile } from '../ds/index.js';
 import * as fx from '../lib/feedback.js';
 import { duration, pct } from '../lib/util.js';
 import { THEMES, EXAM } from '../data/programme.js';
@@ -100,20 +101,20 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
           h('span', { class: 'themestat__name', text: groupLabel(key) }),
           h('span', { class: 'themestat__val', text: `${v.ok}/${v.total}` }),
         ]),
-        h('div', { class: 'bar' }, h('div', { class: `bar__fill bar__fill--${tone}`, style: `width:${p}%` })),
+        ProgressBar({ value: p, height: 10, tone: tone === 'ok' ? 'correct' : 'ink' }),
       ]);
     });
 
   const parts = [
     head,
-    h('div', { class: 'card' }, [
+    Card({ surface: 'white', elevation: 'xs', children: [
       h('h3', { class: 'card__title', text: isExam ? 'Résultat par thème' : 'Résultat par partie' }),
       h('div', { class: 'themestat mt' }, themeRows),
-    ]),
+    ] }),
   ];
 
   if (wrong.length) {
-    parts.push(h('div', { class: 'card' }, [
+    parts.push(Card({ surface: 'white', elevation: 'xs', children: [
       h('h3', { class: 'card__title', text: `${wrong.length} question${wrong.length > 1 ? 's' : ''} à revoir` }),
       h('p', { class: 'card__sub', text: 'Relisez la bonne réponse et son explication : c\'est là que se joue la progression.' }),
       h('div', { class: 'stack stack--tight mt' }, wrong.map((d, i) => {
@@ -145,21 +146,26 @@ export function createResults(result, { isExam = false, onRetry, onReviewErrors,
           ]),
         ]);
       }).filter(Boolean)),
-    ]));
+    ] }));
   }
 
   const buttons = [];
   if (wrong.length && onReviewErrors) {
-    buttons.push(h('button', {
-      class: 'btn', type: 'button',
-      onclick: () => onReviewErrors(wrong.map((d) => d.qid)),
-    }, [icon('refresh'), h('span', { text: 'Revoir ces questions maintenant' })]));
+    buttons.push(Button({
+      variant: 'primary', size: 'lg', fullWidth: true, iconLeft: 'refresh-cw',
+      label: 'Revoir ces questions maintenant',
+      onClick: () => onReviewErrors(wrong.map((d) => d.qid)),
+    }));
   }
   if (onRetry) {
-    buttons.push(h('button', {
-      class: `btn ${wrong.length && onReviewErrors ? 'btn--ghost' : ''}`, type: 'button',
-      onclick: onRetry,
-    }, [icon('play'), h('span', { text: isExam ? 'Nouvel examen blanc' : 'Nouvelle série' })]));
+    buttons.push(Button({
+      // Une seule action tranchée par écran : si « Revoir » est déjà là, la
+      // reprise passe en secondaire.
+      variant: wrong.length && onReviewErrors ? 'secondary' : 'primary',
+      size: 'lg', fullWidth: true, iconLeft: 'play',
+      label: isExam ? 'Nouvel examen blanc' : 'Nouvelle série',
+      onClick: onRetry,
+    }));
   }
   buttons.push(...actions);
 

@@ -1,6 +1,7 @@
 /** Examens blancs : trois formats, 40 questions en 45 minutes. */
 
 import { h, icon } from '../lib/dom.js';
+import { Card, Button, Badge, Icon, IconTile } from '../ds/index.js';
 import { formatDateShort, duration, pct } from '../lib/util.js';
 import { EXAM } from '../data/programme.js';
 import { EXAM_MODES, EXAM_MODE_LIST, modeOf } from '../engine.js';
@@ -34,21 +35,23 @@ function choix() {
 
   const cards = EXAM_MODE_LIST.map((m) => {
     const s = stats(m.key);
-    return h('a', { class: 'item', href: `#/examen/${m.key}`, style: 'align-items:flex-start' }, [
+    return h('a', { class: 'ds-lesson ds-lesson--tap examen__mode', href: `#/examen/${m.key}` }, [
       h('span', {
-        class: 'item__icon',
+        class: 'ds-tile ds-tile--blush',
         style: m.accent ? 'background:var(--accent-100);color:var(--accent)' : '',
       }, icon(m.icon)),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: m.title }),
-        h('span', { class: 'item__sub', text: m.blurb }),
-        h('span', { class: 'item__sub', style: 'margin-top:6px', text: m.source() }),
+      // `div` et non `span` : c'est la structure de `LessonRow`. En inline, le
+      // texte ne se plie pas à la largeur de la colonne et déborde de l'écran.
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title examen__titre', text: m.title }),
+        h('div', { class: 'ds-lesson__meta', text: m.blurb }),
+        h('div', { class: 'ds-lesson__meta', style: 'margin-top:6px', text: m.source() }),
         s.count ? h('div', { class: 'row', style: 'margin-top:8px;gap:6px;flex-wrap:wrap' }, [
           h('span', { class: `badge badge--${s.best >= EXAM.passing ? 'ok' : 'bad'}`, text: `Meilleur ${s.best}/${EXAM.questions}` }),
-          h('span', { class: 'badge', text: `${s.count} passé${s.count > 1 ? 's' : ''}` }),
+          Badge({ tone: 'neutral', label: `${s.count} passé${s.count > 1 ? 's' : ''}` }),
         ]) : null,
       ].filter(Boolean)),
-      h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]);
   });
 
@@ -65,7 +68,7 @@ function choix() {
       h('p', { class: 'section-title', text: 'Choisir un format' }),
       h('div', { class: 'list' }, cards),
 
-      recent.length ? h('div', { class: 'card' }, [
+      recent.length ? Card({ surface: 'white', elevation: 'xs', children: [
         h('h2', { class: 'card__title', text: 'Derniers résultats' }),
         h('div', { class: 'mt' }, recent.map((e) => {
           const ok = e.score >= EXAM.passing;
@@ -76,10 +79,10 @@ function choix() {
               h('div', { text: `${m.short} — ${pct(e.score, e.total)} %` }),
               h('div', { class: 'histrow__date', text: `${formatDateShort(e.date)} · ${duration(e.durationSec)}${e.timedOut ? ' · temps écoulé' : ''}` }),
             ]),
-            h('span', { class: `badge badge--${ok ? 'ok' : 'bad'}`, text: ok ? 'Reçu' : 'Échec' }),
+            Badge({ tone: ok ? 'correct' : 'wrong', label: ok ? 'Reçu' : 'Échec' }),
           ]);
         })),
-      ]) : null,
+      ] }) : null,
 
       h('p', { class: 'hint center', text: "Seuls les résultats du format officiel entrent dans l'estimation de préparation, car lui seul respecte la composition de l'épreuve." }),
     ].filter(Boolean)),
@@ -132,38 +135,38 @@ function presentation(key) {
         h('p', { class: 'hero__sub', text: m.blurb }),
       ]),
 
-      h('div', { class: 'card' }, [
+      Card({ surface: 'white', elevation: 'xs', children: [
         h('h2', { class: 'card__title', text: 'Composition' }),
         h('p', { class: 'card__sub', text: m.source() }),
         h('div', { class: 'stack stack--tight mt' }, m.details.map((d) => h('div', { class: 'row' }, [
-          h('span', { class: 'item__icon', style: 'width:28px;height:28px;border-radius:8px' }, icon('check')),
+          IconTile({ icon: 'check', tone: 'sunken', size: 28, radius: 'var(--radius-sm)' }),
           h('span', { class: 'grow small', text: d }),
         ]))),
-      ]),
+      ] }),
 
-      h('div', { class: 'card' }, [
+      Card({ surface: 'white', elevation: 'xs', children: [
         h('h2', { class: 'card__title', text: "Règles de l'épreuve" }),
         anneauTemps(EXAM.minutes),
         h('div', { class: 'stack stack--tight mt' }, rules.map(([k, v]) => h('div', { class: 'row' }, [
-          h('span', { class: 'item__icon', style: 'width:32px;height:32px;border-radius:9px' }, icon('clock')),
+          IconTile({ icon: 'timer', tone: 'sunken', size: 32, radius: 'var(--radius-sm)' }),
           h('span', { class: 'grow small' }, [
             h('strong', { text: k }),
             h('span', { class: 'muted', text: ` — ${v}` }),
           ]),
         ]))),
-      ]),
+      ] }),
 
       h('button', {
-        class: 'btn btn--accent', type: 'button',
+        class: 'ds-btn ds-btn--primary ds-btn--lg ds-btn--full', type: 'button',
         onclick: () => navigate(`#/examen/run/${key}`),
       }, [icon('play'), h('span', { text: 'Démarrer' })]),
 
       h('p', { class: 'hint center', text: "Prévoyez 45 minutes au calme. Vous pouvez passer une question, mais pas y revenir : la correction n'arrive qu'à la fin, comme à l'examen." }),
 
-      history.length ? h('div', { class: 'card' }, [
+      history.length ? Card({ surface: 'white', elevation: 'xs', children: [
         h('div', { class: 'row row--between' }, [
           h('h2', { class: 'card__title', text: 'Vos résultats sur ce format' }),
-          h('span', { class: 'badge', text: `${passedCount}/${history.length} réussis` }),
+          Badge({ tone: 'neutral', label: `${passedCount}/${history.length} réussis` }),
         ]),
         best !== null ? h('p', { class: 'card__sub', text: `Meilleur score : ${best}/${EXAM.questions}` }) : null,
         h('div', { class: 'mt' }, history.slice(0, 6).map((e) => {
@@ -174,12 +177,12 @@ function presentation(key) {
               h('div', { text: `${e.score}/${e.total} — ${pct(e.score, e.total)} %` }),
               h('div', { class: 'histrow__date', text: `${formatDateShort(e.date)} · ${duration(e.durationSec)}${e.timedOut ? ' · temps écoulé' : ''}` }),
             ]),
-            h('span', { class: `badge badge--${ok ? 'ok' : 'bad'}`, text: ok ? 'Reçu' : 'Échec' }),
+            Badge({ tone: ok ? 'correct' : 'wrong', label: ok ? 'Reçu' : 'Échec' }),
           ]);
         })),
-      ].filter(Boolean)) : null,
+      ].filter(Boolean) }) : null,
 
-      h('a', { class: 'btn btn--quiet', href: '#/examen', text: 'Changer de format' }),
+      Button({ variant: 'ghost', size: 'md', fullWidth: true, href: '#/examen', label: 'Changer de format' }),
     ].filter(Boolean)),
     title: m.short,
     back: '#/examen',

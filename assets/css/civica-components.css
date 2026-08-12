@@ -109,7 +109,10 @@
 .ds-chip--md { height: 32px; padding: 0 12px; gap: 6px; font-size: var(--text-caption); }
 .ds-chip--sm { height: 26px; padding: 0 10px; gap: 4px; font-size: var(--text-micro); }
 .ds-chip--elev { box-shadow: var(--shadow-xs); }
-button.ds-chip, a.ds-chip { cursor: pointer; }
+/* Une puce sur laquelle on appuie doit tenir la cible tactile de 44px que le
+   système fixe lui-même dans ses règles de mise en page. Les puces purement
+   informatives gardent leur hauteur d'origine. */
+button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); height: auto; }
 
 .ds-chip--white { background: var(--white); color: var(--text-primary); }
 .ds-chip--neutral { background: var(--state-neutral-bg); color: var(--state-neutral-fg); }
