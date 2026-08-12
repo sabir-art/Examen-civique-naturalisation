@@ -12,13 +12,14 @@ on:
   workflow_dispatch:
     inputs:
       refaire:
-        description: 'Retélécharger même les images déjà présentes'
+        description: Retélécharger même les images déjà présentes
         type: boolean
         default: false
   push:
     paths:
-      - 'assets/photos/manifeste.json'
-      - '.github/workflows/images.yml'
+      - assets/photos/manifeste.json
+      - .github/workflows/images.yml
+      - scripts/fetch-images.mjs
 
 permissions:
   contents: write
@@ -29,19 +30,23 @@ concurrency:
 
 jobs:
   telecharger:
+    name: Rapatrier les images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Outils d'image
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq webp imagemagick
+          sudo apt-get install -y -qq imagemagick
 
       - name: Rapatrier les images du manifeste
-        id: fetch
         env:
           REFAIRE: ${{ inputs.refaire }}
         run: node scripts/fetch-images.mjs
@@ -55,13 +60,12 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/photos
-          git commit -m "Rapatrier les illustrations du récit dans le dépôt
+          git commit -F - <<'FIN'
+          Rapatrier les illustrations du récit dans le dépôt
 
-Images téléchargées depuis leur adresse de livraison temporaire, redimensionnées
-et versionnées. L'application doit fonctionner hors ligne : elle ne peut pas
-dépendre d'une adresse qui expire."
-          git push origin HEAD:${{ github.ref_name }}
-
-      - name: Récapitulatif
-        if: always()
-        run: cat "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          Images téléchargées depuis leur adresse de livraison temporaire,
+          redimensionnées et versionnées. L'application doit fonctionner hors
+          ligne : elle ne peut pas dépendre d'une adresse qui expire.
+          FIN
+          git pull --rebase origin "${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
