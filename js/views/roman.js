@@ -16,11 +16,17 @@ import { ROMAN, ACTES, ACTE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES, TOTAL_MINUTES, n
 import { AR_BY_KEY, ACTE_AR_BY_KEY, blocs, TOTAL_TRADUITS } from '../data/roman-ar.js';
 import { GLOSSAIRE, TOTAL_TERMES } from '../data/glossaire.js';
 import { marquer, motsDuChapitre } from '../lib/gloss.js';
+import * as images from '../data/images.js';
 import { buildRomanSet, romanMastery, romanActeMastery, romanOverview, nextUnread } from '../engine.js';
 import { runQuiz } from './reviser.js';
 import { navigate, refresh } from '../app.js';
 import * as store from '../store.js';
 import * as fx from '../lib/feedback.js';
+
+// Le manifeste des illustrations est demandé dès le chargement du module :
+// quand on arrive sur un chapitre, il est presque toujours déjà là. Les vues
+// qui en dépendent se redessinent une fois s'il arrive en retard.
+images.charger();
 
 export default function renderRoman({ params }) {
   const target = params[0];
@@ -81,23 +87,57 @@ function ouvrirTerme(entree) {
   modal((close) => [
     h('p', { class: 'card__eyebrow', text: 'Glossaire' }),
     h('h2', { class: 'modal__title', style: 'margin-top:4px', text: entree.terme }),
+    figure(images.imageDuTerme(entree.terme), 'fr', { compacte: true }),
     h('p', { class: 'glossdef', text: entree.def }),
     h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: entree.ar })),
     h('button', { class: 'btn btn--ghost mt', type: 'button', text: 'Fermer', onclick: () => close() }),
+  ].filter(Boolean));
+}
+
+/**
+ * Une illustration, avec sa légende et sa provenance.
+ *
+ * La provenance est écrite sous chaque image, jamais masquée : ces images
+ * sont générées, et le lecteur a le droit de le savoir avant de les prendre
+ * pour des photographies d'archives.
+ */
+function figure(img, lng = 'fr', { compacte = false } = {}) {
+  if (!img) return null;
+  const legende = lng === 'ar' ? img.legende_ar : img.legende;
+  return h('figure', { class: `fig${compacte ? ' fig--sm' : ''}` }, [
+    h('img', {
+      class: 'fig__img', src: images.chemin(img), alt: img.alt || '',
+      loading: 'lazy', decoding: 'async', width: '900', height: '506',
+    }),
+    h('figcaption', { class: 'fig__cap' }, [
+      lng === 'bi'
+        ? h('span', {}, [
+          h('span', { class: 'fig__txt', text: img.legende }),
+          h('span', { class: 'fig__txt arline', dir: 'rtl', lang: 'ar', text: img.legende_ar }),
+        ])
+        : h('span', {
+          class: `fig__txt${lng === 'ar' ? ' arline' : ''}`,
+          dir: lng === 'ar' ? 'rtl' : null, lang: lng === 'ar' ? 'ar' : null,
+          text: legende,
+        }),
+      h('span', { class: 'fig__src', text: images.SOURCES[img.source] || '' }),
+    ]),
   ]);
 }
 
-/** Bloc dépliant d'un terme : le mot, puis les deux définitions. */
+/** Bloc dépliant d'un terme : le mot, son image s'il en a une, les définitions. */
 function ligneTerme(entree, { nouveau = false, arDabord = false } = {}) {
   const fr = h('p', { class: 'glossdef', text: entree.def });
   const ar = h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: entree.ar }));
+  const vue = figure(images.imageDuTerme(entree.terme), arDabord ? 'ar' : 'fr', { compacte: true });
   return h('details', { class: 'card card--pad-sm glossrow' }, [
     h('summary', { class: 'summary', style: 'padding:0' }, [
       icon('bulb'),
       h('span', { class: 'grow', text: entree.terme }),
+      vue ? h('span', { class: 'glossrow__vue', title: 'avec une image' }, icon('star')) : null,
       nouveau ? h('span', { class: 'badge badge--brand', text: 'nouveau' }) : null,
     ].filter(Boolean)),
-    h('div', { class: 'mt' }, arDabord ? [ar, fr] : [fr, ar]),
+    h('div', { class: 'mt' }, [vue, ...(arDabord ? [ar, fr] : [fr, ar])].filter(Boolean)),
   ]);
 }
 
@@ -162,6 +202,7 @@ function glossaire() {
 
   champ.addEventListener('input', draw);
   draw();
+  images.charger().then(() => { if (liste.isConnected) draw(); });
 
   return {
     node: h('div', { class: 'stack' }, [
@@ -324,6 +365,36 @@ function acte(key) {
  * scripts/check-traduction.mjs). Si jamais l'appariement échouait, on retombe
  * sur les deux textes l'un après l'autre plutôt que d'afficher n'importe quoi.
  */
+/**
+ * Glisse les illustrations du chapitre après le bloc qu'elles illustrent.
+ *
+ * L'ancre est un fragment du texte FRANÇAIS. En mode arabe on ne peut donc pas
+ * la chercher dans le texte affiché : on repère l'indice du bloc dans la
+ * version française et on l'applique à la même position côté arabe, ce qui est
+ * exact puisque les deux versions ont le même nombre de blocs dans le même
+ * ordre (garanti par scripts/check-traduction.mjs).
+ */
+function poserImages(prose, c, lng) {
+  const liste = images.imagesDuChapitre(c.key);
+  if (!liste.length) return;
+
+  const blocsFr = [...new DOMParser().parseFromString(`<div>${c.html}</div>`, 'text/html')
+    .body.firstChild.children];
+  const cibles = [...prose.children];
+
+  // On insère de la fin vers le début : sinon chaque insertion décale les
+  // indices de toutes les images suivantes.
+  const places = liste
+    .map((img) => ({ img, i: blocsFr.findIndex((b) => b.outerHTML.includes(img.apres)) }))
+    .filter((x) => x.i >= 0)
+    .sort((a, b) => b.i - a.i);
+
+  for (const { img, i } of places) {
+    const cible = cibles[i];
+    if (cible && cible.parentNode) cible.after(figure(img, lng));
+  }
+}
+
 function corps(c, ar, lng, surTerme) {
   const prose = h('div', { class: 'prose prose--story' });
 
@@ -332,6 +403,7 @@ function corps(c, ar, lng, surTerme) {
     prose.lang = 'ar';
     prose.classList.add('prose--ar');
     prose.innerHTML = ar.html;
+    poserImages(prose, c, 'ar');
     return prose;
   }
 
@@ -350,17 +422,20 @@ function corps(c, ar, lng, surTerme) {
       // Le glossaire ne travaille que sur le français : marquer aussi l'arabe
       // dédoublerait chaque définition sans rien apporter.
       marquer(prose, surTerme);
+      poserImages(prose, c, 'bi');
       return prose;
     }
     // Repli : les deux versions à la suite, sans appariement.
     prose.innerHTML = c.html;
     marquer(prose, surTerme);
+    poserImages(prose, c, 'fr');
     const bloc = h('div', { class: 'prose prose--story prose--ar', dir: 'rtl', lang: 'ar', html: ar.html });
     return h('div', {}, [prose, h('div', { class: 'divider' }), bloc]);
   }
 
   prose.innerHTML = c.html;
   marquer(prose, surTerme);
+  poserImages(prose, c, lng);
   return prose;
 }
 
@@ -450,6 +525,11 @@ function chapitre(key) {
   }
 
   draw();
+  // Si le manifeste des illustrations arrive après le premier rendu, on
+  // redessine une fois. `container.isConnected` évite de travailler pour un
+  // écran que l'on a déjà quitté.
+  images.charger().then(() => { if (container.isConnected) draw(); });
+
   return { node: container, title: `Chapitre ${c.num}`, back: `#/histoire/a/${c.acteKey}` };
 }
 

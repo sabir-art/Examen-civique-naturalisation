@@ -1000,6 +1000,44 @@ details[open] > .summary::after { content: '⌃'; }
 
 .card--retenir[dir="rtl"] .retenir { padding-left: 0; padding-right: 19px; }
 
+/* ------------------------------------------------------- illustrations */
+/*
+ * Les images du récit sont posées dans le fil du texte, juste après le
+ * paragraphe qu'elles illustrent. Elles débordent légèrement de la carte pour
+ * occuper toute la largeur de l'écran : sur un téléphone, une image de 900 px
+ * ramenée dans une marge de 16 px perd la moitié de ce qu'elle a à montrer.
+ */
+.fig {
+  margin: 18px -16px; display: block;
+  background: var(--surface-2);
+}
+.fig__img {
+  display: block; width: 100%; height: auto; aspect-ratio: 900 / 506;
+  object-fit: cover; background: var(--surface-2);
+}
+.fig__cap {
+  display: block; padding: 9px 16px 12px;
+  font-size: 13px; line-height: 1.5; color: var(--muted);
+}
+.fig__txt { display: block; }
+.fig__txt + .fig__txt { margin-top: 6px; }
+/* La provenance est toujours visible, jamais au survol : ces images sont
+   générées, et cela doit se lire sans avoir à chercher. */
+.fig__src {
+  display: block; margin-top: 6px;
+  font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--faint); font-weight: 650;
+}
+
+/* Version réduite : dans un bloc de glossaire ou une feuille modale, où la
+   pleine largeur n'a pas de sens. */
+.fig--sm { margin: 0 0 10px; border-radius: var(--radius-sm); overflow: hidden; }
+.fig--sm .fig__cap { padding: 8px 11px 10px; font-size: 12.5px; }
+
+.prose--ar .fig__cap, [dir="rtl"] .fig__cap { text-align: right; }
+.glossrow__vue { color: var(--brand); display: grid; }
+.glossrow__vue svg { width: 15px; height: 15px; }
+
 /* --------------------------------------------------------- glossaire */
 /*
  * Un mot du glossaire doit se voir sans hurler : il reste dans le fil du

@@ -73,7 +73,30 @@ introduit pour la première fois. La liste et le soulignement viennent du même
 parcours de texte, ils ne peuvent donc pas diverger. Le glossaire complet reste
 consultable et cherchable depuis Histoire et depuis Réviser.
 
-Chaque chapitre a son illustration. Elles sont **dessinées en SVG** par
+### Les illustrations
+
+Chaque chapitre porte une à trois images posées **dans le fil du texte**, juste
+après le paragraphe qu'elles illustrent : l'aqueduc après « le pont du Gard »,
+le double anneau d'Alésia après « Personne ne sort », la balance en équilibre
+après « rien n'est jugé ». Les mots du glossaire qui se voient — isoloir, urne,
+tranchée, bonnet phrygien — montrent la leur en s'ouvrant.
+
+Ce sont des **images générées**, et chacune le dit sous elle. On ne fait pas
+passer une image générée pour une photographie d'archives.
+
+Elles sont ancrées par un **fragment de texte**, pas par un numéro de
+paragraphe : le texte arabe et le texte français doivent garder exactement le
+même nombre de blocs, ce dont dépend le mode bilingue. En échange, retoucher
+une phrase suffit à faire disparaître une image sans le moindre signe — d'où
+`scripts/check-images.mjs`, qui exige que chaque ancre tombe sur un et un seul
+paragraphe.
+
+Elles vivent dans le dépôt (`assets/photos/`, environ 2 Mo au total), jamais
+sur un serveur tiers : l'application doit fonctionner hors ligne. Le
+rapatriement est fait par `.github/workflows/images.yml`, un runner GitHub
+ayant l'accès réseau que le poste de développement n'a pas.
+
+Chaque chapitre a aussi son illustration d'en-tête. Elles sont **dessinées en SVG** par
 `scripts/make-illustrations.mjs` — environ 4 Ko pièce, nettes sur tous les
 écrans, disponibles hors ligne, et sans aucune image reprise d'ailleurs.
 
@@ -96,6 +119,7 @@ format de chaque tentative.
 - **Recherche** dans tout le contenu — les trois banques, les chapitres, les fiches
 - **Récit traduit en arabe**, avec un mode bilingue paragraphe par paragraphe
 - **Glossaire** de 108 mots difficiles, en français et en arabe, avec un glossaire par chapitre
+- **31 illustrations** posées dans le fil du récit, avec leur légende dans les deux langues
 - **Niveaux, points et 20 badges**, calculés à partir de la progression (rien de plus n'est stocké)
 - **Journal d'activité** et rappel quotidien facultatif
 - **Livret du citoyen intégral** : 6 parties, 16 chapitres, 97 sections, annexes comprises
@@ -134,14 +158,14 @@ deux tombe :
 
 ## Contrôles automatiques
 
-Neuf suites Playwright couvrent les 27 écrans à trois largeurs, les contrastes
+Dix suites Playwright couvrent les 27 écrans à trois largeurs, les contrastes
 dans les six combinaisons de thème, la lecture dans les trois langues, et les
 bugs déjà signalés. Chacune a été vérifiée en cassant volontairement ce qu'elle
 surveille — voir `scripts/tests/LISEZMOI.md`.
 
 ```bash
 npx http-server -p 8099 -c-1 &
-for t in sweep a11y bugs erreurs cartes parcours recherche activite langue; do
+for t in sweep a11y bugs erreurs cartes parcours recherche activite langue images; do
   node scripts/tests/$t.mjs || echo "échec : $t"
 done
 ```
@@ -205,6 +229,8 @@ js/data/roman-ar.js     traduction arabe du récit
 js/data/roman-ar/*.js   les trois actes traduits
 js/data/glossaire.js    les mots difficiles, définis en français et en arabe
 js/lib/gloss.js         repérage des mots du glossaire dans un texte rendu
+js/data/images.js       index des illustrations, chargé depuis le manifeste
+assets/photos/          les illustrations + manifeste.json (source unique)
 js/views/roman.js       lecture d'un chapitre et quiz
 js/views/assistant.js   configuration de la clé et conversation
 ```
