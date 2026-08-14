@@ -261,8 +261,8 @@ verifier(lv && /Chapitre terminé/.test(lv.sub), `et l'état écrit en clair (${
 await page.goto(`${BASE}#/histoire`);
 await page.waitForTimeout(600);
 const som = await page.evaluate(() => ({
-  labels: [...document.querySelectorAll('.kpi__lab')].map((e) => e.textContent),
-  valeurs: [...document.querySelectorAll('.kpi__val')].map((e) => e.textContent),
+  labels: [...document.querySelectorAll('.ds-stat__label')].map((e) => e.textContent),
+  valeurs: [...document.querySelectorAll('.ds-stat__value')].map((e) => e.textContent),
   explique: [...document.querySelectorAll('.hint')].some((e) => /mémorisation/i.test(e.textContent)),
 }));
 verifier(som.labels.includes('chapitres terminés'),

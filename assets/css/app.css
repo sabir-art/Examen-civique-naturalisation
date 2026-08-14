@@ -812,8 +812,12 @@ a { color: var(--lien); }
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 18px;
   background: var(--progress-track-on-tint); border-radius: var(--radius-tile); padding: 12px 4px;
 }
-.scorestat__val { font-size: 19px; font-weight: 750; font-variant-numeric: tabular-nums; }
-.scorestat__lab { font-size: 11.5px; opacity: .85; margin-top: 1px; line-height: 1.25; }
+/* La colonne elle-même : centrée, sans quoi les trois chiffres se collent à
+   gauche de leur case. Elle n'avait jamais eu de règle — la classe était
+   posée dans le JavaScript et nulle part ailleurs. */
+.scorestat { text-align: center; }
+.scorestat__val { font: var(--type-h3); font-size: 19px; font-variant-numeric: tabular-nums; }
+.scorestat__lab { font: var(--type-caption); font-weight: var(--weight-medium); opacity: .8; margin-top: 2px; line-height: 1.25; }
 
 /* Confettis d'une réussite : décor pur, retiré si l'utilisateur limite
    les animations. */
@@ -998,6 +1002,77 @@ a.themestat__row { min-height: 44px; }
 .accueil__examenmeta { font: var(--type-caption); opacity: .72; text-align: center; }
 
 .ds-lesson__chev { color: var(--text-muted); }
+
+/* Rangée « anneau + texte » : la disposition d'un bloc de progression. */
+.progrow { display: flex; align-items: center; gap: 16px; }
+/* Empilement serré de lignes dans une carte — l'échelle des niveaux, la liste
+   des thèmes. Le séparateur est porté par les lignes elles-mêmes. */
+.trows { display: grid; }
+
+/* La section « assistant » a sa teinte, comme les autres sections. */
+.item--ai .item__icon, .card--ai .item__icon { background: var(--accent-100); }
+.card--ai { border: 0; }
+
+/* Grille de trois tuiles de chiffres — la disposition, le composant fait le
+   reste. */
+.tiles-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--stack-card); }
+
+/* Carte de reprise : même composition que la séance du jour sur l'accueil. */
+.reprise { display: flex; align-items: center; gap: 14px; }
+.reprise__txt { flex: 1; min-width: 0; }
+.reprise__quoi { font: var(--type-caption); color: var(--text-inverse-muted); }
+.reprise__titre { font: var(--type-h3); margin-top: 3px; text-wrap: pretty; }
+.reprise__go {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; flex: none; border-radius: var(--radius-circle);
+  background: var(--white); color: var(--text-primary);
+}
+
+/* ------------------------------------------------- objets de l'application */
+/*
+ * Ce que le système de design ne couvre pas : le texte long d'un chapitre, la
+ * carte à chevron, la barre fine, le sur-titre d'une carte. Ces règles avaient
+ * été emportées en réécrivant le bloc de l'accueil — les écrans concernés
+ * s'affichaient en texte brut, sans mise en forme.
+ */
+.bar--thin { height: 6px; display: block; }
+.bar__fill--story { background: var(--story); }
+
+.card__eyebrow { font: var(--type-caption); color: var(--muted); }
+
+/* Carte sur laquelle on appuie : relief un peu plus marqué, chevron d'appel,
+   et un enfoncement net au toucher. */
+.card--link {
+  display: block; position: relative; text-decoration: none; color: inherit;
+  border-color: var(--line-strong);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .1s ease, box-shadow .16s ease, background .16s ease;
+}
+.card--link::after {
+  content: ''; position: absolute; right: 14px; top: 18px; width: 8px; height: 8px;
+  border-right: 2px solid var(--faint); border-top: 2px solid var(--faint);
+  transform: rotate(45deg); opacity: .75;
+}
+.card--link:active { transform: scale(.99); background: var(--surface-2); box-shadow: none; }
+
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.kpi { background: var(--surface); border: 0; border-radius: var(--radius-card-inner); padding: 14px 10px; text-align: center; box-shadow: var(--shadow); }
+.kpi__val { font: var(--type-h2); font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-heading); }
+.kpi__lab { font: var(--type-caption); font-weight: var(--weight-medium); color: var(--muted); margin-top: 3px; line-height: 1.25; }
+
+.prose { font-size: 15.5px; line-height: 1.62; }
+.prose h3 { font-size: 16.5px; margin: 20px 0 7px; }
+.prose h3:first-child { margin-top: 0; }
+.prose h4 { font-size: 14.5px; margin: 15px 0 5px; color: var(--brand); }
+.prose p { margin: 0 0 10px; }
+.prose ul { margin: 0 0 12px; padding-left: 20px; }
+.prose li { margin-bottom: 5px; }
+.prose strong { font-weight: 700; }
+.prose .key { background: var(--brand-100); color: var(--brand); padding: 1px 6px; border-radius: 6px; font-weight: 650; }
+.prose blockquote {
+  margin: 0 0 12px; padding: 13px 15px; background: var(--surface-2);
+  border: 0; border-radius: var(--radius-sm); font-size: 14.5px;
+}
 
 /* ------------------------------------------------------- la France racontée */
 /* Le récit se lit d'une traite : texte un peu plus grand et plus aéré. */

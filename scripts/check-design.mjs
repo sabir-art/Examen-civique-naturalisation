@@ -18,7 +18,7 @@
  * copie du système fourni, pas un endroit où bricoler.
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 const CIVICA = 'assets/css/civica.css';
 const APP = 'assets/css/app.css';
@@ -157,7 +157,62 @@ if (derives.length) {
   ok('la couche vendorisée est conforme au système fourni');
 }
 
-/* -------------------------------------------- 5. les polices sont servies */
+/* ------------------------- 5. toute classe employée a bien une règle */
+
+/**
+ * Le défaut que ce contrôle traque est réel et vécu : en réécrivant un bloc de
+ * la feuille de style, des règles encore utilisées ont été emportées. Rien n'a
+ * planté, aucun test ne s'en est plaint — mais l'écran d'histoire affichait
+ * ses chiffres en texte brut, sans mise en forme. C'est invisible depuis le
+ * code : il faut confronter les deux côtés.
+ *
+ * On relève donc les noms de classe écrits en dur dans le JavaScript et on
+ * vérifie que chacun existe dans l'une des deux feuilles. Les noms construits
+ * dynamiquement (`class: `x--${clef}``) sont ignorés : impossible de les
+ * résoudre sans exécuter le code.
+ */
+const feuilles = readFileSync(APP, 'utf8')
+  + readFileSync('assets/css/civica-components.css', 'utf8')
+  + civica;
+
+const sources = [];
+const parcourir = (dossier) => {
+  for (const e of readdirSync(dossier, { withFileTypes: true })) {
+    const chemin = `${dossier}/${e.name}`;
+    if (e.isDirectory()) parcourir(chemin);
+    else if (e.name.endsWith('.js')) sources.push(chemin);
+  }
+};
+parcourir('js');
+
+const utilisees = new Map();
+for (const f of sources) {
+  const texte = readFileSync(f, 'utf8');
+  for (const m of texte.matchAll(/class: '([^'${}]+)'/g)) {
+    for (const nom of m[1].trim().split(/\s+/)) {
+      if (nom && !utilisees.has(nom)) utilisees.set(nom, f);
+    }
+  }
+}
+
+// Quelques classes n'ont volontairement pas de règle : elles servent de prise
+// au JavaScript ou aux contrôles, jamais à la mise en forme.
+const SANS_REGLE = new Set(['grow', 'mt', 'center', 'small', 'muted']);
+/**
+ * La classe doit apparaître comme sélecteur ENTIER, pas comme début d'un
+ * autre. Une simple recherche de sous-chaîne trouvait `.prose` dans
+ * `.prose--story` et déclarait la règle présente alors qu'elle avait été
+ * supprimée — le contrôle se serait tu sur le défaut même qu'il traque.
+ */
+const aUneRegle = (nom) => new RegExp(`\\.${nom.replace(/[-]/g, '\\-')}(?![\\w-])`).test(feuilles);
+const orphelines = [...utilisees].filter(([nom]) => !SANS_REGLE.has(nom) && !aUneRegle(nom));
+if (orphelines.length) {
+  orphelines.forEach(([nom, f]) => ko(`classe sans règle : .${nom} (employée dans ${f})`));
+} else {
+  ok(`les ${utilisees.size} classes écrites dans le JavaScript ont toutes une règle`);
+}
+
+/* -------------------------------------------- 6. les polices sont servies */
 
 const POLICES = [
   'assets/fonts/plus-jakarta-sans-latin.woff2',

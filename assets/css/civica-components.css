@@ -529,6 +529,10 @@ button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); 
 }
 .ds-qcard--ink .ds-qcard__timer { background: rgba(255, 255, 255, .12); }
 .ds-qcard__q { font: var(--type-h2); letter-spacing: -0.015em; text-wrap: pretty; }
+/* Propre à l'application : les étiquettes et la mise en situation, glissées
+   dans la carte entre l'en-tête et l'énoncé. */
+.ds-qcard__extra { display: grid; gap: 10px; }
+.ds-qcard__extra:empty { display: none; }
 
 /* ----------------------------------------------------- AnswerOption */
 .ds-answer {

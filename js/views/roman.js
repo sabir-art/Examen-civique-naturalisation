@@ -12,6 +12,10 @@
  */
 
 import { h, icon, modal } from '../lib/dom.js';
+import {
+  Card, Button, Chip, Badge, Icon, IconTile, SectionHeader,
+  ProgressBar, StatTile, SegmentedControl, LessonRow,
+} from '../ds/index.js';
 import { daysBetween } from '../lib/util.js';
 import { ROMAN, ACTES, ACTE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES, TOTAL_MINUTES, nextChapitre, prevChapitre, questionsOf } from '../data/roman.js';
 import { AR_BY_KEY, ACTE_AR_BY_KEY, blocs, TOTAL_TRADUITS } from '../data/roman-ar.js';
@@ -240,22 +244,39 @@ function sommaire() {
 
   const termines = CHAPITRES.filter((c) => romanChapitreProgres(c.key).termine).length;
   const lecture = Math.round((termines / o.chapitres) * 100);
-  const kpis = h('div', { class: 'kpis' }, [
+  // `StatTile` : le composant du système pour « un chiffre et son intitulé ».
+  const kpis = h('div', { class: 'tiles-3' }, [
     ['chapitres terminés', `${termines}/${o.chapitres}`],
     ['mémorisation', `${o.mastery} %`],
     ['bonnes réponses', o.accuracy === null ? '—' : `${o.accuracy} %`],
-  ].map(([lab, val]) => h('div', { class: 'kpi' }, [
-    h('div', { class: 'kpi__val', text: val }),
-    h('div', { class: 'kpi__lab', text: lab }),
-  ])));
+  ].map(([lab, val]) => StatTile({ value: val, label: lab, surface: 'white', align: 'center' })));
 
+  /*
+   * La reprise est une carte encre, pas un bouton : le titre d'un chapitre ne
+   * tient pas en quatre mots, et le système veut des libellés de bouton
+   * courts. La carte porte le titre sur autant de lignes qu'il faut, l'action
+   * reste lisible d'un coup d'œil.
+   */
   const actions = h('div', { class: 'stack stack--tight' }, [
-    h('div', { class: 'bar' }, h('div', { class: 'bar__fill', style: `width:${lecture}%` })),
-    h('a', { class: 'btn', href: `#/histoire/c/${reprise.key}` }, [
-      icon('play'),
-      h('span', { text: o.lus === 0 ? 'Commencer par le début' : suite ? `Reprendre : ${reprise.titre}` : 'Relire le dernier chapitre' }),
-    ]),
-    o.lus > 0 ? h('a', { class: 'btn btn--ghost', href: '#/histoire/quiz', text: `Quiz sur toute l'histoire (${o.total} questions)` }) : null,
+    ProgressBar({ value: lecture, height: 10 }),
+    Card({
+      surface: 'ink', radius: 'inner', padding: 'md',
+      href: `#/histoire/c/${reprise.key}`, className: 'reprise',
+      children: [
+        h('div', { class: 'reprise__txt' }, [
+          h('div', {
+            class: 'reprise__quoi',
+            text: o.lus === 0 ? 'Commencer par le début' : suite ? 'Reprendre la lecture' : 'Relire le dernier chapitre',
+          }),
+          h('div', { class: 'reprise__titre', text: reprise.titre }),
+        ]),
+        h('span', { class: 'reprise__go' }, Icon({ name: 'play', size: 18 })),
+      ],
+    }),
+    o.lus > 0 ? Button({
+      variant: 'secondary', size: 'lg', fullWidth: true,
+      href: '#/histoire/quiz', label: `Quiz sur tout le récit (${o.total} questions)`,
+    }) : null,
     o.due > 0 ? h('p', { class: 'hint center', text: `${o.due} question${o.due > 1 ? 's' : ''} du récit à revoir aujourd'hui.` }) : null,
     // Deux chiffres voisins qui ne mesurent pas la même chose : mieux vaut le
     // dire que laisser croire à un compteur bloqué.
