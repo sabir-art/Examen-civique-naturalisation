@@ -230,6 +230,22 @@ function show({ node, title, back, tab, chrome = true }) {
   window.scrollTo(0, 0);
 }
 
+/**
+ * Escamote la barre d'onglets pendant un questionnaire lancé depuis un écran
+ * qui, lui, la garde — le choix d'un thème, par exemple.
+ *
+ * Un questionnaire en cours pose déjà un garde-fou : partir demande une
+ * confirmation. La barre n'y mène donc nulle part, et les quatre-vingt-seize
+ * pixels qu'elle réserve manquent en bas, là où la dernière réponse se cache
+ * sous le bouton. Les autres modes la masquaient déjà par `hideTabs` ; celui-ci
+ * ne le pouvait pas, le questionnaire naissant après le rendu de l'écran. Le
+ * prochain passage du routeur rétablit l'état normal.
+ */
+export function masquerOnglets() {
+  basEl.replaceChildren();
+  document.body.classList.add('is-plain');
+}
+
 /** Redessine la vue courante (après un changement de données). */
 export function refresh() {
   lastPath = null;

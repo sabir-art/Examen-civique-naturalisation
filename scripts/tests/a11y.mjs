@@ -104,7 +104,9 @@ for (const [scheme, choix] of CAS) {
   await p.click('.ds-answer >> nth=0');
   await p.click('button:has-text("Valider")');
   await p.waitForSelector('.ds-verdict');
-  await p.click('.ds-bottomnav__tab[data-tab="/"]');
+  // Le bouton de retour de la barre du haut, et non un onglet : la barre
+  // d'onglets est escamotée pendant qu'on répond, comme dans les autres modes.
+  await p.click('.ds-topbar [aria-label="Retour"]');
   await p.waitForSelector('.modal__panel');
   const boutons = await p.evaluate(() => {
     const out = [];

@@ -377,7 +377,11 @@
    neutre dans les écrans où l'on entre. La classe est posée par le routeur,
    au même endroit que l'affichage de la barre d'onglets, pour que les deux
    ne puissent pas se contredire. */
-body.is-plain { --bg: var(--fond-plein); }
+/* Sur ces écrans la barre d'onglets n'est pas dessinée : la place qu'elle
+   réserve doit disparaître avec elle, sinon un questionnaire perd quatre-vingts
+   pixels de hauteur au profit d'une barre absente — et la dernière réponse
+   passe sous la ligne de flottaison. */
+body.is-plain { --bg: var(--fond-plein); --tabbar-h: 0px; --bottomnav-inset: 0px; }
 
 * { box-sizing: border-box; }
 
@@ -781,13 +785,30 @@ a { color: var(--lien); }
 }
 .quizfoot--nobar { bottom: 0; padding-bottom: calc(12px + var(--safe-b)); }
 /* Correction affichée : la barre redescend dans le flux, sous l'explication et
-   sous le panneau « approfondir », au lieu de rester collée par-dessus. */
+   sous le panneau « approfondir », au lieu de rester collée par-dessus. Même
+   chose quand la question déborde de l'écran : collée, la barre masquerait la
+   dernière réponse dès l'arrivée (voir `ajusterBarre` dans quiz.js). */
 .quiz.is-revealed .quizfoot,
+.quiz.is-debordant .quizfoot,
 .quiz.is-deepened .quizfoot {
   position: static; margin: 16px 0 0; padding: 0;
   background: none; backdrop-filter: none; -webkit-backdrop-filter: none; border-top: 0;
 }
-/* De quoi faire défiler le dernier élément au-dessus de la barre. */
+/* Écrans courts : les quatre réponses doivent tenir sous l'énoncé sans qu'on
+   ait à défiler pour découvrir la dernière. Le système est dessiné large ; on
+   resserre ici l'aération, jamais la surface d'appui — une réponse garde 52px
+   de haut, au-dessus des 44px exigés. Au-delà de cette hauteur d'écran, la
+   composition reste celle du système, au pixel près. */
+@media (max-height: 745px) {
+  .ds-qcard { padding: 14px; gap: 9px; }
+  .ds-qcard__q { font-size: 18.5px; }
+  .choices { gap: 7px; margin-top: 9px; }
+  .ds-answer { min-height: 46px; padding: 8px 12px; }
+  .quizbar { margin-bottom: 8px; padding-top: 4px; }
+}
+
+/* La marge basse de `.app` suffit à dégager le dernier élément au-dessus de la
+   barre une fois la page défilée : mesuré, pas supposé. */
 .quizbody { padding-bottom: 8px; }
 
 /* --------------------------------------------------------------- results */

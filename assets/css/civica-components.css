@@ -11,7 +11,9 @@
    l'appui, le focus clavier et le thème sombre sans repasser par du
    JavaScript, et il empêche le navigateur de mettre les règles en cache.
 
-   UNE SEULE ADAPTATION, et elle est nommée. Le système désigne par `ink` deux
+   DEUX ADAPTATIONS, et elles sont nommées.
+
+   La première. Le système désigne par `ink` deux
    choses différentes : « la surface encre » (barre de navigation, puce
    sombre) et « l'élément de plus fort contraste de l'écran » (bouton
    principal, segment retenu, interrupteur allumé). En thème clair les deux
@@ -19,6 +21,11 @@
    s'opposent : la surface reste sombre, l'élément tranché devient clair. Les
    composants du premier groupe gardent `--surface-ink` ; ceux du second
    prennent `--brand`, qui s'inverse avec le thème.
+
+   La seconde porte sur le rail du contrôle segmenté, blanc dans le système
+   parce qu'il y repose sur le fond teinté de la page. Dans l'application il
+   vit à l'intérieur d'une carte blanche, où il disparaissait. Le détail est
+   écrit au-dessus de la règle.
    ========================================================================= */
 
 /* ═══════════════════════════════════════════════════════════════ core */
@@ -440,10 +447,15 @@ button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); 
 }
 
 /* ------------------------------------------------- SegmentedControl */
+/* Seconde adaptation au contexte de l'application (voir l'en-tête) : le
+   système pose ce contrôle sur le fond teinté de la page, où un rail blanc se
+   détache. Ici il vit dans une carte blanche, et un rail blanc sur blanc
+   devient invisible : on ne voit plus que le segment choisi, sans deviner
+   qu'il y en a d'autres à côté. Le rail prend donc le gris d'enfoncement. */
 .ds-seg {
   display: flex; gap: 4px; padding: 4px;
-  background: var(--white); border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-xs);
+  background: var(--surface-sunken); border-radius: var(--radius-pill);
+  box-shadow: none;
 }
 .ds-seg--full { width: 100%; }
 .ds-seg__btn {

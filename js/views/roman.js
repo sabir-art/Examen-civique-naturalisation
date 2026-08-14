@@ -692,11 +692,14 @@ function quiz({ chapitre: chapKey = null, acte: acteKey = null }) {
       label: 'Récit',
       backTo,
       onRestart: () => start(),
+      // Le titre du chapitre suivant tenait rarement sur une ligne : le bouton
+      // se coupait en deux. Le numéro suffit à savoir où l'on va, et le titre
+      // s'affiche en entier sur l'écran d'arrivée.
       extraActions: suivant
         ? [h('button', {
           class: 'btn btn--accent', type: 'button',
           onclick: () => navigate(`#/histoire/c/${suivant.key}`),
-        }, [h('span', { text: `Chapitre suivant : ${suivant.titre}` })])]
+        }, [h('span', { text: `Chapitre ${suivant.num}` }), icon('chevron-right')])]
         : [],
     });
   }

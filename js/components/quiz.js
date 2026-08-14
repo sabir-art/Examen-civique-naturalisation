@@ -179,7 +179,30 @@ export function createQuiz({
     // redescend dans le flux, sinon elle tranche l'explication en deux.
     root.classList.toggle('is-revealed', revealed);
     drawFoot();
+    ajusterBarre();
   }
+
+  /**
+   * La barre collée en bas recouvre ce qui passe dessous. Tant que la question
+   * tient dans l'écran, cela ne coûte rien et « Valider » reste sous le pouce.
+   * Dès que l'énoncé déborde — une mise en situation suivie de quatre réponses
+   * longues —, la dernière réponse se retrouve masquée à l'arrivée : on la
+   * croit absente. Dans ce cas la barre reprend sa place dans le flux, sous
+   * les réponses. On y accède en défilant, ce qu'il faudra faire de toute façon
+   * pour lire la question en entier.
+   *
+   * La mesure se fait la barre décollée, sinon on mesurerait la mise en page
+   * qu'on est en train de décider.
+   */
+  function ajusterBarre() {
+    requestAnimationFrame(() => {
+      if (!root.isConnected) return;
+      root.classList.add('is-debordant');
+      const deborde = document.documentElement.scrollHeight > window.innerHeight + 1;
+      root.classList.toggle('is-debordant', deborde);
+    });
+  }
+  window.addEventListener('resize', ajusterBarre);
 
   /** Panneau d'approfondissement de la question affichée, s'il est ouvert. */
   let deepen = null;

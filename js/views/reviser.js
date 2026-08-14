@@ -30,7 +30,7 @@ import { TOTAL_TERMES } from '../data/glossaire.js';
 import { buildTraining, mastery, coverage, planRevision, planErreurs, compositionSeance, resteSeance } from '../engine.js';
 import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
-import { setGuard, refresh } from '../app.js';
+import { setGuard, refresh, masquerOnglets } from '../app.js';
 
 const COUNTS = [10, 20, 40];
 
@@ -296,6 +296,8 @@ function session({ mode, count, label }) {
 /* ---------------------------------------------------------- exécution */
 
 export function runQuiz({ container, cards, immediate, label, backTo, onRestart, timeLimitSec = null, isExam = false, onFinished, extraActions = [] }) {
+  // Un questionnaire occupe tout l'écran, d'où qu'il vienne.
+  masquerOnglets();
   const quiz = createQuiz({
     cards,
     immediate,
