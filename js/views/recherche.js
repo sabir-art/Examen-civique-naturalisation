@@ -8,6 +8,7 @@
  */
 
 import { h, icon } from '../lib/dom.js';
+import { Card, Button, Badge, Icon, IconTile } from '../ds/index.js';
 import { QUESTIONS } from '../data/questions.js';
 import { LIVRET_QUESTIONS } from '../data/q-livret.js';
 import { ROMAN_QUESTIONS, CHAPITRES as ROMAN_CHAPITRES, CHAPITRE_BY_KEY as ROMAN_BY_KEY } from '../data/roman.js';
@@ -162,13 +163,13 @@ export default function renderRecherche() {
   }
 
   function lignePage(e, mots) {
-    return h('a', { class: 'item', href: e.href }, [
-      h('span', { class: 'item__icon' }, icon(FAMILLES[e.famille].icone)),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title' }, surligne(e.titre, mots)),
-        h('span', { class: 'item__sub', text: e.sousTitre }),
+    return h('a', { class: 'ds-lesson ds-lesson--tap', href: e.href }, [
+      IconTile({ size: 38, tone: 'sunken', icon: FAMILLES[e.famille].icone }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long' }, surligne(e.titre, mots)),
+        h('div', { class: 'ds-lesson__meta', text: e.sousTitre }),
       ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]);
   }
 
@@ -207,7 +208,7 @@ export default function renderRecherche() {
       blocs.push(h('div', { class: 'stack stack--tight' }, [
         h('div', { class: 'row row--between' }, [
           h('p', { class: 'section-title', style: 'margin:0', text: meta.label }),
-          h('span', { class: 'badge', text: String(groupe.length) }),
+          Badge({ tone: 'neutral', label: String(groupe.length) }),
         ]),
         estQuestion
           ? h('div', { class: 'card card--pad-sm sreslist' }, visibles.map((e) => ligneQuestion(e, mots)))

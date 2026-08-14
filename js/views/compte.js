@@ -143,7 +143,7 @@ function mainView() {
       Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]),
     canInstall() ? h('button', {
-      class: 'item', type: 'button',
+      class: 'ds-lesson ds-lesson--tap', type: 'button',
       onclick: async () => { const ok = await promptInstall(); if (ok) toast("L'application est installée."); refresh(); },
     }, [
       IconTile({ icon: 'download', tone: 'sunken', size: 38 }),
@@ -172,7 +172,7 @@ function mainView() {
         h('span', { class: 'muted', text: ` · créé le ${formatDateShort(o2.createdAt)}` }),
       ]),
       o2.id === p.id
-        ? h('span', { class: 'badge badge--brand', text: 'Actif' })
+        ? Badge({ tone: 'info', label: 'Actif' })
         : h('button', {
           class: 'btn btn--sm btn--ghost', type: 'button', text: 'Utiliser',
           onclick: () => { store.switchProfile(o2.id); applyTheme(); navigate('#/'); },

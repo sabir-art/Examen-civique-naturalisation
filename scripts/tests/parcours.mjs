@@ -108,7 +108,7 @@ verifier(/Centurion/.test(texte), 'cent questions vues débloquent « Centurion 
 verifier(/Reçu/.test(texte), 'un examen réussi débloque « Reçu »');
 verifier(/Lecteur/.test(texte), 'un chapitre lu débloque « Lecteur »');
 
-const compteur = await page.textContent('.row--between .badge');
+const compteur = await page.textContent('.row--between .ds-badge');
 verifier(/\d+\/\d+/.test(compteur), `le compteur de badges est affiché (${compteur})`);
 
 /* -------------------------------- 5. une remise à zéro remet les badges à zéro */

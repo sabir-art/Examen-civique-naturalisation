@@ -7,6 +7,7 @@
  */
 
 import { h, icon } from '../lib/dom.js';
+import { Card, Button, Badge, Icon, IconTile } from '../ds/index.js';
 import * as ai from '../ai.js';
 import { findQuestion } from '../engine.js';
 import { systemPrompt, questionContext } from '../ai-context.js';
@@ -91,7 +92,7 @@ function chat({ about = null }) {
   function drawHead() {
     const p = ai.PROVIDERS[ai.provider()];
     head.replaceChildren(
-      h('span', { class: 'badge badge--brand', text: `${p.label} · ${ai.model()}` }),
+      Badge({ tone: 'info', label: `${p.label} · ${ai.model()}` }),
       h('div', { class: 'row', style: 'gap:14px' }, [
         thread.length ? h('button', {
           class: 'linkbtn', type: 'button', text: 'Nouvelle conversation',

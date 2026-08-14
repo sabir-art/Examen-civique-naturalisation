@@ -7,6 +7,7 @@
  */
 
 import { h, icon, toast } from '../lib/dom.js';
+import { Card, Button, Badge, Icon, IconTile, Switch } from '../ds/index.js';
 import { formatDate, formatTime, plural, DAY, startOfDay } from '../lib/util.js';
 import { EXAM } from '../data/programme.js';
 import { EXAM_MODES, modeOf } from '../engine.js';
@@ -194,7 +195,7 @@ export default function renderActivite() {
         h('span', { class: 'item__title', text: e.titre }),
         h('span', { class: 'item__sub', text: `${e.sous} · ${formatTime(e.ts)}` }),
       ]),
-      nouveau ? h('span', { class: 'badge badge--brand', text: 'nouveau' }) : null,
+      nouveau ? Badge({ tone: 'info', label: 'nouveau' }) : null,
       h('span', { class: 'item__chev' }, icon('chevron')),
     ].filter(Boolean)));
   }

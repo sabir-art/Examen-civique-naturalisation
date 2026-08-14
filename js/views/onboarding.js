@@ -1,6 +1,7 @@
 /** Première ouverture : création du compte local. */
 
 import { h, icon, toast } from '../lib/dom.js';
+import { Card, Button, StatTile } from '../ds/index.js';
 import * as store from '../store.js';
 import { EXAM } from '../data/programme.js';
 import { QUESTIONS } from '../data/questions.js';
@@ -34,10 +35,8 @@ export default function renderOnboarding({ onDone }) {
       h('p', { class: 'hero__sub', text: `${QUESTIONS.length} questions d'entraînement, des examens blancs en conditions réelles et un suivi de votre progression. Gratuit, sans publicité, hors ligne.` }),
     ]),
 
-    h('div', { class: 'kpis' }, facts.map(([v, l]) => h('div', { class: 'kpi' }, [
-      h('div', { class: 'kpi__val', text: v }),
-      h('div', { class: 'kpi__lab', text: l }),
-    ]))),
+    h('div', { class: 'tiles-3' },
+      facts.map(([v, l]) => StatTile({ value: v, label: l, surface: 'white', align: 'center' }))),
 
     h('form', { class: 'card stack', onsubmit: submit }, [
       h('div', {}, [

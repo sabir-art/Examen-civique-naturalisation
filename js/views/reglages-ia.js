@@ -7,6 +7,7 @@
  */
 
 import { h, icon, toast, confirmDialog } from '../lib/dom.js';
+import { Card, Button, Badge, Icon } from '../ds/index.js';
 import * as ai from '../ai.js';
 
 export default function renderReglagesIA() {
@@ -60,7 +61,7 @@ function assistantSection(container) {
   card.append(
     h('div', { class: 'row row--between' }, [
       h('h2', { class: 'card__title', text: "Assistant (texte)" }),
-      actif ? h('span', { class: 'badge badge--ok', text: 'Activé' }) : h('span', { class: 'badge', text: 'Non activé' }),
+      actif ? Badge({ tone: 'correct', label: 'Activé' }) : Badge({ tone: 'neutral', label: 'Non activé' }),
     ]),
     h('p', { class: 'card__sub', text: "Collez la clé de votre choix : Claude, ChatGPT, Gemini ou Mistral. Le fournisseur est reconnu automatiquement." }),
   );
@@ -213,7 +214,7 @@ function voixSection(container) {
   card.append(
     h('div', { class: 'row row--between' }, [
       h('h2', { class: 'card__title', text: 'Voix (ElevenLabs)' }),
-      cfg.key ? h('span', { class: 'badge badge--ok', text: 'Activée' }) : h('span', { class: 'badge', text: 'Voix du téléphone' }),
+      cfg.key ? Badge({ tone: 'correct', label: 'Activée' }) : Badge({ tone: 'neutral', label: 'Voix du téléphone' }),
     ]),
     h('p', { class: 'card__sub', text: cfg.key
       ? "Les explications peuvent être lues à voix haute par la voix que vous choisissez."

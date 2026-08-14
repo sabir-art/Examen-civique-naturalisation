@@ -1,6 +1,7 @@
 /** Mon parcours : niveau, points d'expérience et badges. */
 
 import { h, icon } from '../lib/dom.js';
+import { Card, Button, Badge, Icon, ProgressBar, StatTile } from '../ds/index.js';
 import { formatDateShort, plural } from '../lib/util.js';
 import { NIVEAUX, niveau, badges, POINTS_AIDE } from '../lib/xp.js';
 import * as store from '../store.js';
@@ -67,7 +68,7 @@ export default function renderParcours() {
           h('span', { class: 'lvl__seuil', text: niv.seuil === 0 ? 'dès la première question' : `à partir de ${niv.seuil.toLocaleString('fr-FR')} points` }),
         ]),
         etat === 'passe' ? h('span', { class: 'lvl__mark' }, icon('check'))
-          : etat === 'courant' ? h('span', { class: 'badge badge--brand', text: 'ici' })
+          : etat === 'courant' ? Badge({ tone: 'info', label: 'ici' })
             : h('span', { class: 'lvl__mark lvl__mark--off' }, icon('lock')),
       ]);
     })));
@@ -99,7 +100,7 @@ export default function renderParcours() {
     h('h2', { class: 'card__title', text: 'Comment se gagnent les points' }),
     h('div', { class: 'stack stack--tight mt' }, POINTS_AIDE.map(([quoi, combien]) => h('div', { class: 'row row--between' }, [
       h('span', { class: 'small', text: quoi }),
-      h('span', { class: 'badge badge--brand nowrap', text: combien }),
+      Badge({ tone: 'info', label: combien, className: 'nowrap' }),
     ]))),
     h('p', { class: 'hint mt', text: "Les points sont recalculés à partir de votre progression : ils suivent une sauvegarde importée et repartent de zéro si vous effacez tout." }),
   ]);
@@ -110,7 +111,7 @@ export default function renderParcours() {
 
       h('div', { class: 'row row--between' }, [
         h('p', { class: 'section-title', style: 'margin:0', text: 'Badges obtenus' }),
-        h('span', { class: 'badge', text: `${obtenus.length}/${liste.length}` }),
+        Badge({ tone: 'neutral', label: `${obtenus.length}/${liste.length}` }),
       ]),
       obtenus.length
         ? grille(obtenus, false)
