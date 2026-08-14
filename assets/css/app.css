@@ -987,6 +987,26 @@ a.themestat__row { min-height: 44px; }
    est long — « Système institutionnel et politique » — on le laisse plier. */
 .ds-lesson__titre--long { white-space: normal; }
 
+/* Les trois formats d'examen blanc portent chacun leur pastel : c'est la seule
+   chose qui les distingue au premier coup d'œil, puisqu'ils annoncent tous
+   quarante questions, quarante-cinq minutes et le même seuil. La règle du
+   système tient : le pastel est sur la carte, le texte reste à l'encre, et ce
+   qui se pose dessus est blanc — jamais un second pastel. Ces modificateurs
+   vivent ici et non dans la feuille des composants, qui ne recopie que ce que
+   le système fournit ; `LessonRow` n'y a pas d'aplat. */
+.ds-lesson--teinte { color: var(--text-on-tint); box-shadow: none; }
+.ds-lesson--lavender { background: var(--surface-lavender); }
+.ds-lesson--butter { background: var(--surface-butter); }
+.ds-lesson--mint { background: var(--surface-mint); }
+/* Sur un aplat, le gris du système perd son contraste : le texte secondaire
+   reprend l'encre, adoucie par sa graisse et sa taille plutôt que par sa
+   couleur. */
+.ds-lesson--teinte .ds-lesson__meta { color: var(--text-on-tint); opacity: .78; }
+.ds-lesson--teinte .badge,
+.ds-lesson--teinte .badge--ok,
+.ds-lesson--teinte .badge--bad,
+.ds-lesson--teinte .ds-badge { background: var(--bloc-sur-pastel); color: var(--text-on-tint); }
+
 /* ------------------------------------------------------------- accueil */
 /*
  * L'accueil est composé de `Card`, `ThemeCard`, `LessonRow`, `ProgressRing` et

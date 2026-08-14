@@ -42,11 +42,16 @@ function choix() {
 
   const cards = EXAM_MODE_LIST.map((m) => {
     const s = stats(m.key);
-    return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/examen/${m.key}` }, [
+    return h('a', {
+      class: `ds-lesson ds-lesson--tap ligne--haute ds-lesson--teinte ds-lesson--${TEINTE[m.key] || 'lavender'}`,
+      href: `#/examen/${m.key}`,
+    }, [
       // `IconTile` et non la classe posée à la main : la taille du composant
       // vient de sa propriété `size`, pas de la feuille de style. Écrite en
       // classe seule, la pastille se réduisait à la taille de son icône.
-      IconTile({ icon: m.icon, tone: TEINTE[m.key] || 'sunken', size: 44 }),
+      // Blanche, parce que la couleur est désormais portée par la carte : deux
+      // pastels l'un sur l'autre, le système n'en veut pas.
+      IconTile({ icon: m.icon, tone: 'white', size: 44 }),
       // `div` et non `span` : c'est la structure de `LessonRow`. En inline, le
       // texte ne se plie pas à la largeur de la colonne et déborde de l'écran.
       h('div', { class: 'ds-lesson__body' }, [
