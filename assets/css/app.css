@@ -1003,6 +1003,11 @@ a.themestat__row { min-height: 44px; }
 
 .ds-lesson__chev { color: var(--text-muted); }
 
+/* Numéro d'un chapitre du livret, dans la pastille d'une ligne. */
+.livret__num { font: var(--type-label); font-weight: var(--weight-bold); }
+/* L'état d'une partie s'aligne en haut, comme le chevron de la même ligne. */
+.livret__etat { margin-top: 6px; }
+
 /* Rangée « anneau + texte » : la disposition d'un bloc de progression. */
 .progrow { display: flex; align-items: center; gap: 16px; }
 /* Empilement serré de lignes dans une carte — l'échelle des niveaux, la liste

@@ -1,6 +1,7 @@
 /** Fiches de cours : liste et lecture d'une fiche. */
 
 import { h, icon } from '../lib/dom.js';
+import { Card, Button, Icon, IconTile, LessonRow, ProgressBar } from '../ds/index.js';
 import { COURS, COURS_BY_KEY } from '../data/cours.js';
 import { THEMES } from '../data/programme.js';
 import { pool } from '../data/questions.js';
@@ -18,19 +19,19 @@ function liste() {
 
   const officiel = h('div', { class: 'stack stack--tight' }, [
     h('p', { class: 'section-title', text: 'Document officiel' }),
-    h('a', { class: 'item', href: '#/livret', style: 'align-items:flex-start' }, [
-      h('span', { class: 'item__icon', style: 'background:var(--accent-100);color:var(--accent)' }, icon('star')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: LIVRET.titre }),
-        h('span', { class: 'item__sub', text: `${LIVRET.edition} · ${LIVRET.editeur}` }),
-        h('span', { class: 'item__sub', style: 'margin-top:6px', text: `${PARTIES.length} parties, ${CHAPITRES.length} chapitres, ${lo.total} questions dédiées` }),
+    h('a', { class: 'ds-lesson ds-lesson--tap examen__mode', href: '#/livret' }, [
+      IconTile({ icon: 'star', tone: 'lavender', size: 44 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title examen__titre', text: LIVRET.titre }),
+        h('div', { class: 'ds-lesson__meta', text: `${LIVRET.edition} · ${LIVRET.editeur}` }),
+        h('div', { class: 'ds-lesson__meta', style: 'margin-top:6px', text: `${PARTIES.length} parties, ${CHAPITRES.length} chapitres, ${lo.total} questions dédiées` }),
         h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', {
           class: `bar__fill bar__fill--${lo.mastery >= 70 ? 'ok' : lo.mastery >= 35 ? 'warn' : 'bad'}`,
           style: `width:${lo.mastery}%`,
         })),
-        h('span', { class: 'item__sub', style: 'margin-top:5px', text: `Maîtrise du livret : ${lo.mastery} %` }),
+        h('div', { class: 'ds-lesson__meta', style: 'margin-top:5px', text: `Maîtrise du livret : ${lo.mastery} %` }),
       ]),
-      h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]),
     h('p', { class: 'hint', text: "Le texte du ministère de l'Intérieur, repris intégralement, avec un quiz par chapitre." }),
   ]);
@@ -45,14 +46,16 @@ function liste() {
       ]),
       h('div', { class: 'list' }, COURS.map((c) => {
         const m = c.theme ? Math.round(mastery(c.theme) * 100) : null;
-        return h('a', { class: 'item', href: `#/cours/${c.key}` }, [
-          h('span', { class: 'item__icon' }, icon(c.icon)),
-          h('span', { class: 'item__body' }, [
-            h('span', { class: 'item__title', text: c.title }),
-            h('span', { class: 'item__sub', text: c.subtitle }),
+        return h('a', { class: 'ds-lesson ds-lesson--tap', href: `#/cours/${c.key}` }, [
+          IconTile({ icon: c.icon, tone: 'sunken', size: 38 }),
+          h('div', { class: 'ds-lesson__body' }, [
+            // Deux lignes autorisées : les intitulés de fiche sont longs, et
+            // la troncature de `LessonRow` est faite pour des titres courts.
+            h('div', { class: 'ds-lesson__title examen__titre', text: c.title }),
+            h('div', { class: 'ds-lesson__meta', text: c.subtitle }),
           ]),
           m !== null ? h('span', { class: `badge badge--${m >= 70 ? 'ok' : m >= 35 ? 'warn' : 'bad'}`, text: `${m} %` }) : null,
-          h('span', { class: 'item__chev' }, icon('chevron')),
+          Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
         ].filter(Boolean));
       })),
     ]),
@@ -92,10 +95,10 @@ function fiche(key) {
       ])),
 
       theme ? h('a', {
-        class: 'btn', href: `#/reviser/t/${c.theme}`,
+        class: 'ds-btn ds-btn--primary ds-btn--lg ds-btn--full', href: `#/reviser/t/${c.theme}`,
       }, [icon('play'), h('span', { text: `S'entraîner sur ce thème (${pool({ theme: c.theme }).length} questions)` })]) : null,
 
-      h('a', { class: 'btn btn--ghost', href: '#/cours', text: 'Toutes les fiches' }),
+      Button({ variant: 'secondary', size: 'lg', fullWidth: true, href: '#/cours', label: 'Toutes les fiches' }),
     ].filter(Boolean)),
     title: c.title,
     back: '#/cours',

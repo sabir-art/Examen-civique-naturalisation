@@ -242,12 +242,13 @@ await page.waitForTimeout(600);
 await page.goto(`${BASE}#/livret/p/${chapLivret.partie}`);
 await page.waitForTimeout(700);
 const lv = await page.evaluate(() => {
-  const it = [...document.querySelectorAll('.item')].find((x) => x.querySelector('.bar__fill--ok'));
+  // Les chapitres du livret sont des lignes `LessonRow` du système.
+  const it = [...document.querySelectorAll('.ds-lesson')].find((x) => x.querySelector('.bar__fill--ok'));
   if (!it) return null;
   const fill = it.querySelector('.bar__fill');
   return {
-    sub: [...it.querySelectorAll('.item__sub')].map((e) => e.textContent).join(' | '),
-    badge: it.querySelector('.badge')?.textContent || null,
+    sub: [...it.querySelectorAll('.ds-lesson__meta')].map((e) => e.textContent).join(' | '),
+    badge: it.querySelector('.ds-badge')?.textContent || null,
     largeur: parseInt(fill.style.width, 10),
   };
 });
