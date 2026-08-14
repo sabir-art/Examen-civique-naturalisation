@@ -954,13 +954,14 @@ a.themestat__row { min-height: 44px; }
 .empty__icon svg { width: 26px; height: 26px; }
 
 /* --------------------------------------------------------------- examen */
-/* Le choix d'un format est une `LessonRow` dont le contenu tient sur trois
-   lignes : elle s'aligne donc en haut, et non au centre. */
-.examen__mode { align-items: flex-start; }
-/* L'intitulé d'un format tient sur deux lignes si besoin : la troncature de
-   `LessonRow` est faite pour des titres courts. */
-.examen__titre { white-space: normal; }
-.examen__mode .ds-lesson__chev { margin-top: 10px; }
+/* Une ligne dont le contenu tient sur plusieurs lignes s'aligne en haut, et
+   non au centre : c'est le cas des formats d'examen, des parties du livret,
+   des chapitres et des réglages. */
+.ligne--haute { align-items: flex-start; }
+.ligne--haute .ds-lesson__chev { margin-top: 10px; }
+/* `LessonRow` tronque son intitulé, ce qui convient à un titre court. Quand il
+   est long — « Système institutionnel et politique » — on le laisse plier. */
+.ds-lesson__titre--long { white-space: normal; }
 
 /* ------------------------------------------------------------- accueil */
 /*

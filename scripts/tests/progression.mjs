@@ -36,12 +36,13 @@ async function etatDansActe(acte, rang) {
   await page.goto(`${BASE}#/histoire/a/${acte}`);
   await page.waitForTimeout(600);
   return page.evaluate((i) => {
-    const it = document.querySelectorAll('.item')[i];
+    // Les chapitres d'un acte sont des lignes `LessonRow` du système.
+    const it = document.querySelectorAll('.ds-lesson')[i];
     if (!it) return null;
     const fill = it.querySelector('.bar__fill');
     return {
-      lignes: [...it.querySelectorAll('.item__sub')].map((e) => e.textContent),
-      badge: it.querySelector('.badge')?.textContent || null,
+      lignes: [...it.querySelectorAll('.ds-lesson__meta')].map((e) => e.textContent),
+      badge: it.querySelector('.ds-badge')?.textContent || null,
       largeur: fill ? parseInt(fill.style.width, 10) : 0,
       vert: !!it.querySelector('.bar__fill--ok'),
     };
@@ -153,9 +154,9 @@ const mem = await page.evaluate(() => {
   const c = [...document.querySelectorAll('.card--info')].find((x) => /Mémorisation/.test(x.textContent));
   if (!c) return null;
   return {
-    pct: parseInt(c.querySelector('.badge').textContent, 10),
+    pct: parseInt(c.querySelector('.ds-badge').textContent, 10),
     texte: c.querySelector('.hint').textContent,
-    rouge: !!c.querySelector('.badge--bad, .bar__fill--bad'),
+    rouge: !!c.querySelector('.ds-badge--wrong, .bar__fill--bad'),
   };
 });
 verifier(mem !== null, 'le chapitre explique séparément la mémorisation');
@@ -206,11 +207,11 @@ await page.waitForTimeout(600);
 await page.goto(`${BASE}#/histoire`);
 await page.waitForTimeout(700);
 const acte = await page.evaluate(() => {
-  const it = document.querySelectorAll('.item')[0];
+  const it = document.querySelectorAll('.ds-lesson')[0];
   const fill = it.querySelector('.bar__fill');
   return {
-    sub: [...it.querySelectorAll('.item__sub')].map((e) => e.textContent).join(' | '),
-    badge: it.querySelector('.badge')?.textContent || null,
+    sub: [...it.querySelectorAll('.ds-lesson__meta')].map((e) => e.textContent).join(' | '),
+    badge: it.querySelector('.ds-badge')?.textContent || null,
     largeur: fill ? parseInt(fill.style.width, 10) : 0,
     vert: !!it.querySelector('.bar__fill--ok'),
   };

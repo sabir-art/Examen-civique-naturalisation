@@ -103,7 +103,7 @@ verifier(provenance.avecAlt === provenance.total, 'chaque image a une descriptio
 
 const LANGUES = { fr: 0, ar: 1, bi: 2 };
 async function choisir(lng) {
-  await page.locator('.seg--langue .seg__btn').nth(LANGUES[lng]).click();
+  await page.locator('.seg--langue .ds-seg__btn').nth(LANGUES[lng]).click();
   await page.waitForTimeout(450);
 }
 
@@ -149,7 +149,7 @@ if (await motIllustre.count()) {
   await page.waitForTimeout(350);
   verifier((await page.locator('.modal__panel .fig').count()) === 1,
     'appuyer sur un mot illustré ouvre sa définition avec l’image');
-  await page.click('.modal__panel .btn');
+  await page.click('.modal__panel .ds-btn');
 } else {
   ko('aucun mot illustré trouvé dans le chapitre 18');
 }

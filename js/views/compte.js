@@ -1,6 +1,7 @@
 /** Mon compte : profil, sauvegarde, synchronisation, réglages. */
 
 import { h, icon, toast, modal, confirmDialog } from '../lib/dom.js';
+import { Card, Button, Badge, Icon, IconTile, SegmentedControl } from '../ds/index.js';
 import { formatDate, formatDateShort } from '../lib/util.js';
 import * as store from '../store.js';
 import * as sync from '../sync.js';
@@ -38,7 +39,7 @@ function mainView() {
   const nameInput = h('input', { class: 'input', type: 'text', value: p.name, maxlength: '40' });
   const dateInput = h('input', { class: 'input', type: 'date', value: p.goalDate || '' });
 
-  const identity = h('div', { class: 'card stack' }, [
+  const identity = Card({ surface: 'white', elevation: 'xs', className: 'stack', children: [
     h('h2', { class: 'card__title', text: 'Mon profil' }),
     h('div', { class: 'field' }, [
       h('label', { class: 'label', text: 'Prénom' }),
@@ -56,21 +57,23 @@ function mainView() {
         refresh();
       },
     }),
-  ]);
+  ] });
 
   const themePref = p.settings.theme || 'auto';
-  const appearance = h('div', { class: 'card stack stack--tight' }, [
+  const appearance = Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
     h('h2', { class: 'card__title', text: 'Apparence' }),
-    h('div', { class: 'seg' }, [
-      // « Auto » et non « Automatique » : à 320px de large, le mot long ne
-      // tient pas dans un tiers de la carte et se faisait couper.
-      ['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre'],
-    ].map(([v, label]) => h('button', {
-      class: 'seg__btn', type: 'button', 'aria-pressed': themePref === v ? 'true' : 'false',
-      text: label,
-      onclick: () => { store.setSetting('theme', v); applyTheme(); refresh(); },
-    }))),
-  ]);
+    // `SegmentedControl` du système. « Auto » et non « Automatique » : à 320px
+    // de large, le mot long ne tient pas dans un tiers de la carte.
+    SegmentedControl({
+      options: [
+        { value: 'auto', label: 'Auto' },
+        { value: 'light', label: 'Clair' },
+        { value: 'dark', label: 'Sombre' },
+      ],
+      value: themePref,
+      onChange: (v) => { store.setSetting('theme', v); applyTheme(); refresh(); },
+    }),
+  ] });
 
   const s = p.settings || {};
   const bascule = (cle, titre, sous, defaut = true) => {
@@ -81,87 +84,87 @@ function mainView() {
       onclick: () => { store.setSetting(cle, !actif); if (!actif) fx.tap(); refresh(); },
     }, [
       h('span', { class: 'grow', style: 'text-align:left' }, [
-        h('span', { class: 'item__title', text: titre }),
-        h('span', { class: 'item__sub', text: sous }),
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: titre }),
+        h('div', { class: 'ds-lesson__meta', text: sous }),
       ]),
       h('span', { class: 'toggle' }, h('span', { class: 'toggle__dot' })),
     ]);
   };
 
-  const sensations = h('div', { class: 'card stack stack--tight' }, [
+  const sensations = Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
     h('h2', { class: 'card__title', text: 'Sons et vibrations' }),
     bascule('sound', 'Sons', 'Un petit signal à chaque réponse et à la fin d\'une série'),
     bascule('haptics', 'Vibration', fx.vibrationDisponible()
       ? 'Une brève vibration en même temps que le son'
       : "Non proposé par ce navigateur — sur iPhone, aucune application web n'a accès au moteur haptique"),
-  ]);
+  ] });
 
-  const backup = h('div', { class: 'card stack stack--tight' }, [
+  const backup = Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
     h('h2', { class: 'card__title', text: 'Sauvegarde' }),
     h('p', { class: 'card__sub', text: `${o.seen} question${o.seen > 1 ? 's' : ''} suivie${o.seen > 1 ? 's' : ''}, ${o.exams} examen${o.exams > 1 ? 's' : ''} blanc${o.exams > 1 ? 's' : ''}. Exportez un fichier de secours de temps en temps : il se réimporte sur n'importe quel appareil.` }),
     h('div', { class: 'btn-row mt' }, [
       h('button', { class: 'btn btn--ghost', type: 'button', onclick: doExport }, [icon('download'), h('span', { text: 'Exporter' })]),
       h('button', { class: 'btn btn--ghost', type: 'button', onclick: doImport }, [icon('upload'), h('span', { text: 'Importer' })]),
     ]),
-  ]);
+  ] });
 
   const cloudState = sync.isSignedIn()
     ? `Connecté — ${sync.accountEmail()}`
     : sync.isConfigured() ? 'Configurée, non connectée' : 'Non configurée';
 
   const links = h('div', { class: 'list' }, [
-    h('a', { class: 'item item--ai', href: '#/compte/ia' }, [
-      h('span', { class: 'item__icon' }, icon('star')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Assistant et voix' }),
+    h('a', { class: 'ds-lesson ds-lesson--tap item--ai', href: '#/compte/ia' }, [
+      IconTile({ icon: 'star', tone: 'lavender', size: 38 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Assistant et voix' }),
         h('span', {
-          class: 'item__sub',
+          class: 'ds-lesson__meta',
           text: ai.isConfigured()
             ? `${ai.PROVIDERS[ai.provider()].label} · ${ai.model()}${ai.hasVoiceKey() ? ' · voix ElevenLabs' : ''}`
             : 'Brancher une IA et une voix (facultatif)',
         }),
       ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]),
-    h('a', { class: 'item', href: '#/activite' }, [
-      h('span', { class: 'item__icon' }, icon('bell')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Activité et rappel quotidien' }),
-        h('span', { class: 'item__sub', text: rappelEtat() }),
+    h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/activite' }, [
+      IconTile({ icon: 'bell', tone: 'sunken', size: 38 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Activité et rappel quotidien' }),
+        h('div', { class: 'ds-lesson__meta', text: rappelEtat() }),
       ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]),
-    h('a', { class: 'item', href: '#/compte/synchronisation' }, [
-      h('span', { class: 'item__icon' }, icon('cloud')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: 'Synchronisation entre appareils' }),
-        h('span', { class: 'item__sub', text: cloudState }),
+    h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/compte/synchronisation' }, [
+      IconTile({ icon: 'cloud', tone: 'sunken', size: 38 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Synchronisation entre appareils' }),
+        h('div', { class: 'ds-lesson__meta', text: cloudState }),
       ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]),
     canInstall() ? h('button', {
       class: 'item', type: 'button',
       onclick: async () => { const ok = await promptInstall(); if (ok) toast("L'application est installée."); refresh(); },
     }, [
-      h('span', { class: 'item__icon' }, icon('download')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: "Installer l'application" }),
-        h('span', { class: 'item__sub', text: "Pour l'ouvrir depuis l'écran d'accueil, même hors ligne" }),
+      IconTile({ icon: 'download', tone: 'sunken', size: 38 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: "Installer l'application" }),
+        h('div', { class: 'ds-lesson__meta', text: "Pour l'ouvrir depuis l'écran d'accueil, même hors ligne" }),
       ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]) : null,
-    h('a', { class: 'item', href: '#/compte/a-propos' }, [
-      h('span', { class: 'item__icon' }, icon('info')),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: "À propos et infos pratiques" }),
-        h('span', { class: 'item__sub', text: `${QUESTIONS.length} questions · sources officielles` }),
+    h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/compte/a-propos' }, [
+      IconTile({ icon: 'info', tone: 'sunken', size: 38 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: "À propos et infos pratiques" }),
+        h('div', { class: 'ds-lesson__meta', text: `${QUESTIONS.length} questions · sources officielles` }),
       ]),
-      h('span', { class: 'item__chev' }, icon('chevron')),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]),
   ].filter(Boolean));
 
   const others = store.profiles();
-  const profilesCard = h('div', { class: 'card stack stack--tight' }, [
+  const profilesCard = Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
     h('h2', { class: 'card__title', text: 'Comptes sur cet appareil' }),
     h('div', { class: 'stack stack--tight' }, others.map((o2) => h('div', { class: 'row row--between' }, [
       h('span', { class: 'grow small' }, [
@@ -179,9 +182,9 @@ function mainView() {
       class: 'btn btn--ghost mt', type: 'button',
       onclick: addProfile,
     }, [icon('plus'), h('span', { text: 'Ajouter un compte' })]),
-  ]);
+  ] });
 
-  const danger = h('div', { class: 'card stack stack--tight' }, [
+  const danger = Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
     h('h2', { class: 'card__title', text: 'Zone sensible' }),
     h('p', { class: 'card__sub', text: 'Ces actions sont définitives. Exportez une sauvegarde avant.' }),
     h('button', {
@@ -206,7 +209,7 @@ function mainView() {
         if (ok) { store.deleteProfile(p.id); toast('Compte supprimé.'); navigate('#/'); refresh(); }
       },
     }) : null,
-  ].filter(Boolean));
+  ].filter(Boolean) });
 
   return {
     node: h('div', { class: 'stack' }, [identity, appearance, sensations, backup, links, profilesCard, danger]),
@@ -307,7 +310,7 @@ function cloudView() {
     if (!sync.isConfigured()) {
       const urlInput = h('input', { class: 'input', type: 'url', placeholder: 'https://xxxx.supabase.co', autocapitalize: 'off', autocorrect: 'off' });
       const keyInput = h('input', { class: 'input', type: 'text', placeholder: 'Clé publique (anon)', autocapitalize: 'off', autocorrect: 'off' });
-      parts.push(h('div', { class: 'card stack stack--tight' }, [
+      parts.push(Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
         h('h2', { class: 'card__title', text: 'Configurer' }),
         h('div', { class: 'field' }, [h('label', { class: 'label', text: 'Adresse du projet' }), urlInput]),
         h('div', { class: 'field' }, [h('label', { class: 'label', text: 'Clé publique' }), keyInput]),
@@ -318,7 +321,7 @@ function cloudView() {
             catch (err) { toast(err.message); }
           },
         }),
-      ]));
+      ] }));
     } else if (!sync.isSignedIn()) {
       const email = h('input', { class: 'input', type: 'email', placeholder: 'Adresse e-mail', autocapitalize: 'off' });
       const pass = h('input', { class: 'input', type: 'password', placeholder: 'Mot de passe (8 caractères minimum)' });
@@ -330,7 +333,7 @@ function cloudView() {
           draw();
         } catch (err) { toast(err.message || 'Échec.'); }
       };
-      parts.push(h('div', { class: 'card stack stack--tight' }, [
+      parts.push(Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
         h('h2', { class: 'card__title', text: 'Votre compte en ligne' }),
         email, pass,
         h('div', { class: 'btn-row mt' }, [
@@ -341,9 +344,9 @@ function cloudView() {
           class: 'btn btn--quiet', type: 'button', text: 'Changer de projet',
           onclick: () => { sync.forget(); toast('Configuration effacée.'); draw(); },
         }),
-      ]));
+      ] }));
     } else {
-      parts.push(h('div', { class: 'card stack stack--tight' }, [
+      parts.push(Card({ surface: 'white', elevation: 'xs', className: 'stack stack--tight', children: [
         h('h2', { class: 'card__title', text: 'Connecté' }),
         h('p', { class: 'card__sub', text: sync.accountEmail() }),
         cfg?.lastSync ? h('p', { class: 'card__sub', text: `Dernière synchronisation : ${formatDate(cfg.lastSync)}` }) : null,
@@ -377,7 +380,7 @@ function cloudView() {
           class: 'btn btn--quiet', type: 'button', text: 'Se déconnecter',
           onclick: () => { sync.signOut(); toast('Déconnecté.'); draw(); },
         }),
-      ].filter(Boolean)));
+      ].filter(Boolean) }));
     }
 
     parts.push(h('p', { class: 'hint center', text: "Sans synchronisation, pensez simplement à exporter une sauvegarde de temps en temps depuis l'écran précédent." }));

@@ -34,7 +34,7 @@ await p.screenshot({ path: `${SHOT}/F1-compte-clair.png`, fullPage: true });
 await step('le champ date ne déborde pas de sa carte', async () => {
   const r = await p.evaluate(() => {
     const i = document.querySelector('input[type="date"]');
-    const carte = i.closest('.card');
+    const carte = i.closest('.card, .ds-card');
     return { input: i.getBoundingClientRect().right, carte: carte.getBoundingClientRect().right };
   });
   if (r.input > r.carte - 8) throw new Error(`le champ finit à ${Math.round(r.input)} pour une carte à ${Math.round(r.carte)}`);

@@ -19,10 +19,10 @@ function liste() {
 
   const officiel = h('div', { class: 'stack stack--tight' }, [
     h('p', { class: 'section-title', text: 'Document officiel' }),
-    h('a', { class: 'ds-lesson ds-lesson--tap examen__mode', href: '#/livret' }, [
+    h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: '#/livret' }, [
       IconTile({ icon: 'star', tone: 'lavender', size: 44 }),
       h('div', { class: 'ds-lesson__body' }, [
-        h('div', { class: 'ds-lesson__title examen__titre', text: LIVRET.titre }),
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: LIVRET.titre }),
         h('div', { class: 'ds-lesson__meta', text: `${LIVRET.edition} · ${LIVRET.editeur}` }),
         h('div', { class: 'ds-lesson__meta', style: 'margin-top:6px', text: `${PARTIES.length} parties, ${CHAPITRES.length} chapitres, ${lo.total} questions dédiées` }),
         h('div', { class: 'bar', style: 'margin-top:8px' }, h('div', {
@@ -51,7 +51,7 @@ function liste() {
           h('div', { class: 'ds-lesson__body' }, [
             // Deux lignes autorisées : les intitulés de fiche sont longs, et
             // la troncature de `LessonRow` est faite pour des titres courts.
-            h('div', { class: 'ds-lesson__title examen__titre', text: c.title }),
+            h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: c.title }),
             h('div', { class: 'ds-lesson__meta', text: c.subtitle }),
           ]),
           m !== null ? h('span', { class: `badge badge--${m >= 70 ? 'ok' : m >= 35 ? 'warn' : 'bad'}`, text: `${m} %` }) : null,

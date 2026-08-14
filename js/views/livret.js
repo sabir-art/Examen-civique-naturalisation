@@ -56,10 +56,10 @@ function sommaire() {
 
   const list = h('div', { class: 'list' }, PARTIES.map((p) => {
     const av = livretPartieProgres(p.key);
-    return h('a', { class: 'ds-lesson ds-lesson--tap examen__mode', href: `#/livret/p/${p.key}` }, [
+    return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/livret/p/${p.key}` }, [
       IconTile({ icon: p.icon, tone: 'butter', size: 44 }),
       h('div', { class: 'ds-lesson__body' }, [
-        h('div', { class: 'ds-lesson__title examen__titre', text: `${p.num === 'A' ? '' : `Partie ${p.num} — `}${p.title}` }),
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: `${p.num === 'A' ? '' : `Partie ${p.num} — `}${p.title}` }),
         h('div', { class: 'ds-lesson__meta', text: `${p.chapters.length} chapitre${p.chapters.length > 1 ? 's' : ''} · pages ${p.pages}` }),
         av.pct === null ? null
           : h('div', { class: 'ds-lesson__meta', text: av.termine ? 'Partie terminée' : `${av.termines}/${av.chapitres} chapitres terminés` }),
@@ -103,10 +103,10 @@ function partie(key) {
   const list = h('div', { class: 'list' }, p.chapters.map((c) => {
     const av = livretChapitreProgres(c.key);
     const nq = questionsOf(c.key).length;
-    return h('a', { class: 'ds-lesson ds-lesson--tap examen__mode', href: `#/livret/c/${c.key}` }, [
+    return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/livret/c/${c.key}` }, [
       h('span', { class: 'ds-tile ds-tile--sunken livret__num', text: c.num }),
       h('div', { class: 'ds-lesson__body' }, [
-        h('div', { class: 'ds-lesson__title examen__titre', text: c.title }),
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: c.title }),
         h('div', { class: 'ds-lesson__meta', text: `${c.sections.length} section${c.sections.length > 1 ? 's' : ''} · page${String(c.pages).includes('à') ? 's' : ''} ${c.pages}${nq ? ` · ${nq} questions` : ''}` }),
         av.pct === null ? null
           : h('div', { class: 'ds-lesson__meta', text: av.termine ? 'Chapitre terminé' : `${av.justes}/${av.total} questions justes` }),

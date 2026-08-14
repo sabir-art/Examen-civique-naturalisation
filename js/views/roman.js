@@ -79,13 +79,18 @@ function choixLangue(onChange) {
     { v: 'ar', court: 'العربية' },
     { v: 'bi', court: 'FR + ع' },
   ];
-  return h('div', { class: 'seg seg--langue' }, CHOIX.map((c) => h('button', {
-    class: 'seg__btn', type: 'button',
-    'aria-pressed': actuelle === c.v ? 'true' : 'false',
-    lang: c.v === 'ar' ? 'ar' : 'fr',
-    text: c.court,
-    onclick: () => { if (langue() !== c.v) { setLangue(c.v); onChange(); } },
-  })));
+  const seg = SegmentedControl({
+    options: CHOIX.map((c) => ({ value: c.v, label: c.court })),
+    value: actuelle,
+    onChange: (v) => { if (langue() !== v) { setLangue(v); onChange(); } },
+    className: 'seg--langue',
+  });
+  // L'attribut de langue est posé après coup : le composant ne le connaît pas,
+  // et sans lui le navigateur rend l'arabe avec la police latine.
+  seg.querySelectorAll('.ds-seg__btn').forEach((b, i) => {
+    if (CHOIX[i].v === 'ar') b.setAttribute('lang', 'ar');
+  });
+  return seg;
 }
 
 /* ------------------------------------------------------------- glossaire */
@@ -98,7 +103,7 @@ function ouvrirTerme(entree) {
     figure(images.imageDuTerme(entree.terme), 'fr', { compacte: true }),
     h('p', { class: 'glossdef', text: entree.def }),
     h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: entree.ar })),
-    h('button', { class: 'btn btn--ghost mt', type: 'button', text: 'Fermer', onclick: () => close() }),
+    Button({ variant: 'secondary', size: 'lg', fullWidth: true, label: 'Fermer', onClick: () => close(), className: 'mt' }),
   ].filter(Boolean));
 }
 
@@ -143,7 +148,7 @@ function ligneTerme(entree, { nouveau = false, arDabord = false } = {}) {
       icon('bulb'),
       h('span', { class: 'grow', text: entree.terme }),
       vue ? h('span', { class: 'glossrow__vue', title: 'avec une image' }, icon('star')) : null,
-      nouveau ? h('span', { class: 'badge badge--brand', text: 'nouveau' }) : null,
+      nouveau ? Badge({ tone: 'info', label: 'nouveau' }) : null,
     ].filter(Boolean)),
     h('div', { class: 'mt' }, [vue, ...(arDabord ? [ar, fr] : [fr, ar])].filter(Boolean)),
   ]);
@@ -170,7 +175,7 @@ function carteMotsDuChapitre(c, lng) {
   return h('div', { class: 'stack stack--tight' }, [
     h('div', { class: 'row row--between' }, [
       h('p', { class: 'section-title', style: 'margin:0', text: 'Les mots de ce chapitre' }),
-      h('span', { class: 'badge', text: `${termes.length}` }),
+      Badge({ tone: 'neutral', label: String(termes.length) }),
     ]),
     h('div', { class: 'card card--info' }, [
       h('p', {
@@ -289,7 +294,7 @@ function sommaire() {
   // Langue de lecture, choisie une fois pour tous les chapitres.
   const carteLangue = h('div', { class: 'card' }, [
     h('div', { class: 'row', style: 'gap:12px' }, [
-      h('span', { class: 'item__icon item__icon--story' }, icon('chat')),
+      IconTile({ icon: 'message-circle', tone: 'lavender', size: 38 }),
       h('div', { class: 'grow' }, [
         h('h2', { class: 'card__title', text: 'Langue de lecture' }),
         h('p', { class: 'card__sub', text: `Le récit est traduit en arabe (${TOTAL_TRADUITS} chapitres). Choisissez « FR + ع » pour lire les deux, paragraphe par paragraphe.` }),
@@ -303,20 +308,20 @@ function sommaire() {
     const p = romanActeProgres(a.key);
     const ar = ACTE_AR_BY_KEY.get(a.key);
     const lng = langue();
-    return h('a', { class: 'item item--story', href: `#/histoire/a/${a.key}`, style: 'align-items:flex-start' }, [
-      h('span', { class: 'item__icon' }, icon(a.icon)),
-      h('span', { class: 'item__body' }, [
-        h('span', { class: 'item__title', text: `Acte ${a.num} — ${a.titre}` }),
-        lng !== 'fr' && ar ? h('span', { class: 'item__title arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
+    return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/histoire/a/${a.key}` }, [
+      IconTile({ icon: a.icon, tone: 'lavender', size: 44 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: `Acte ${a.num} — ${a.titre}` }),
+        lng !== 'fr' && ar ? h('div', { class: 'ds-lesson__title ds-lesson__titre--long arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
         h('span', {
-          class: 'item__sub',
+          class: 'ds-lesson__meta',
           text: `${a.epoque} · ${p.termine ? `${p.chapitres} chapitres terminés` : `${p.termines}/${p.chapitres} chapitres terminés`}`,
         }),
         h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
           h('div', { class: `bar__fill${p.termine ? ' bar__fill--ok' : ''}`, style: `width:${p.pct}%` })),
       ].filter(Boolean)),
-      p.termine ? h('span', { class: 'badge badge--ok', text: 'Terminé', style: 'margin-top:6px' }) : null,
-      h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
+      p.termine ? Badge({ tone: 'correct', label: 'Terminé', className: 'livret__etat' }) : null,
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ].filter(Boolean));
   }));
 
@@ -328,13 +333,13 @@ function sommaire() {
       carteLangue,
       h('p', { class: 'section-title', text: 'Les trois actes' }),
       list,
-      h('a', { class: 'item', href: '#/histoire/glossaire' }, [
-        h('span', { class: 'item__icon item__icon--brand' }, icon('bulb')),
-        h('span', { class: 'item__body' }, [
-          h('span', { class: 'item__title', text: 'Glossaire des mots difficiles' }),
-          h('span', { class: 'item__sub', text: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe` }),
+      h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/histoire/glossaire' }, [
+        IconTile({ icon: 'lightbulb', tone: 'lavender', size: 38 }),
+        h('div', { class: 'ds-lesson__body' }, [
+          h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Glossaire des mots difficiles' }),
+          h('div', { class: 'ds-lesson__meta', text: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe` }),
         ]),
-        h('span', { class: 'item__chev' }, icon('chevron')),
+        Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
       ]),
       h('p', { class: 'hint center mt', text: "Les faits sont ceux du programme officiel et du livret du citoyen ; c'est la façon de les raconter qui change. Les scènes sont écrites pour rendre les dates et les noms plus faciles à retenir." }),
     ]),
@@ -363,26 +368,26 @@ function acte(key) {
           : p.total === 0 ? 'Lu'
             : `Lu · ${p.justes}/${p.total} questions justes`;
 
-    return h('a', { class: `item ${p.termine ? 'item--story' : ''}`, href: `#/histoire/c/${c.key}`, style: 'align-items:flex-start' }, [
+    return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/histoire/c/${c.key}` }, [
       h('span', { class: 'vignette' }, [
         h('img', { src: `./assets/story/${c.key}.svg`, alt: '', loading: 'lazy', width: '800', height: '420' }),
         h('span', { class: 'vignette__num', text: String(c.num) }),
       ]),
-      h('span', { class: 'item__body' }, [
+      h('div', { class: 'ds-lesson__body' }, [
         lng === 'ar' && ar
-          ? h('span', { class: 'item__title', dir: 'rtl', lang: 'ar', text: ar.titre })
-          : h('span', { class: 'item__title', text: c.titre }),
-        lng === 'bi' && ar ? h('span', { class: 'item__title arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
-        h('span', { class: 'item__sub', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min` }),
-        motsNouveaux(c) ? h('span', { class: 'item__sub', text: `${motsNouveaux(c)} nouveau${motsNouveaux(c) > 1 ? 'x' : ''} mot${motsNouveaux(c) > 1 ? 's' : ''} de vocabulaire` }) : null,
-        etat ? h('span', { class: 'item__sub', text: etat }) : null,
+          ? h('div', { class: 'ds-lesson__title ds-lesson__titre--long', dir: 'rtl', lang: 'ar', text: ar.titre })
+          : h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: c.titre }),
+        lng === 'bi' && ar ? h('div', { class: 'ds-lesson__title ds-lesson__titre--long arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
+        h('div', { class: 'ds-lesson__meta', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min` }),
+        motsNouveaux(c) ? h('div', { class: 'ds-lesson__meta', text: `${motsNouveaux(c)} nouveau${motsNouveaux(c) > 1 ? 'x' : ''} mot${motsNouveaux(c) > 1 ? 's' : ''} de vocabulaire` }) : null,
+        etat ? h('div', { class: 'ds-lesson__meta', text: etat }) : null,
         p.pct > 0 ? h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
           h('div', { class: `bar__fill${p.termine ? ' bar__fill--ok' : ''}`, style: `width:${p.pct}%` })) : null,
       ].filter(Boolean)),
       p.termine
-        ? h('span', { class: 'badge badge--ok', text: 'Terminé', style: 'margin-top:6px' })
-        : p.lu ? h('span', { class: 'badge', text: 'Lu', style: 'margin-top:6px' }) : null,
-      h('span', { class: 'item__chev', style: 'margin-top:10px' }, icon('chevron')),
+        ? Badge({ tone: 'correct', label: 'Terminé', className: 'livret__etat' })
+        : p.lu ? Badge({ tone: 'neutral', label: 'Lu', className: 'livret__etat' }) : null,
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ].filter(Boolean));
   }));
 
@@ -537,9 +542,9 @@ function chapitre(key) {
             : h('p', { class: 'card__sub', style: 'margin-top:7px', html: `${c.lieu} — ${c.date} · ${c.minutes} min de lecture` }),
           nq ? h('div', { class: 'row', style: 'margin-top:10px;gap:8px;flex-wrap:wrap' }, [
             progres.termine
-              ? h('span', { class: 'badge badge--ok', text: 'Chapitre terminé' })
-              : h('span', { class: 'badge', text: `${progres.justes}/${nq} questions justes` }),
-            h('span', { class: 'badge', text: `${nq} questions` }),
+              ? Badge({ tone: 'correct', label: 'Chapitre terminé' })
+              : Badge({ tone: 'neutral', label: `${progres.justes}/${nq} questions justes` }),
+            Badge({ tone: 'neutral', label: `${nq} questions` }),
           ]) : null,
         ].filter(Boolean)),
       ]),
@@ -615,7 +620,7 @@ function carteMemorisation(key, nq, progres) {
   return h('div', { class: 'card card--info' }, [
     h('div', { class: 'row row--between' }, [
       h('p', { class: 'card__title', style: 'font-size:15px', text: 'Mémorisation' }),
-      h('span', { class: 'badge badge--brand', text: `${m} %` }),
+      Badge({ tone: 'info', label: `${m} %` }),
     ]),
     h('div', { class: 'bar bar--thin mt' }, h('div', { class: 'bar__fill', style: `width:${m}%` })),
     h('p', {

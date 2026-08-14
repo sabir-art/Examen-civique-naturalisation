@@ -30,7 +30,7 @@ await page.waitForSelector('.accueil__hero');
 
 const LANGUES = { fr: 0, ar: 1, bi: 2 };
 async function choisir(lng) {
-  await page.locator('.seg--langue .seg__btn').nth(LANGUES[lng]).click();
+  await page.locator('.seg--langue .ds-seg__btn').nth(LANGUES[lng]).click();
   await page.waitForTimeout(450);
 }
 
@@ -39,7 +39,7 @@ async function choisir(lng) {
 await page.goto(BASE + '#/histoire/c/ch12');
 await page.waitForTimeout(600);
 verifier((await page.locator('.seg--langue').count()) > 0, 'le sélecteur de langue est présent sur un chapitre');
-verifier(await page.locator('.seg--langue .seg__btn').first().getAttribute('aria-pressed') === 'true',
+verifier(await page.locator('.seg--langue .ds-seg__btn').first().getAttribute('aria-selected') === 'true',
   'le français est sélectionné par défaut');
 verifier((await page.locator('.prose--ar').count()) === 0, 'aucun texte arabe en mode français');
 
@@ -154,7 +154,7 @@ verifier((await page.locator('.modal__panel').count()) === 1, 'appuyer sur un mo
 verifier((await page.locator('.modal__panel .glossdef').count()) === 1, 'la définition française est là');
 const arDef = await page.textContent('.modal__panel .glossar');
 verifier((arDef.match(/[؀-ۿ]/g) || []).length > 10, 'la définition arabe est là');
-await page.click('.modal__panel .btn');
+await page.click('.modal__panel .ds-btn');
 await page.waitForTimeout(250);
 verifier((await page.locator('.modal__panel').count()) === 0, 'la feuille se referme');
 
@@ -176,7 +176,7 @@ async function comparer() {
     soulignes: [...document.querySelectorAll('.gloss')].map((e) => e.dataset.terme),
     formes: [...document.querySelectorAll('.gloss')].map((e) => e.textContent),
     listes: [...document.querySelectorAll('.glossrow .summary .grow')].map((e) => e.textContent),
-    neufs: document.querySelectorAll('.glossrow .badge--brand').length,
+    neufs: document.querySelectorAll('.glossrow .ds-badge--info').length,
   }));
 }
 

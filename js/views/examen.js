@@ -35,7 +35,7 @@ function choix() {
 
   const cards = EXAM_MODE_LIST.map((m) => {
     const s = stats(m.key);
-    return h('a', { class: 'ds-lesson ds-lesson--tap examen__mode', href: `#/examen/${m.key}` }, [
+    return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/examen/${m.key}` }, [
       h('span', {
         class: 'ds-tile ds-tile--blush',
         style: m.accent ? 'background:var(--accent-100);color:var(--accent)' : '',
@@ -43,7 +43,7 @@ function choix() {
       // `div` et non `span` : c'est la structure de `LessonRow`. En inline, le
       // texte ne se plie pas à la largeur de la colonne et déborde de l'écran.
       h('div', { class: 'ds-lesson__body' }, [
-        h('div', { class: 'ds-lesson__title examen__titre', text: m.title }),
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: m.title }),
         h('div', { class: 'ds-lesson__meta', text: m.blurb }),
         h('div', { class: 'ds-lesson__meta', style: 'margin-top:6px', text: m.source() }),
         s.count ? h('div', { class: 'row', style: 'margin-top:8px;gap:6px;flex-wrap:wrap' }, [
