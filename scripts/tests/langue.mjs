@@ -254,6 +254,42 @@ for (const [w, hh] of [[320, 568], [390, 844], [430, 932]]) {
 verifier(debordements.length === 0,
   `aucun défilement horizontal en 3 largeurs × 3 langues${debordements.length ? ` — ${debordements.slice(0, 3).join(' ; ')}` : ''}`);
 
+/* ------------------- 10. aucun texte ne sort de sa carte */
+
+/**
+ * Le défilement de la page ne suffit pas à repérer le défaut : un texte peut
+ * sortir de sa carte des deux côtés sans que la page s'élargisse, parce qu'un
+ * conteneur plus haut rogne. C'est ce qui arrivait au chapitre 7 en arabe —
+ * la parenthèse « (Déclaration des droits de l'homme et du citoyen) » portait
+ * `white-space: nowrap` et traversait l'écran.
+ *
+ * On compare donc chaque bloc de texte à la carte qui le contient.
+ */
+await page.setViewportSize({ width: 390, height: 844 });
+const sorties = [];
+for (const lng of ['fr', 'ar', 'bi']) {
+  await page.goto(BASE + '#/histoire/c/ch07');
+  await page.waitForTimeout(400);
+  await choisir(lng);
+  await page.waitForTimeout(400);
+  const hors = await page.evaluate(() => {
+    const out = [];
+    for (const el of document.querySelectorAll('.prose p, .prose li, .prose blockquote, .arline, .lat, .glossdef')) {
+      const carte = el.closest('.ds-card, .card, .prose');
+      if (!carte) continue;
+      const r = el.getBoundingClientRect();
+      const c = carte.getBoundingClientRect();
+      if (r.right > c.right + 1 || r.left < c.left - 1) {
+        out.push(`${el.className || el.tagName} : ${Math.round(r.left)}→${Math.round(r.right)} hors de ${Math.round(c.left)}→${Math.round(c.right)}`);
+      }
+    }
+    return out.slice(0, 3);
+  });
+  hors.forEach((x) => sorties.push(`${lng} — ${x}`));
+}
+verifier(sorties.length === 0,
+  `aucun texte ne sort de sa carte, dans les trois langues${sorties.length ? ` — ${sorties.join(' ; ')}` : ''}`);
+
 await browser.close();
 console.log(erreurs.length ? `\n${erreurs.length} erreur(s).` : '\nAucune erreur.');
 process.exit(erreurs.length ? 1 : 0);

@@ -76,20 +76,72 @@ export function modal(render) {
     const root = document.getElementById('modal-root');
     const close = (value) => {
       root.replaceChildren();
+      document.body.classList.remove('is-locked');
       document.removeEventListener('keydown', onKey);
       resolve(value);
     };
     const onKey = (e) => { if (e.key === 'Escape') close(undefined); };
     document.addEventListener('keydown', onKey);
 
-    const panel = h('div', { class: 'modal__panel', role: 'dialog', 'aria-modal': 'true' }, render(close));
+    const panel = h('div', { class: 'modal__panel', role: 'dialog', 'aria-modal': 'true' }, [
+      h('span', { class: 'modal__grip', 'aria-hidden': 'true' }),
+      ...[].concat(render(close)).filter(Boolean),
+    ]);
     root.append(h('div', { class: 'modal' }, [
       h('div', { class: 'modal__scrim', onclick: () => close(undefined) }),
       panel,
     ]));
+
+    // La page de derrière ne défile plus tant que la feuille est ouverte : sur
+    // un téléphone, le doigt qui glisse sur la feuille entraînait le chapitre
+    // en dessous, et l'on perdait sa place en lisant une définition.
+    document.body.classList.add('is-locked');
+    glisserPourFermer(panel, () => close(undefined));
+
     const focusable = panel.querySelector('input, button, select, textarea');
     if (focusable) setTimeout(() => focusable.focus(), 60);
   });
+}
+
+/**
+ * Tirer la feuille vers le bas la ferme.
+ *
+ * Le geste ne prend la main QUE si le contenu est déjà en haut de sa course :
+ * sinon on ne pourrait plus faire défiler une définition longue sans fermer la
+ * feuille par accident. En dessous du seuil, elle revient en place.
+ */
+function glisserPourFermer(panneau, fermer) {
+  const SEUIL = 90;
+  const corps = panneau.querySelector('.ds-sheet__body, .modal__body') || panneau;
+  let depart = null;
+  let delta = 0;
+
+  panneau.addEventListener('touchstart', (e) => {
+    if (corps.scrollTop > 0) { depart = null; return; }
+    depart = e.touches[0].clientY;
+    delta = 0;
+    panneau.style.transition = 'none';
+  }, { passive: true });
+
+  panneau.addEventListener('touchmove', (e) => {
+    if (depart === null) return;
+    delta = e.touches[0].clientY - depart;
+    if (delta <= 0) { panneau.style.transform = ''; return; }
+    // `preventDefault` : sans lui, Safari continue de faire défiler la page
+    // derrière pendant que la feuille suit le doigt.
+    if (e.cancelable) e.preventDefault();
+    panneau.style.transform = `translateY(${delta}px)`;
+  }, { passive: false });
+
+  const relacher = () => {
+    if (depart === null) return;
+    panneau.style.transition = '';
+    panneau.style.transform = '';
+    depart = null;
+    if (delta > SEUIL) fermer();
+  };
+  panneau.addEventListener('touchend', relacher);
+  panneau.addEventListener('touchcancel', relacher);
 }
 
 /** Boîte de confirmation. */

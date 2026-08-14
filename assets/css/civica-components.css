@@ -131,6 +131,9 @@ button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); 
   height: 22px; padding: 0 9px;
   font: var(--type-micro); letter-spacing: 0.01em;
   border-radius: var(--radius-pill);
+  /* Une puce ne se plie jamais : « 11 % » coupé en deux lignes donnait un
+     rond avec le nombre en haut et le signe en bas. */
+  white-space: nowrap;
 }
 .ds-badge__dot { width: 6px; height: 6px; border-radius: var(--radius-circle); background: currentColor; }
 .ds-badge:has(.ds-badge__dot) { padding: 0 9px 0 7px; }

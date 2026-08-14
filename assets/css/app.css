@@ -559,6 +559,9 @@ a { color: var(--lien); }
 .hero--revise { background: var(--revise-100); }
 .hero--livret { background: var(--livret-100); }
 .hero--progress { background: var(--progress-100); }
+/* Bandeau blanc : quand la couleur sert plus bas — un pastel par format
+   d'examen — l'en-tête la laisse aux cartes et se contente du fond de carte. */
+.hero--blanc { background: var(--surface); box-shadow: var(--shadow); }
 
 /* --------------------------------------------------------------- buttons */
 /* Pilule pleine, encre : l'unique élément noir de l'écran, donc la seule
@@ -1304,7 +1307,19 @@ details[open] > .summary::after { content: '⌃'; }
    du sens de lecture, sinon les parenthèses partent du mauvais côté. */
 .lat {
   unicode-bidi: isolate; direction: ltr; font-family: var(--font);
-  font-size: .93em; color: var(--muted); white-space: nowrap;
+  font-size: .93em; color: var(--muted);
+  /* PAS de `white-space: nowrap` : il tenait les noms propres d'un bloc, mais
+     une expression longue — « (Déclaration des droits de l'homme et du
+     citoyen) » — ne pouvait alors plus se couper et sortait de la carte des
+     deux côtés. Un nom propre court ne se coupera de toute façon pas. */
+  overflow-wrap: anywhere;
+}
+
+/* Filet de sécurité sur tout le texte long : un mot sans espace — une adresse,
+   un composé arabe, un nom latin dans une phrase arabe — ne doit jamais
+   pouvoir déborder de son conteneur. */
+.prose, .prose--ar, .prose--story, .arline, .glossdef, .glossar {
+  overflow-wrap: break-word; word-break: normal; hyphens: auto;
 }
 
 /* Mode bilingue : le paragraphe arabe est rattaché au paragraphe français
@@ -1467,7 +1482,9 @@ mark { background: color-mix(in srgb, var(--warn) 34%, transparent); color: inhe
 .item--neuf { border-color: color-mix(in srgb, var(--brand) 45%, transparent); }
 
 /* ------------------------------------------------- graphique hebdomadaire */
-.week { display: flex; align-items: flex-end; gap: 8px; height: 96px; margin-top: 6px; }
+/* Le graphique a besoin d'air : collé au titre et haut de 96px, on ne
+   distinguait pas la forme de la semaine. */
+.week { display: flex; align-items: flex-end; gap: 8px; height: 132px; margin: 18px 0 4px; }
 .week__day { flex: 1; display: grid; gap: 6px; justify-items: center; align-content: end; }
 .week__bar {
   width: 100%; max-width: 26px; min-height: 5px; border-radius: 7px 7px 3px 3px;
@@ -1573,15 +1590,41 @@ details[open] > .summary svg:first-child { transform: rotate(-12deg) scale(1.08)
   backdrop-filter: var(--blur-overlay); -webkit-backdrop-filter: var(--blur-overlay);
   animation: fade .2s ease;
 }
+/* Tant qu'une feuille est ouverte, la page de derrière est figée. `position:
+   fixed` et non `overflow: hidden` : sur iOS, `overflow` seul ne suffit pas,
+   le document continue de défiler sous le doigt. */
+body.is-locked { position: fixed; inset: 0; width: 100%; overflow: hidden; }
+
+/* La poignée : elle dit que la feuille se tire. Sans elle, personne ne
+   devine que le geste existe. */
+.modal__grip {
+  display: block; width: 40px; height: 4px; margin: 0 auto 14px;
+  border-radius: 2px; background: var(--border-default);
+}
+
 .modal__panel {
   position: relative; width: 100%; max-width: 520px; background: var(--surface);
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0; padding: 22px 18px calc(20px + var(--safe-b));
   box-shadow: var(--shadow-sheet); animation: slideup var(--dur-base) var(--ease-out);
   max-height: 88vh; overflow-y: auto;
+  touch-action: pan-y;
+  transition: transform var(--dur-base) var(--ease-out);
 }
 @media (min-width: 560px) {
   .modal { align-items: center; }
-  .modal__panel { border-radius: 22px; padding-bottom: 20px; }
+  /* Tant qu'une feuille est ouverte, la page de derrière est figée. `position:
+   fixed` et non `overflow: hidden` : sur iOS, `overflow` seul ne suffit pas,
+   le document continue de défiler sous le doigt. */
+body.is-locked { position: fixed; inset: 0; width: 100%; overflow: hidden; }
+
+/* La poignée : elle dit que la feuille se tire. Sans elle, personne ne
+   devine que le geste existe. */
+.modal__grip {
+  display: block; width: 40px; height: 4px; margin: 0 auto 14px;
+  border-radius: 2px; background: var(--border-default);
+}
+
+.modal__panel { border-radius: 22px; padding-bottom: 20px; }
 }
 @keyframes fade { from { opacity: 0; } }
 @keyframes slideup { from { transform: translateY(22px); opacity: .6; } }

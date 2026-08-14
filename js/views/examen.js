@@ -9,6 +9,13 @@ import { navigate } from '../app.js';
 import { runQuiz } from './reviser.js';
 import * as store from '../store.js';
 
+/**
+ * Un pastel par format d'examen blanc. Les trois se ressemblent par leur
+ * contenu — 40 questions, 45 minutes, même seuil — donc c'est la couleur qui
+ * les distingue au premier coup d'œil.
+ */
+const TEINTE = { officiel: 'lavender', livret: 'butter', mixte: 'mint' };
+
 export default function renderExamen({ params }) {
   const target = params[0];
   if (target && target.startsWith('run/')) {
@@ -36,10 +43,10 @@ function choix() {
   const cards = EXAM_MODE_LIST.map((m) => {
     const s = stats(m.key);
     return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/examen/${m.key}` }, [
-      h('span', {
-        class: 'ds-tile ds-tile--blush',
-        style: m.accent ? 'background:var(--accent-100);color:var(--accent)' : '',
-      }, icon(m.icon)),
+      // `IconTile` et non la classe posée à la main : la taille du composant
+      // vient de sa propriété `size`, pas de la feuille de style. Écrite en
+      // classe seule, la pastille se réduisait à la taille de son icône.
+      IconTile({ icon: m.icon, tone: TEINTE[m.key] || 'sunken', size: 44 }),
       // `div` et non `span` : c'est la structure de `LessonRow`. En inline, le
       // texte ne se plie pas à la largeur de la colonne et déborde de l'écran.
       h('div', { class: 'ds-lesson__body' }, [
@@ -59,7 +66,7 @@ function choix() {
 
   return {
     node: h('div', { class: 'stack' }, [
-      h('div', { class: 'hero hero--exam' }, [
+      h('div', { class: 'hero hero--blanc' }, [
         h('p', { class: 'hero__eyebrow', text: 'Conditions réelles' }),
         h('h1', { class: 'hero__title', text: 'Examen blanc' }),
         h('p', { class: 'hero__sub', text: `Trois formats, tous en ${EXAM.questions} questions et ${EXAM.minutes} minutes, avec le même seuil de réussite : ${EXAM.passing}/${EXAM.questions}.` }),
