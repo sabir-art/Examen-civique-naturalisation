@@ -103,7 +103,11 @@ export function modal(render) {
     const onKey = (e) => { if (e.key === 'Escape') close(undefined); };
     document.addEventListener('keydown', onKey);
 
-    const panel = h('div', { class: 'modal__panel', role: 'dialog', 'aria-modal': 'true' }, [
+    const panel = h('div', {
+      class: 'modal__panel', role: 'dialog', 'aria-modal': 'true',
+      // Le panneau lui-même reçoit le focus à l'ouverture (voir plus bas).
+      tabindex: '-1',
+    }, [
       h('span', { class: 'modal__grip', 'aria-hidden': 'true' }),
       ...[].concat(render(close)).filter(Boolean),
     ]);
@@ -118,8 +122,13 @@ export function modal(render) {
     verrouiller(lecture);
     glisserPourFermer(panel, () => close(undefined));
 
-    const focusable = panel.querySelector('input, button, select, textarea');
-    if (focusable) setTimeout(() => focusable.focus(), 60);
+    // Le focus va au PANNEAU, pas à sa première commande. Donner le focus à un
+    // champ de saisie faisait défiler la feuille jusqu'à lui — le titre et la
+    // définition passaient hors de l'écran — et ouvrait le clavier d'emblée,
+    // alors qu'on venait lire. Le panneau reste atteignable au clavier, la
+    // tabulation entre ensuite dans son contenu.
+    panel.scrollTop = 0;
+    setTimeout(() => panel.focus({ preventScroll: true }), 60);
   });
 }
 

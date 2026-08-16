@@ -160,17 +160,28 @@ export function createConverser({
   }
 
   /**
-   * Redessine le fil.
+   * Le nombre de messages déjà en mémoire à l'ouverture de ce bloc.
    *
-   * En plein écran on montre tout l'historique ; dans une feuille on ne montre
-   * que l'échange en cours — la feuille sert à une précision, pas à relire
-   * trois jours de conversation, et elle grandirait sans fin.
+   * C'est la frontière entre CE QUE L'IA SAIT et CE QU'ON MONTRE. Les deux ne
+   * se confondent pas : la mémoire est globale et durable — l'assistant se
+   * souvient de tout ce qu'on lui a dit —, mais un encart ouvert sur le mot
+   * « outre-mer » n'a aucune raison d'afficher une discussion sur le Sénat.
+   * On venait y lire une définition ; la conversation d'avant repoussait le
+   * mot hors de l'écran et il fallait remonter pour le trouver.
+   */
+  const depart = fil.nombre();
+
+  /**
+   * Redessine ce qui est MONTRÉ.
+   *
+   * En plein écran, c'est toute la conversation : cet écran est fait pour ça.
+   * Dans un encart, c'est seulement ce qui s'y est dit depuis son ouverture.
    */
   function dessiner() {
     const messages = fil.messages();
-    const montres = forme === 'feuille' ? messages.slice(-2) : messages;
+    const montres = forme === 'feuille' ? messages.slice(depart) : messages;
     liste.replaceChildren(...montres.map((m) => bulle(m.role, m.content)));
-    if (!messages.length && chips) liste.append(chips);
+    if (!montres.length && chips) liste.append(chips);
     onActivite?.();
   }
 

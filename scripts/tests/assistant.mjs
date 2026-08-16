@@ -147,8 +147,90 @@ await step("les suggestions ne passent pas sous la barre de saisie", async () =>
 
 /* ------------------------------------------------------------- le contexte */
 
-/* La demande d'origine : depuis un mot du glossaire, on parle à l'IA SUR PLACE.
-   Partir vers l'écran Assistant faisait perdre le mot, la page et la ligne. */
+/* Mémoire et transcription ne se confondent pas : l'assistant se souvient de
+   tout, mais une feuille ouverte sur un mot n'affiche que ce mot. Une
+   discussion antérieure y repousserait la définition hors de l'écran. */
+await step("une feuille de glossaire s'ouvre sur le mot, pas sur la conversation d'avant", async () => {
+  await p.evaluate(async () => {
+    const f = await import('./js/ai-thread.js');
+    f.effacer();
+    f.ajouter('user', 'Quelle différence entre un député et un sénateur ?');
+    f.ajouter('assistant', 'Imagine une maison à deux étages, c’est le Parlement.');
+  });
+  await p.goto(BASE + '#/histoire/c/ch09');
+  await p.waitForSelector('.gloss');
+  await p.locator('.gloss').first().click();
+  await p.waitForSelector('.modal__panel');
+  await p.waitForTimeout(600);
+
+  const vu = await p.evaluate(() => {
+    const panneau = document.querySelector('.modal__panel');
+    const titre = panneau.querySelector('.modal__title');
+    const r = titre.getBoundingClientRect();
+    const pr = panneau.getBoundingClientRect();
+    return {
+      bulles: panneau.querySelectorAll('.msg').length,
+      texte: panneau.textContent,
+      defilement: panneau.scrollTop,
+      titreVisible: r.top >= pr.top - 1 && r.bottom <= pr.bottom + 1,
+      mot: titre.textContent.trim(),
+      /* Ce qui a le focus décide de ce que le téléphone montre : le navigateur
+         amène l'élément focalisé sous les yeux. Focaliser N'IMPORTE QUELLE
+         commande à l'intérieur — champ de saisie comme puce de suggestion —
+         fait donc défiler la feuille jusqu'en bas, loin du mot, et un champ
+         ouvre en plus le clavier. C'est au panneau lui-même de prendre le
+         focus. Le contrôle du défilement ci-dessus ne suffit pas à l'établir :
+         sur un écran de bureau la feuille tient souvent entière, et rien ne
+         bouge. Ici on vérifie la cause, qui, elle, est nette. */
+      focus: `${document.activeElement?.tagName}.${document.activeElement?.className || ''}`,
+      focusHorsPanneau: document.activeElement !== panneau,
+    };
+  });
+  if (vu.bulles) throw new Error(`${vu.bulles} bulle(s) d'une discussion antérieure dans la feuille`);
+  if (vu.texte.includes('deux étages')) throw new Error('la conversation précédente est affichée dans la feuille');
+  if (vu.defilement > 2) throw new Error(`la feuille s'ouvre déjà défilée (${vu.defilement}px) : le mot n'est plus en vue`);
+  if (!vu.titreVisible) throw new Error(`« ${vu.mot} » n'est pas visible à l'ouverture`);
+  if (vu.focusHorsPanneau) {
+    throw new Error(`le focus va à ${vu.focus} au lieu du panneau : la feuille défile jusqu'à cette commande`);
+  }
+});
+
+/* …mais la mémoire, elle, voyage : c'est tout l'intérêt. */
+await step("la mémoire accompagne quand même la question posée depuis la feuille", async () => {
+  let corps = null;
+  await p.route('**://api.anthropic.com/**', async (route) => {
+    try { corps = JSON.parse(route.request().postData() || '{}'); } catch { corps = {}; }
+    await route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"interrompu"}' });
+  });
+  await p.fill('.modal__panel .compose__field', 'Et pour les élections locales ?');
+  await p.click('.modal__panel .compose__send');
+  await p.waitForTimeout(1200);
+  await p.unroute('**://api.anthropic.com/**');
+
+  if (!corps) throw new Error("aucun appel n'a été tenté");
+  const tout = JSON.stringify(corps.messages || []);
+  if (!tout.includes('deux étages')) {
+    throw new Error("l'échange précédent n'accompagne pas la question : l'assistant repart de zéro");
+  }
+});
+
+await step("la réponse en cours s'affiche, elle, dans la feuille", async () => {
+  const bulles = await p.evaluate(() => document.querySelectorAll('.modal__panel .msg').length);
+  if (bulles < 1) throw new Error('la question posée ici ne s’affiche pas');
+});
+
+await step("rouvrir une autre feuille repart d'une page blanche", async () => {
+  await p.click('.modal__panel button:has-text("Fermer")');
+  await p.waitForTimeout(500);
+  await p.locator('.gloss').nth(1).click();
+  await p.waitForSelector('.modal__panel');
+  await p.waitForTimeout(500);
+  const bulles = await p.evaluate(() => document.querySelectorAll('.modal__panel .msg').length);
+  if (bulles) throw new Error(`${bulles} bulle(s) héritée(s) de la feuille précédente`);
+  await p.click('.modal__panel button:has-text("Fermer")');
+  await p.waitForTimeout(400);
+});
+
 await step("un mot du glossaire se discute dans sa feuille, sans la quitter", async () => {
   await p.evaluate(async () => (await import('./js/ai-thread.js')).effacer());
   await p.goto(BASE + '#/histoire/c/ch09');
@@ -195,7 +277,12 @@ await step("changer d'écran referme la feuille et rend le défilement", async (
   // intercepte les appuis, donc on ne peut pas la contourner par un bouton :
   // c'est le geste de retour du téléphone qui change d'écran par-dessous.
   if (!(await p.locator('.modal__panel').count())) throw new Error('rien à fermer : le contrôle ne prouverait rien');
-  await p.goBack();
+  // On change d'écran par-dessous, comme le fait le geste de retour du
+  // téléphone. L'adresse est posée directement : `goBack` dépend de
+  // l'historique accumulé par les contrôles précédents et pourrait retomber
+  // sur la même adresse, auquel cas rien ne se passerait et l'on ne saurait
+  // pas si la feuille tient bon ou si le routeur n'a simplement pas été appelé.
+  await p.evaluate(() => { window.location.hash = '#/histoire'; });
   await p.waitForTimeout(800);
   const etat = await p.evaluate(() => ({
     feuille: Boolean(document.querySelector('.modal__panel')),
