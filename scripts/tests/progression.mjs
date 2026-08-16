@@ -143,8 +143,13 @@ verifier(e.largeur === 100,
   `après avoir lu ET répondu juste à tout, la barre est pleine (${e.largeur} %)`);
 verifier(e.vert, 'et elle est verte');
 verifier(e.badge === 'Terminé', `le badge dit « Terminé » (${e.badge})`);
-verifier(e.lignes.some((l) => /Chapitre terminé/.test(l)),
-  `l'état est écrit en toutes lettres (${e.lignes.slice(-1)[0]})`);
+// L'état ne doit jamais reposer sur la seule barre : il se lit en mots. Le
+// badge dit où l'on en est (vérifié juste au-dessus), le détail dit combien de
+// questions sont justes. L'un ne répète plus l'autre — un badge « Terminé »
+// suivi de « Chapitre terminé » disait deux fois la même chose et prenait sur
+// la place du titre.
+verifier(e.lignes.some((l) => /\d+\/\d+ questions justes/.test(l)),
+  `le détail chiffré est écrit en toutes lettres (${e.lignes.slice(-1)[0]})`);
 
 /* ------------------------ 4. la mémorisation est expliquée, pas subie */
 

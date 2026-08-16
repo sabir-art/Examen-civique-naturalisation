@@ -810,6 +810,10 @@ a { color: var(--lien); }
 /* La marge basse de `.app` suffit à dégager le dernier élément au-dessus de la
    barre une fois la page défilée : mesuré, pas supposé. */
 .quizbody { padding-bottom: 8px; }
+/* La correction n'est pas une cinquième réponse. Sans intervalle franc, elle
+   se colle à la dernière et se lit comme la suite de la liste. */
+.quizbody > .ds-verdict { margin-top: 18px; }
+@media (max-height: 745px) { .quizbody > .ds-verdict { margin-top: 14px; } }
 
 /* --------------------------------------------------------------- results */
 /* Aplat pastel et texte encre, comme les bandeaux : le système ne veut ni
@@ -986,6 +990,13 @@ a.themestat__row { min-height: 44px; }
 /* `LessonRow` tronque son intitulé, ce qui convient à un titre court. Quand il
    est long — « Système institutionnel et politique » — on le laisse plier. */
 .ds-lesson__titre--long { white-space: normal; }
+
+/* L'état d'un chapitre — l'étiquette et son détail — vit sous le texte et non
+   à droite de la ligne. Posé à droite, il prenait sa largeur sur le titre, qui
+   se pliait en quatre pour lui laisser la place, et la barre d'avancement ne
+   mesurait plus que la colonne restante. */
+.ligne__etat { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ligne__etat .ds-lesson__meta { margin-top: 0; }
 
 /* Les trois formats d'examen blanc portent chacun leur pastel : c'est la seule
    chose qui les distingue au premier coup d'œil, puisqu'ils annoncent tous

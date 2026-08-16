@@ -27,6 +27,8 @@ import {
   romanChapitreProgres, romanActeProgres, romanProchaineRevue,
 } from '../engine.js';
 import { runQuiz } from './reviser.js';
+import { preparerDemande } from './assistant.js';
+import * as ai from '../ai.js';
 import { navigate, refresh } from '../app.js';
 import * as store from '../store.js';
 import * as fx from '../lib/feedback.js';
@@ -103,6 +105,21 @@ function ouvrirTerme(entree) {
     figure(images.imageDuTerme(entree.terme), 'fr', { compacte: true }),
     h('p', { class: 'glossdef', text: entree.def }),
     h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: entree.ar })),
+    // Une définition en trois lignes ne suffit pas toujours : on peut demander
+    // la suite sans avoir à récrire de quoi l'on parle.
+    ai.isConfigured() ? Button({
+      variant: 'tonal', size: 'lg', fullWidth: true, iconLeft: 'message-circle',
+      label: 'Demander à l’assistant', className: 'mt',
+      onClick: () => {
+        preparerDemande({
+          sujet: `le mot « ${entree.terme} » du glossaire`,
+          repere: entree.def,
+          amorce: 'Explique-moi ce mot autrement, avec un exemple concret de la vie en France.',
+        });
+        close();
+        navigate('#/assistant');
+      },
+    }) : null,
     Button({ variant: 'secondary', size: 'lg', fullWidth: true, label: 'Fermer', onClick: () => close(), className: 'mt' }),
   ].filter(Boolean));
 }
@@ -317,10 +334,10 @@ function sommaire() {
           class: 'ds-lesson__meta',
           text: `${a.epoque} · ${p.termine ? `${p.chapitres} chapitres terminés` : `${p.termines}/${p.chapitres} chapitres terminés`}`,
         }),
+        p.termine ? h('div', { class: 'ligne__etat' }, Badge({ tone: 'correct', label: 'Terminé' })) : null,
         h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
           h('div', { class: `bar__fill${p.termine ? ' bar__fill--ok' : ''}`, style: `width:${p.pct}%` })),
       ].filter(Boolean)),
-      p.termine ? Badge({ tone: 'correct', label: 'Terminé', className: 'livret__etat' }) : null,
       Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ].filter(Boolean));
   }));
@@ -359,14 +376,16 @@ function acte(key) {
     const p = romanChapitreProgres(c.key);
     const ar = AR_BY_KEY.get(c.key);
 
-    // Ce qui reste à faire, en toutes lettres. Une barre nue sous un chapitre
-    // se lit comme un avancement : autant qu'elle en soit vraiment un, et
-    // qu'elle dise de quoi il s'agit.
-    const etat = p.termine ? 'Chapitre terminé'
-      : !p.lu && !p.vues ? null
-        : !p.lu ? `${p.justes}/${p.total} questions justes · à lire`
-          : p.total === 0 ? 'Lu'
-            : `Lu · ${p.justes}/${p.total} questions justes`;
+    /* L'étiquette d'état dit d'un coup d'œil où l'on en est ; le détail chiffré
+       la complète. Les deux vont ensemble, en bas de la carte : posée à droite
+       de la ligne, l'étiquette prenait sa largeur sur le titre, qui se pliait
+       en quatre pour lui laisser la place. */
+    const etiquette = p.termine ? Badge({ tone: 'correct', label: 'Terminé' })
+      : p.lu ? Badge({ tone: 'neutral', label: 'Lu' })
+        : null;
+    // Le détail ne répète pas l'étiquette : elle dit déjà « terminé » ou « lu ».
+    const detail = p.total && p.vues ? `${p.justes}/${p.total} questions justes`
+      : (!p.lu && p.vues ? 'à lire' : null);
 
     return h('a', { class: 'ds-lesson ds-lesson--tap ligne--haute', href: `#/histoire/c/${c.key}` }, [
       h('span', { class: 'vignette' }, [
@@ -380,13 +399,15 @@ function acte(key) {
         lng === 'bi' && ar ? h('div', { class: 'ds-lesson__title ds-lesson__titre--long arline', dir: 'rtl', lang: 'ar', text: ar.titre }) : null,
         h('div', { class: 'ds-lesson__meta', text: `${c.lieu} · ${stripTags(c.date)} · ${c.minutes} min` }),
         motsNouveaux(c) ? h('div', { class: 'ds-lesson__meta', text: `${motsNouveaux(c)} nouveau${motsNouveaux(c) > 1 ? 'x' : ''} mot${motsNouveaux(c) > 1 ? 's' : ''} de vocabulaire` }) : null,
-        etat ? h('div', { class: 'ds-lesson__meta', text: etat }) : null,
+        etiquette || detail ? h('div', { class: 'ligne__etat' }, [
+          etiquette,
+          detail ? h('span', { class: 'ds-lesson__meta', text: detail }) : null,
+        ].filter(Boolean)) : null,
+        // La barre prend toute la largeur du texte : elle mesure le chapitre,
+        // pas la colonne qui restait une fois l'étiquette servie.
         p.pct > 0 ? h('div', { class: 'bar bar--thin', style: 'margin-top:8px' },
           h('div', { class: `bar__fill${p.termine ? ' bar__fill--ok' : ''}`, style: `width:${p.pct}%` })) : null,
       ].filter(Boolean)),
-      p.termine
-        ? Badge({ tone: 'correct', label: 'Terminé', className: 'livret__etat' })
-        : p.lu ? Badge({ tone: 'neutral', label: 'Lu', className: 'livret__etat' }) : null,
       Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ].filter(Boolean));
   }));
@@ -569,6 +590,20 @@ function chapitre(key) {
       nq ? h('a', { class: 'btn', href: `#/histoire/q/${key}`, onclick: () => store.markRead(key) }, [
         icon('play'), h('span', { text: progres.justes ? `Refaire les ${nq} questions` : `Vérifier (${nq} questions)` }),
       ]) : null,
+
+      // On lit, une question vient. Elle se pose ici, sans quitter le fil : le
+      // chapitre est nommé à l'assistant, et l'on revient à la ligne où l'on
+      // s'était arrêté.
+      ai.isConfigured() ? h('button', {
+        class: 'btn btn--ghost', type: 'button',
+        onclick: () => {
+          preparerDemande({
+            sujet: `le chapitre « ${c.titre} » du récit (${stripTags(c.date)}, ${c.lieu})`,
+            amorce: 'J’ai une question sur ce chapitre : ',
+          });
+          navigate('#/assistant');
+        },
+      }, [icon('message-circle'), h('span', { text: 'Une question sur ce chapitre ?' })]) : null,
 
       lng !== 'fr' ? h('p', { class: 'hint center', text: 'Les questions sont en français, comme le jour de l’examen.' }) : null,
 

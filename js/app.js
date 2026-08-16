@@ -76,6 +76,10 @@ function dessinerHaut({ title, back, chrome }) {
       onClick: () => navigate('#/activite'),
     });
   }
+  // L'assistant, lui, est partout : la question vient en lisant, et il ne faut
+  // pas avoir à revenir à l'accueil pour la poser. C'est le seul bouton que
+  // portent aussi les écrans de détail.
+  actions.push({ icon: 'message-circle', label: 'Demander à l’assistant', onClick: () => navigate('#/assistant') });
 
   const avatar = h('button', {
     class: 'chrome__avatar', type: 'button', 'aria-label': 'Mon compte',
@@ -164,6 +168,18 @@ export function navigate(hash, { replace = false } = {}) {
   else location.hash = hash;
 }
 
+/**
+ * Où l'on en était sur les écrans qui se lisent.
+ *
+ * Un chapitre se lit en plusieurs fois, et l'on en sort pour un mot du
+ * glossaire ou une question à l'assistant. Revenir en tête de page à chaque
+ * retour oblige à re-chercher sa ligne — c'est ce que fait perdre une lecture.
+ * Seuls ces écrans-là sont concernés : sur une liste ou un questionnaire, on
+ * veut bien recommencer par le haut.
+ */
+const ECRANS_DE_LECTURE = /^\/(histoire\/(c|a)\/|livret\/|cours\/|histoire\/glossaire)/;
+const positions = new Map();
+
 async function route() {
   const path = currentPath();
 
@@ -199,6 +215,15 @@ async function route() {
     result = h('div', { class: 'empty', text: "Impossible d'afficher cette page." });
   }
 
+  // Avant de remplacer l'écran : la page affichée est encore celle qu'on
+  // quitte, et son défilement est encore le bon. Un changement de fragment ne
+  // fait pas défiler la page de lui-même — aucun de nos fragments ne désigne
+  // un élément —, donc la valeur lue ici est bien celle qu'on avait sous les
+  // yeux.
+  if (lastPath && ECRANS_DE_LECTURE.test(lastPath)) {
+    positions.set(lastPath, window.scrollY || 0);
+  }
+
   const node = result?.node || result;
   show({
     node,
@@ -206,11 +231,12 @@ async function route() {
     back: result?.back !== undefined ? result.back : match.back,
     tab: result?.hideTabs ? null : match.tab,
     chrome: true,
+    reprise: positions.get(path) || 0,
   });
   lastPath = path;
 }
 
-function show({ node, title, back, tab, chrome = true }) {
+function show({ node, title, back, tab, chrome = true, reprise = 0 }) {
   hideSplash();
   appEl.hidden = false;
 
@@ -228,6 +254,14 @@ function show({ node, title, back, tab, chrome = true }) {
   appEl.replaceChildren(node);
   appEl.scrollTop = 0;
   window.scrollTo(0, 0);
+  // Retour sur un écran qu'on lisait : on reprend à la ligne où l'on était.
+  // Après le rendu, sinon la page n'est pas encore assez haute pour qu'on
+  // puisse y descendre.
+  if (reprise > 0) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => window.scrollTo(0, reprise));
+    });
+  }
 }
 
 /**
