@@ -5,6 +5,7 @@
 import * as store from './store.js';
 import { amorcer } from './lib/feedback.js';
 import { h, toast, fermerFeuille } from './lib/dom.js';
+import { annoterRomains } from './lib/chiffres.js';
 import { TopBar, BottomNav } from './ds/navigation.js';
 import { Avatar } from './ds/core.js';
 import { badgesObtenus } from './lib/xp.js';
@@ -107,6 +108,7 @@ function dessinerHaut({ title, back, chrome }) {
     onBack: back ? () => navigate(back) : null,
     actions,
   }));
+  annoterRomains(hautEl);
 }
 
 /** « Bonjour » avant 18 h, « Bonsoir » ensuite. */
@@ -271,6 +273,7 @@ function show({ node, title, back, tab, chrome = true, reprise = 0 }) {
   document.body.classList.toggle('is-plain', !(chrome && tab));
 
   appEl.replaceChildren(node);
+  annoterRomains(appEl);
   appEl.scrollTop = 0;
   window.scrollTo(0, 0);
   // Retour sur un écran qu'on lisait : on reprend à la ligne où l'on était.
@@ -319,6 +322,49 @@ export function ecranPrecedent(defaut = '#/', seulementSi = null) {
   if (seulementSi && !seulementSi.test(hash)) return defaut;
   return hash;
 }
+
+/**
+ * Double les chiffres romains de tout ce qui apparaît à l'écran.
+ *
+ * Par observation plutôt qu'en appelant l'annotation à chaque endroit qui
+ * dessine : un questionnaire change de question, un chapitre se redessine, une
+ * réponse d'IA s'écrit au fil de l'eau, une feuille s'ouvre. Énumérer ces
+ * endroits, c'est en oublier un — et un seul oubli, et le lecteur retombe sur
+ * un « XVIII » nu là où il en avait besoin.
+ */
+function surveillerLesChiffres() {
+  if (typeof MutationObserver !== 'function') return;
+  let enCours = false;
+  const observateur = new MutationObserver((mutations) => {
+    if (enCours) return;
+    const ajouts = [];
+    for (const m of mutations) {
+      for (const n of m.addedNodes) {
+        if (n.nodeType !== 1) continue;
+        /* Nos propres annotations sont écartées ICI, à la source. Sans ce
+           filtre, l'observateur se nourrit de son propre travail : annoter
+           insère des nœuds, qui déclenchent l'observateur, qui annote… La
+           marque posée sur les expressions déjà traitées suffisait à
+           interrompre la boucle, mais elle en était l'unique rempart — une
+           barrière unique sur un chemin qui mène au gel de l'application, ce
+           n'est pas assez. */
+        if (n.classList?.contains('chiffre') || n.classList?.contains('chiffre__arabe')) continue;
+        if (n.closest?.('.chiffre')) continue;
+        ajouts.push(n);
+      }
+    }
+    if (!ajouts.length) return;
+    // Nos propres insertions déclencheraient l'observateur à leur tour ; le
+    // drapeau évite d'y repasser pour rien.
+    enCours = true;
+    for (const n of ajouts) annoterRomains(n);
+    enCours = false;
+  });
+  for (const hote of [appEl, document.getElementById('modal-root')]) {
+    if (hote) observateur.observe(hote, { childList: true, subtree: true });
+  }
+}
+surveillerLesChiffres();
 
 /** Redessine la vue courante (après un changement de données). */
 export function refresh() {

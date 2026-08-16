@@ -1870,3 +1870,13 @@ body.is-locked { position: fixed; inset: 0; width: 100%; overflow: hidden; }
 .causerie--feuille { margin-top: 14px; }
 .causerie--feuille .causerie__fil:empty { display: none; }
 .causerie--feuille .msg__body { max-width: 100%; }
+
+/* --------------------------------------------------- chiffres romains */
+/* Le romain et son chiffre arabe forment un tout : on ne les sépare pas au
+   fil du texte. Les expressions concernées sont courtes — « Louis XVI (16) »,
+   « Ve République (5) » — et tiennent partout. */
+.chiffre { white-space: nowrap; }
+/* Discret mais lisible : c'est un appui de lecture, pas une note de bas de
+   page. Chiffres à chasse fixe, pour qu'ils se ressemblent d'une ligne à
+   l'autre. */
+.chiffre__arabe { color: var(--muted); font-variant-numeric: tabular-nums; }
