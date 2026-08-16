@@ -25,8 +25,25 @@ import * as fil from '../ai-thread.js';
 import { systemPrompt } from '../ai-context.js';
 import { format, dots, boutonVoix } from './reponse-ia.js';
 
-/** Le moteur de dictée du navigateur, s'il en a un. */
-const Dictee = typeof window !== 'undefined'
+/**
+ * Le moteur de dictée du navigateur — quand il en a un QUI MARCHE.
+ *
+ * Sur les navigateurs d'Apple, l'objet existe mais la dictée ne tient pas ses
+ * promesses : elle peut ne jamais rendre la main, et l'application se retrouve
+ * bloquée sur un bouton qui ne répond plus. La détection par présence de l'API
+ * ne suffit donc pas — c'est le piège classique, et j'y suis tombé.
+ *
+ * Ce n'est pas une perte pour autant : sur iPhone, le clavier porte déjà son
+ * propre micro, qui dicte dans n'importe quel champ et fonctionne, lui. Mieux
+ * vaut le laisser faire que le refaire mal.
+ *
+ * Tous les navigateurs d'iOS reposent sur WebKit — y compris Chrome — d'où le
+ * test sur le fournisseur plutôt que sur le nom du navigateur.
+ */
+const MOTEUR_APPLE = typeof navigator !== 'undefined'
+  && navigator.vendor === 'Apple Computer, Inc.';
+
+const Dictee = (typeof window !== 'undefined' && !MOTEUR_APPLE)
   ? (window.SpeechRecognition || window.webkitSpeechRecognition)
   : null;
 
@@ -110,10 +127,41 @@ export function createConverser({
   /* ------------------------------------------------------------- dictée */
 
   let reco = null;
+  let veille = null;
+
+  /**
+   * Rend l'interface, quoi qu'il arrive au moteur.
+   *
+   * Séparé de l'arrêt du moteur À DESSEIN : un moteur qui ne répond plus ne
+   * doit pas emporter le bouton avec lui. L'écoute se coupe visuellement tout
+   * de suite ; ce que la machine en fait ensuite ne concerne plus l'utilisateur.
+   */
+  function rendreLaMain() {
+    if (veille) { clearTimeout(veille); veille = null; }
+    reco = null;
+    compose.classList.remove('is-ecoute');
+    micBtn?.setAttribute('aria-label', 'Dicter la question');
+  }
+
+  function arreterDictee() {
+    const moteur = reco;
+    rendreLaMain();
+    // `abort` avant `stop` : le premier coupe net, le second attend un dernier
+    // résultat qui peut ne jamais venir.
+    try { moteur?.abort?.(); } catch { /* moteur déjà parti */ }
+    try { moteur?.stop?.(); } catch { /* idem */ }
+  }
 
   function basculerDictee() {
-    if (reco) { reco.stop(); return; }
-    reco = new Dictee();
+    if (reco) { arreterDictee(); return; }
+
+    try {
+      reco = new Dictee();
+    } catch {
+      toast("La dictée n'est pas disponible ici.");
+      rendreLaMain();
+      return;
+    }
     reco.lang = 'fr-FR';
     reco.interimResults = true;
     reco.continuous = false;
@@ -135,17 +183,23 @@ export function createConverser({
       } else if (e.error !== 'aborted' && e.error !== 'no-speech') {
         toast("La dictée n'a pas fonctionné.");
       }
+      rendreLaMain();
     };
-    reco.onend = () => {
-      reco = null;
-      compose.classList.remove('is-ecoute');
-      micBtn?.setAttribute('aria-label', 'Dicter la question');
-      champ.focus();
-    };
+    reco.onend = () => { rendreLaMain(); champ.focus(); };
 
     compose.classList.add('is-ecoute');
     micBtn?.setAttribute('aria-label', "Arrêter la dictée");
-    try { reco.start(); } catch { reco = null; compose.classList.remove('is-ecoute'); }
+
+    try {
+      reco.start();
+    } catch {
+      rendreLaMain();
+      return;
+    }
+    // Filet de sécurité : un moteur qui ne signale ni résultat, ni erreur, ni
+    // fin laisserait l'écoute allumée pour toujours. Au bout d'une minute, on
+    // reprend la main de force.
+    veille = setTimeout(() => arreterDictee(), 60000);
   }
 
   /* ------------------------------------------------------------- bulles */
@@ -296,7 +350,7 @@ export function createConverser({
   root.redessiner = dessiner;
   root.hauteurSaisie = () => compose.offsetHeight;
   /** À appeler quand l'écran disparaît : coupe la dictée et la requête. */
-  root.stop = () => { if (reco) reco.stop(); arreter(); };
+  root.stop = () => { arreterDictee(); arreter(); };
 
   return root;
 }

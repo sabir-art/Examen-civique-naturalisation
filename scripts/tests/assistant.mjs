@@ -432,6 +432,97 @@ await step('aller poser une question puis revenir rend le chapitre où on l’av
   }
 });
 
+/* ------------------------------------------------------------- la dictée */
+
+/**
+ * Un moteur de dictée peut ne jamais rendre la main : ni résultat, ni erreur,
+ * ni fin. C'est ce qui est arrivé sur iPhone — le bouton restait allumé et ne
+ * répondait plus. On plante ici exactement ce moteur-là, et l'on exige que
+ * l'application reste utilisable.
+ */
+const MOTEUR_MUET = `
+  window.__dicteesLancees = 0;
+  window.__arrets = 0;
+  class MoteurMuet {
+    constructor() { this.lang = ''; }
+    start() { window.__dicteesLancees++; }        // et plus jamais rien
+    stop() { window.__arrets++; }                 // sans effet, comme sur iOS
+    abort() { window.__arrets++; }
+  }
+  window.SpeechRecognition = MoteurMuet;
+  Object.defineProperty(navigator, 'vendor', { get: () => 'Test', configurable: true });
+`;
+
+await step("un moteur de dictée qui se fige ne bloque pas l'application", async () => {
+  const ctxDictee = await b.newContext({ viewport: { width: 393, height: 734 }, locale: 'fr-FR' });
+  await ctxDictee.addInitScript(MOTEUR_MUET);
+  const q = await ctxDictee.newPage();
+  const plantages = [];
+  q.on('pageerror', (e) => plantages.push(e.message));
+  await q.goto(BASE, { waitUntil: 'networkidle' });
+  await q.fill('#ob-name', 'Abdellah'); await q.click('button[type=submit]');
+  await q.waitForSelector('.accueil__hero');
+  await q.evaluate(() => localStorage.setItem('examen-civique.assistant', JSON.stringify({
+    provider: 'anthropic', keys: { anthropic: 'chaine-de-test' }, models: { anthropic: 'm' },
+  })));
+  await q.reload({ waitUntil: 'networkidle' });
+  await q.goto(BASE + '#/assistant');
+  await q.waitForSelector('.compose__mic');
+
+  await q.click('.compose__mic');
+  await q.waitForTimeout(300);
+  const pendant = await q.evaluate(() => ({
+    ecoute: document.querySelector('.compose').classList.contains('is-ecoute'),
+    lancees: window.__dicteesLancees,
+  }));
+  if (!pendant.lancees) throw new Error('la dictée n’a pas été lancée : le contrôle ne prouverait rien');
+  if (!pendant.ecoute) throw new Error('rien n’indique que le micro écoute');
+
+  // Deuxième appui : l'interface doit revenir, que le moteur réponde ou non.
+  await q.click('.compose__mic');
+  await q.waitForTimeout(400);
+  const apres = await q.evaluate(() => ({
+    ecoute: document.querySelector('.compose').classList.contains('is-ecoute'),
+  }));
+  if (apres.ecoute) throw new Error('le micro reste allumé : le bouton est mort et l’écran est bloqué');
+
+  // Et le reste répond toujours : on tape, on envoie, on navigue.
+  await q.fill('.compose__field', 'Une question après la dictée');
+  if ((await q.inputValue('.compose__field')) !== 'Une question après la dictée') {
+    throw new Error('le champ ne répond plus');
+  }
+  await q.click('.ds-topbar [aria-label="Retour"]');
+  await q.waitForTimeout(600);
+  if ((await q.evaluate(() => location.hash)) === '#/assistant') {
+    throw new Error('la navigation ne répond plus');
+  }
+  if (plantages.length) throw new Error(`erreur JavaScript : ${plantages[0]}`);
+  await ctxDictee.close();
+});
+
+await step("sur les navigateurs d'Apple, la dictée n'est pas proposée", async () => {
+  const ctxApple = await b.newContext({ viewport: { width: 393, height: 734 }, locale: 'fr-FR' });
+  // Tous les navigateurs d'iOS reposent sur WebKit et annoncent ce fournisseur.
+  await ctxApple.addInitScript(`
+    window.SpeechRecognition = function () {};
+    Object.defineProperty(navigator, 'vendor', { get: () => 'Apple Computer, Inc.', configurable: true });
+  `);
+  const q = await ctxApple.newPage();
+  await q.goto(BASE, { waitUntil: 'networkidle' });
+  await q.fill('#ob-name', 'Abdellah'); await q.click('button[type=submit]');
+  await q.waitForSelector('.accueil__hero');
+  await q.evaluate(() => localStorage.setItem('examen-civique.assistant', JSON.stringify({
+    provider: 'anthropic', keys: { anthropic: 'chaine-de-test' }, models: { anthropic: 'm' },
+  })));
+  await q.reload({ waitUntil: 'networkidle' });
+  await q.goto(BASE + '#/assistant');
+  await q.waitForSelector('.compose');
+  await q.waitForTimeout(400);
+  const micros = await q.evaluate(() => document.querySelectorAll('.compose__mic').length);
+  await ctxApple.close();
+  if (micros) throw new Error(`${micros} bouton(s) de dictée proposé(s) alors que le moteur y est défaillant`);
+});
+
 /* --------------------------------- la flèche de retour ramène d'où l'on vient */
 
 const DEPARTS = [
