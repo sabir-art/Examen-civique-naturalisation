@@ -74,9 +74,13 @@ export function toast(message, ms = 2600) {
 export function modal(render) {
   return new Promise((resolve) => {
     const root = document.getElementById('modal-root');
+    // Position de lecture au moment de l'ouverture. `position: fixed` sort le
+    // corps du flux : le navigateur oublie alors où l'on en était et la page
+    // repart du haut. On la relève avant de verrouiller, on la rend après.
+    const lecture = window.scrollY || document.documentElement.scrollTop || 0;
     const close = (value) => {
       root.replaceChildren();
-      document.body.classList.remove('is-locked');
+      deverrouiller(lecture);
       document.removeEventListener('keydown', onKey);
       resolve(value);
     };
@@ -95,12 +99,33 @@ export function modal(render) {
     // La page de derrière ne défile plus tant que la feuille est ouverte : sur
     // un téléphone, le doigt qui glisse sur la feuille entraînait le chapitre
     // en dessous, et l'on perdait sa place en lisant une définition.
-    document.body.classList.add('is-locked');
+    verrouiller(lecture);
     glisserPourFermer(panel, () => close(undefined));
 
     const focusable = panel.querySelector('input, button, select, textarea');
     if (focusable) setTimeout(() => focusable.focus(), 60);
   });
+}
+
+/**
+ * Immobilise la page de derrière sans lui faire perdre sa place.
+ *
+ * Le corps passe en `position: fixed`, ce qui le sort du flux : sa hauteur
+ * n'est plus celle du document, le défilement retombe à zéro, et l'on rouvre
+ * le chapitre tout en haut. On le remonte donc d'autant qu'on avait descendu,
+ * de sorte que l'image ne bouge pas d'un pixel.
+ */
+function verrouiller(y) {
+  document.body.style.top = `${-y}px`;
+  document.body.classList.add('is-locked');
+}
+
+function deverrouiller(y) {
+  document.body.classList.remove('is-locked');
+  document.body.style.top = '';
+  // Rendue d'un coup, sans animation : la feuille se referme sur la ligne
+  // qu'on était en train de lire.
+  window.scrollTo(0, y);
 }
 
 /**

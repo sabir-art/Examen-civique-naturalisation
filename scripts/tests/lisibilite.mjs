@@ -1,13 +1,16 @@
 /**
  * Ce qui est à l'écran doit être atteignable sans deviner.
  *
- * Deux règles, nées de défauts réels signalés sur iPhone :
+ * Trois règles, nées de défauts réels signalés sur iPhone :
  *
  *   1. Aucune réponse ne doit se cacher derrière la barre d'action. La barre
  *      est collée en bas ; ce qui la précède défile DERRIÈRE elle. Une
  *      quatrième réponse ainsi masquée passe pour absente.
  *   2. Un contrôle segmenté doit se distinguer de la carte qui le porte, sinon
  *      on ne voit que le segment retenu et l'on ignore qu'il y a un choix.
+ *   3. Ouvrir puis fermer une fiche de glossaire doit rendre le chapitre là où
+ *      on l'avait laissé. Perdre sa ligne au milieu d'une lecture longue coûte
+ *      plus cher que le mot qu'on était allé chercher.
  */
 import pw from '/opt/node22/lib/node_modules/playwright/index.js';
 const { chromium } = pw;
@@ -221,6 +224,52 @@ await step('les segments non retenus restent lisibles sur ce rail', async () => 
 });
 
 await p.screenshot({ path: `${SHOT}/L-segmente.png` });
+
+/* ------------------------------------------- fiche de glossaire */
+
+await step('ouvrir un mot du glossaire ne fait pas remonter le chapitre', async () => {
+  await p.goto(BASE + '#/histoire/c/ch09');
+  await p.waitForSelector('.gloss');
+  // On descend dans le chapitre, comme on le ferait en lisant.
+  await p.evaluate(() => window.scrollTo(0, Math.round(document.documentElement.scrollHeight * 0.45)));
+  await p.waitForTimeout(300);
+  const avant = await p.evaluate(() => window.scrollY);
+  if (avant < 200) throw new Error(`chapitre trop court pour l'épreuve (${avant})`);
+
+  // Le mot souligné le plus proche du milieu de l'écran : celui qu'on lirait.
+  const ouvert = await p.evaluate(() => {
+    const milieu = window.innerHeight / 2;
+    const mots = [...document.querySelectorAll('.gloss')]
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter((x) => x.r.top > 0 && x.r.bottom < window.innerHeight)
+      .sort((a, b) => Math.abs(a.r.top - milieu) - Math.abs(b.r.top - milieu));
+    if (!mots.length) return null;
+    mots[0].el.click();
+    return mots[0].el.textContent.trim();
+  });
+  if (!ouvert) throw new Error('aucun mot de glossaire visible à cette hauteur');
+  await p.waitForSelector('.modal__panel');
+  await p.waitForTimeout(350);
+
+  /* Fiche ouverte : la page doit être immobile ET rendue telle quelle. Le
+     corps passe en `position: fixed`, ce qui remet le défilement à zéro ; s'il
+     n'est pas compensé, le chapitre est déjà remonté en haut derrière la
+     fiche, et l'on ne s'en aperçoit qu'en refermant. */
+  const pendant = await p.evaluate(() => ({
+    y: window.scrollY,
+    haut: parseFloat(getComputedStyle(document.body).top) || 0,
+  }));
+
+  await p.click('.modal__panel button:has-text("Fermer")');
+  await p.waitForTimeout(400);
+  const apres = await p.evaluate(() => window.scrollY);
+
+  const decalage = Math.abs(apres - avant);
+  if (decalage > 4) {
+    throw new Error(`« ${ouvert} » : lecture reprise à ${apres} au lieu de ${avant}`
+      + ` (écart de ${decalage} ; pendant l'ouverture : défilement ${pendant.y}, corps à ${pendant.haut})`);
+  }
+});
 
 /* ------------------------------------------------------ bouton d'action */
 
