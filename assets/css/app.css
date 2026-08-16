@@ -1223,7 +1223,11 @@ a.themestat__row { min-height: 44px; }
   color: var(--brand); text-decoration: none; cursor: pointer;
 }
 
-.chat { display: flex; flex-direction: column; gap: 12px; padding-bottom: 78px; }
+/* La barre de saisie est en position fixe : elle ne pousse rien, elle recouvre.
+   Le corps lui rend donc sa hauteur exacte, publiée par l'écran lui-même — elle
+   change quand la question s'allonge, jusqu'à trois ou quatre lignes. Une
+   valeur écrite en dur cachait les dernières suggestions. */
+.chat { display: flex; flex-direction: column; gap: 12px; padding-bottom: calc(var(--chatbar-h, 78px) + 14px); }
 .msg { display: flex; }
 .msg--user { justify-content: flex-end; }
 .msg__body {

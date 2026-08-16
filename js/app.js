@@ -80,7 +80,14 @@ function dessinerHaut({ title, back, chrome }) {
   // L'assistant, lui, est partout : la question vient en lisant, et il ne faut
   // pas avoir à revenir à l'accueil pour la poser. C'est le seul bouton que
   // portent aussi les écrans de détail.
-  actions.push({ icon: 'message-circle', label: 'Demander à l’assistant', onClick: () => navigate('#/assistant') });
+  //
+  // En pastel et non en blanc : à côté de la loupe et de la cloche, un
+  // troisième rond blanc se fondait dans la rangée et personne ne le
+  // remarquait. La couleur dit qu'il y a quelqu'un à qui parler.
+  actions.push({
+    icon: 'message-circle', variant: 'tonal',
+    label: 'Demander à l’assistant', onClick: () => navigate('#/assistant'),
+  });
 
   const avatar = h('button', {
     class: 'chrome__avatar', type: 'button', 'aria-label': 'Mon compte',
@@ -286,6 +293,21 @@ function show({ node, title, back, tab, chrome = true, reprise = 0 }) {
 export function masquerOnglets() {
   basEl.replaceChildren();
   document.body.classList.add('is-plain');
+}
+
+/**
+ * L'écran d'où l'on vient, sous forme d'adresse.
+ *
+ * L'assistant s'ouvre depuis n'importe où : son bouton de retour ne peut donc
+ * pas viser l'accueil une fois pour toutes, sans quoi on lit un chapitre, on
+ * pose une question, et l'on se retrouve à la maison. Renvoie l'accueil quand
+ * on arrive directement par l'adresse, faute de mieux.
+ */
+export function ecranPrecedent(defaut = '#/') {
+  if (!lastPath) return defaut;
+  const hash = `#${lastPath}`;
+  // Ne jamais renvoyer sur soi-même : le bouton ne ferait rien.
+  return hash.startsWith(`#${currentPath()}`) ? defaut : hash;
 }
 
 /** Redessine la vue courante (après un changement de données). */

@@ -13,6 +13,7 @@ import * as fil from '../ai-thread.js';
 import { findQuestion } from '../engine.js';
 import { systemPrompt, questionContext } from '../ai-context.js';
 import { format, dots, boutonVoix } from '../components/reponse-ia.js';
+import { ecranPrecedent } from '../app.js';
 
 /**
  * Ce qu'on était en train de lire au moment d'appeler l'assistant.
@@ -37,14 +38,17 @@ export function preparerDemande({ sujet, repere = '', amorce = '' }) {
 
 export default function renderAssistant({ params }) {
   const target = params[0];
-  if (!ai.isConfigured()) { contexteEnAttente = null; return invitation(); }
-  if (target && target.startsWith('q/')) return chat({ about: target.slice(2) });
-  return chat({});
+  // L'écran d'où l'on vient, relevé maintenant : le routeur ne l'aura plus une
+  // fois cette vue installée. C'est là que doit ramener la flèche de retour.
+  const retour = ecranPrecedent();
+  if (!ai.isConfigured()) { contexteEnAttente = null; return invitation(retour); }
+  if (target && target.startsWith('q/')) return chat({ about: target.slice(2), retour });
+  return chat({ retour });
 }
 
 /* ------------------------------------------------------------- invitation */
 
-function invitation() {
+function invitation(retour = '#/') {
   return {
     node: h('div', { class: 'stack' }, [
       h('div', { class: 'hero' }, [
@@ -60,7 +64,7 @@ function invitation() {
       h('p', { class: 'hint center', text: "L'application entière fonctionne sans assistant : questions, examens blancs, livret et récit sont complets." }),
     ]),
     title: 'Assistant',
-    back: '#/',
+    back: retour,
   };
 }
 
@@ -74,7 +78,7 @@ const SUGGESTIONS = [
 
 /* -------------------------------------------------------------- discussion */
 
-function chat({ about = null }) {
+function chat({ about = null, retour = '#/' }) {
   const container = h('div', { class: 'stack' });
   const list = h('div', { class: 'chat' });
   let busy = false;
@@ -231,9 +235,19 @@ function chat({ about = null }) {
 
   drawThread();
 
-  container.append(head, list, h('div', { class: 'chatbar' }, [
+  const barre = h('div', { class: 'chatbar' }, [
     h('div', { class: 'chatbar__inner' }, [field, sendBtn]),
-  ]));
+  ]);
+  container.append(head, list, barre);
+
+  // La barre flotte au-dessus du contenu : ce qu'elle couvre doit lui être
+  // rendu. Sa hauteur est mesurée, non devinée — le champ grandit avec la
+  // question, et les dernières suggestions passaient dessous.
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(() => {
+      container.style.setProperty('--chatbar-h', `${Math.ceil(barre.offsetHeight)}px`);
+    }).observe(barre);
+  }
 
   /** Écrit une demande dans le champ sans l'envoyer : on peut encore la changer. */
   function preremplir(texte) {
@@ -263,5 +277,5 @@ function chat({ about = null }) {
     ].filter(Boolean).join('\n'));
   }
 
-  return { node: container, title: 'Assistant', back: '#/' };
+  return { node: container, title: 'Assistant', back: retour };
 }

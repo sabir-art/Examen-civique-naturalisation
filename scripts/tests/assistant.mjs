@@ -95,6 +95,56 @@ await step("la barre du haut ne déborde pas une fois ce bouton ajouté", async 
   if (mesure.page > mesure.ecran + 1) throw new Error(`la page déborde : ${mesure.page} pour ${mesure.ecran}`);
 });
 
+await step("le bouton de l'assistant se distingue de ses voisins", async () => {
+  await p.goto(BASE + '#/');
+  await p.waitForTimeout(500);
+  const fonds = await p.evaluate(() => {
+    const boutons = [...document.querySelectorAll('.ds-topbar__actions .ds-iconbtn')];
+    return boutons.map((b) => ({
+      quoi: b.getAttribute('aria-label'),
+      fond: getComputedStyle(b).backgroundColor,
+    }));
+  });
+  const assistant = fonds.find((f) => /assistant/i.test(f.quoi || ''));
+  if (!assistant) throw new Error('bouton introuvable');
+  const voisins = fonds.filter((f) => f !== assistant);
+  if (!voisins.length) throw new Error('aucun voisin : le contrôle ne prouverait rien');
+  const lire = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  const [r1, g1, b1] = lire(assistant.fond);
+  for (const v of voisins) {
+    const [r2, g2, b2] = lire(v.fond);
+    const ecart = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+    if (ecart < 20) {
+      throw new Error(`même aplat que « ${v.quoi} » (${assistant.fond} contre ${v.fond}) : les ronds se confondent`);
+    }
+  }
+});
+
+await step("les suggestions ne passent pas sous la barre de saisie", async () => {
+  await p.evaluate(async () => (await import('./js/ai-thread.js')).effacer());
+  await p.goto(BASE + '#/assistant');
+  await p.waitForSelector('.chip');
+  await p.waitForTimeout(500);
+
+  // Question longue : la barre grandit, et c'est là que la réserve écrite en
+  // dur ne suffisait plus.
+  await p.fill('.chat__field', 'Une question assez longue pour que le champ de saisie occupe plusieurs lignes et pousse la barre vers le haut, comme lorsqu’on colle un passage entier du récit avant de demander une explication.');
+  await p.waitForTimeout(400);
+
+  const chevauche = await p.evaluate(() => {
+    const barre = document.querySelector('.chatbar').getBoundingClientRect();
+    const perdues = [];
+    for (const c of document.querySelectorAll('.chip')) {
+      const r = c.getBoundingClientRect();
+      if (r.bottom > barre.top && r.top < barre.bottom) perdues.push(c.textContent.trim().slice(0, 34));
+    }
+    return { perdues, hauteurBarre: Math.round(barre.height) };
+  });
+  if (chevauche.perdues.length) {
+    throw new Error(`${chevauche.perdues.length} suggestion(s) sous la barre (haute de ${chevauche.hauteurBarre}px) : « ${chevauche.perdues[0]} »`);
+  }
+});
+
 /* ------------------------------------------------------------- le contexte */
 
 await step("depuis une fiche de glossaire, la question part avec le mot", async () => {
@@ -228,6 +278,39 @@ await step('aller poser une question puis revenir rend le chapitre où on l’av
   if (Math.abs(apres - avant) > 40) {
     throw new Error(`lecture reprise à ${apres} au lieu de ${avant}`);
   }
+});
+
+/* --------------------------------- la flèche de retour ramène d'où l'on vient */
+
+const DEPARTS = [
+  { nom: 'un chapitre', url: '#/histoire/c/ch09' },
+  { nom: 'le livret', url: '#/livret' },
+  { nom: 'un tableau d’enquête', url: '#/tableaux/regimes' },
+  { nom: 'les progrès', url: '#/progres' },
+];
+for (const d of DEPARTS) {
+  await step(`depuis ${d.nom}, la flèche de retour y ramène`, async () => {
+    await p.goto(BASE + d.url);
+    await p.waitForTimeout(500);
+    await p.click('.ds-topbar [aria-label="Demander à l’assistant"]');
+    await p.waitForSelector('.chat__field');
+    await p.waitForTimeout(400);
+    await p.click('.ds-topbar [aria-label="Retour"]');
+    await p.waitForTimeout(600);
+    const ou = await p.evaluate(() => location.hash);
+    if (ou !== d.url) throw new Error(`retour sur « ${ou} » au lieu de « ${d.url} »`);
+  });
+}
+
+await step("arrivé directement sur l'assistant, le retour mène à l'accueil", async () => {
+  await p.goto(BASE + '#/assistant');
+  await p.reload({ waitUntil: 'networkidle' });
+  await p.waitForSelector('.chat__field');
+  await p.waitForTimeout(400);
+  await p.click('.ds-topbar [aria-label="Retour"]');
+  await p.waitForTimeout(500);
+  const ou = await p.evaluate(() => location.hash);
+  if (ou !== '#/' && ou !== '') throw new Error(`retour sur « ${ou} »`);
 });
 
 await p.goto(BASE + '#/assistant');

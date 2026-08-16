@@ -35,8 +35,11 @@ export function TopBar({
       ].filter(Boolean)),
     ]),
     h('div', { class: 'ds-topbar__actions' }, [
+      // `variant` est laissé au choix de l'appelant, avec le blanc du système
+      // par défaut : une action qui doit se distinguer de ses voisines — trois
+      // ronds blancs identiques ne se remarquent plus — prend un autre aplat.
       ...actions.map((a) => IconButton({
-        icon: a.icon, label: a.label, badge: a.badge, variant: 'white', onClick: a.onClick,
+        icon: a.icon, label: a.label, badge: a.badge, variant: a.variant || 'white', onClick: a.onClick,
       })),
       progress ? h('span', { class: 'ds-topbar__streak' }, [
         Icon({ name: 'flame', size: 14, className: 'ds-topbar__flame' }),
