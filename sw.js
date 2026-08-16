@@ -4,7 +4,7 @@
  * en arrière-plan. Changer CACHE force le rechargement des fichiers.
  */
 
-const CACHE = 'examen-civique-v20';
+const CACHE = 'examen-civique-v21';
 
 const ASSETS = [
   './',
@@ -124,6 +124,7 @@ const ASSETS = [
   './js/views/cours.js',
   './js/views/livret.js',
   './js/views/roman.js',
+  './js/views/tableaux.js',
   './js/views/cartes.js',
   './js/views/progres.js',
   './js/views/parcours.js',
@@ -144,6 +145,7 @@ const ASSETS = [
   './js/data/livret/partie-5.js',
   './js/data/livret/annexes.js',
   './js/data/roman.js',
+  './js/data/tableaux.js',
   './js/data/roman/acte-1.js',
   './js/data/roman/acte-2.js',
   './js/data/roman/acte-3.js',

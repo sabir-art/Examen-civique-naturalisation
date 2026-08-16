@@ -17,6 +17,7 @@ import renderExamen from './views/examen.js';
 import renderCours from './views/cours.js';
 import renderLivret from './views/livret.js';
 import renderRoman from './views/roman.js';
+import renderTableaux from './views/tableaux.js';
 import renderCartes from './views/cartes.js';
 import renderProgres from './views/progres.js';
 import renderParcours from './views/parcours.js';
@@ -130,6 +131,10 @@ const ROUTES = [
   { path: /^\/$/, view: renderHome, title: 'Examen civique', tab: '/' },
   { path: /^\/histoire$/, view: renderRoman, title: 'La France racontée', tab: '/histoire' },
   { path: /^\/histoire\/(.+)$/, view: renderRoman, title: 'La France racontée', tab: '/histoire', back: '#/histoire' },
+  // Les tableaux d'enquête relèvent de l'Histoire : ils mettent en ordre ce que
+  // le récit raconte, et chaque fiche renvoie à son chapitre.
+  { path: /^\/tableaux$/, view: renderTableaux, title: 'Tableaux d’enquête', tab: '/histoire', back: '#/histoire' },
+  { path: /^\/tableaux\/(.+)$/, view: renderTableaux, title: 'Tableau d’enquête', tab: '/histoire', back: '#/tableaux' },
   { path: /^\/reviser$/, view: renderReviser, title: 'Réviser', tab: '/reviser' },
   { path: /^\/cartes$/, view: renderCartes, title: 'Cartes mémoire', tab: '/reviser', back: '#/reviser' },
   { path: /^\/cartes\/(.+)$/, view: renderCartes, title: 'Cartes mémoire', tab: '/reviser', back: '#/reviser' },
@@ -177,7 +182,7 @@ export function navigate(hash, { replace = false } = {}) {
  * Seuls ces écrans-là sont concernés : sur une liste ou un questionnaire, on
  * veut bien recommencer par le haut.
  */
-const ECRANS_DE_LECTURE = /^\/(histoire\/(c|a)\/|livret\/|cours\/|histoire\/glossaire)/;
+const ECRANS_DE_LECTURE = /^\/(histoire\/(c|a)\/|livret\/|cours\/|histoire\/glossaire|tableaux)/;
 const positions = new Map();
 
 async function route() {
@@ -231,7 +236,10 @@ async function route() {
     back: result?.back !== undefined ? result.back : match.back,
     tab: result?.hideTabs ? null : match.tab,
     chrome: true,
-    reprise: positions.get(path) || 0,
+    // Un écran qui vise lui-même un endroit précis — une fiche du tableau
+    // désignée par l'adresse — garde la main : lui rendre en plus l'ancienne
+    // position ferait défiler deux fois, et la seconde gagnerait.
+    reprise: result?.ancre ? 0 : (positions.get(path) || 0),
   });
   lastPath = path;
 }

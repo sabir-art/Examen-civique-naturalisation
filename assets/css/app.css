@@ -566,6 +566,10 @@ a { color: var(--lien); }
 /* Bandeau blanc : quand la couleur sert plus bas — un pastel par format
    d'examen — l'en-tête la laisse aux cartes et se contente du fond de carte. */
 .hero--blanc { background: var(--surface); box-shadow: var(--shadow); }
+/* Les trois tableaux d'enquête, chacun dans son pastel. */
+.hero--lavender { background: var(--surface-lavender); }
+.hero--mint { background: var(--surface-mint); }
+.hero--butter { background: var(--surface-butter); }
 
 /* --------------------------------------------------------------- buttons */
 /* Pilule pleine, encre : l'unique élément noir de l'écran, donc la seule
@@ -1689,4 +1693,107 @@ body.is-locked { position: fixed; inset: 0; width: 100%; overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ------------------------------------------------------ tableau d'enquête */
+/* Un mur de fiches épinglées. La gouttière de gauche n'est pas décorative :
+   c'est l'espace où passent les ficelles. Les fiches gardent leur largeur, les
+   fils courent à côté — jamais par-dessus le texte. */
+.mur {
+  position: relative;
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding-left: var(--mur-gouttiere);
+  --mur-gouttiere: 46px;
+}
+/* Le tracé est posé sous les fiches et ne reçoit aucun appui : c'est un
+   dessin, et tout ce qu'il montre est écrit à côté. */
+.mur__fils { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.mur__fils .fil,
+.mur__fils .arc {
+  fill: none; stroke: var(--line-strong); stroke-width: 1.5; stroke-linecap: round;
+  transition: stroke .18s ease, stroke-width .18s ease, opacity .18s ease;
+}
+.mur__fils .arc { stroke-dasharray: 3 5; opacity: .75; }
+/* Une fiche tenue : ses ficelles s'épaississent et prennent l'encre, les
+   autres s'effacent sans disparaître — on garde le plan du mur. */
+.mur--tire .fil, .mur--tire .arc { opacity: .2; }
+.mur--tire .fil--vif, .mur--tire .arc--vif { opacity: 1; stroke: var(--brand); stroke-width: 2.5; }
+
+.fiche {
+  position: relative; z-index: 1;
+  background: var(--surface); border-radius: var(--radius-card);
+  padding: 14px; box-shadow: var(--shadow);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.fiche:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }
+.mur--tire .fiche { opacity: .38; }
+.mur--tire .fiche--tenue,
+.mur--tire .fiche--liee { opacity: 1; }
+.fiche--tenue { box-shadow: var(--shadow-lg); }
+
+/* L'épingle : posée dans la gouttière, à cheval sur le fil. */
+.fiche__pin {
+  position: absolute; left: calc(var(--mur-gouttiere) * -1 + 23px - 15px); top: 18px;
+  width: 30px; height: 30px; border-radius: var(--radius-circle);
+  display: grid; place-items: center;
+  background: var(--surface-sunken); color: var(--text-primary);
+  box-shadow: 0 0 0 4px var(--bg);
+}
+.fiche__pin svg { width: 15px; height: 15px; }
+.fiche__pin--regime { background: var(--topic-histoire); }
+.fiche__pin--evenement { background: var(--topic-symboles); }
+.fiche__pin--texte { background: var(--topic-valeurs); }
+.fiche__pin--personne { background: var(--topic-institutions); }
+.fiche__pin--institution { background: var(--topic-institutions); }
+.fiche__pin--droit { background: var(--topic-valeurs); }
+
+/* `min-width: 0` : sans lui, une épingle un peu longue impose sa largeur à la
+   colonne et fait défiler tout le mur de côté. */
+.fiche__corps { min-width: 0; }
+.fiche__haut { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.fiche__quand {
+  font-family: var(--font-mono); font-size: var(--text-caption); font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+}
+.fiche__nature { font: var(--type-micro); color: var(--muted); }
+.fiche__titre { font: var(--type-h3); font-size: 17px; margin-top: 4px; text-wrap: pretty; }
+.fiche__resume { font: var(--type-body-sm); color: var(--text-secondary); margin-top: 6px; text-wrap: pretty; }
+
+.fiche__epingles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.epingle {
+  display: inline-flex; align-items: center; padding: 4px 9px;
+  border-radius: var(--radius-pill); background: var(--surface-sunken);
+  font: var(--type-micro); color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+/* Une ficelle écrite. Le bouton mène à l'autre bout du fil. */
+.fiche__liens { display: grid; gap: 6px; margin-top: 12px; }
+.ficelle {
+  display: flex; align-items: flex-start; gap: 8px; width: 100%; text-align: left;
+  min-height: var(--tap-target-min); padding: 8px 10px;
+  border: 0; border-radius: var(--radius-card-inner);
+  background: var(--surface-sunken); color: var(--text-primary);
+  font-family: inherit; font-size: var(--text-caption); line-height: 1.4;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.ficelle svg { width: 14px; height: 14px; flex: none; margin-top: 2px; color: var(--muted); }
+.ficelle__quoi { color: var(--muted); }
+.ficelle__qui { font-weight: var(--weight-bold); }
+
+.fiche__lire {
+  display: flex; align-items: center; gap: 8px;
+  min-height: var(--tap-target-min); margin-top: 10px;
+  font: var(--type-caption); font-weight: var(--weight-bold);
+  color: var(--text-primary); text-decoration: none;
+}
+.fiche__lire svg { width: 15px; height: 15px; flex: none; }
+
+/* Écrans étroits : la gouttière se resserre, jamais au point de faire passer
+   les ficelles sous le texte. */
+@media (max-width: 360px) {
+  .mur { --mur-gouttiere: 38px; }
+  .fiche__pin { left: calc(var(--mur-gouttiere) * -1 + 19px - 13px); width: 26px; height: 26px; }
 }

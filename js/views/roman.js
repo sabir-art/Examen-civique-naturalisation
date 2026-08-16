@@ -26,6 +26,7 @@ import {
   buildRomanSet, romanMastery, romanOverview, nextUnread,
   romanChapitreProgres, romanActeProgres, romanProchaineRevue,
 } from '../engine.js';
+import { TOTAL_FICHES, fichesDuChapitre } from '../data/tableaux.js';
 import { runQuiz } from './reviser.js';
 import { preparerDemande } from './assistant.js';
 import * as ai from '../ai.js';
@@ -350,13 +351,23 @@ function sommaire() {
       carteLangue,
       h('p', { class: 'section-title', text: 'Les trois actes' }),
       list,
-      h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/histoire/glossaire' }, [
-        IconTile({ icon: 'lightbulb', tone: 'lavender', size: 38 }),
-        h('div', { class: 'ds-lesson__body' }, [
-          h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Glossaire des mots difficiles' }),
-          h('div', { class: 'ds-lesson__meta', text: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe` }),
+      h('div', { class: 'list' }, [
+        h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/tableaux' }, [
+          IconTile({ icon: 'pin', tone: 'mint', size: 38 }),
+          h('div', { class: 'ds-lesson__body' }, [
+            h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Les tableaux d’enquête' }),
+            h('div', { class: 'ds-lesson__meta', text: `${TOTAL_FICHES} fiches reliées entre elles : qui a gouverné, qui fait quoi, quels droits ont été arrachés quand` }),
+          ]),
+          Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
         ]),
-        Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+        h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/histoire/glossaire' }, [
+          IconTile({ icon: 'lightbulb', tone: 'lavender', size: 38 }),
+          h('div', { class: 'ds-lesson__body' }, [
+            h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Glossaire des mots difficiles' }),
+            h('div', { class: 'ds-lesson__meta', text: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe` }),
+          ]),
+          Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+        ]),
       ]),
       h('p', { class: 'hint center mt', text: "Les faits sont ceux du programme officiel et du livret du citoyen ; c'est la façon de les raconter qui change. Les scènes sont écrites pour rendre les dates et les noms plus faciles à retenir." }),
     ]),
@@ -590,6 +601,13 @@ function chapitre(key) {
       nq ? h('a', { class: 'btn', href: `#/histoire/q/${key}`, onclick: () => store.markRead(key) }, [
         icon('play'), h('span', { text: progres.justes ? `Refaire les ${nq} questions` : `Vérifier (${nq} questions)` }),
       ]) : null,
+
+      // Ce chapitre est épinglé quelque part sur un mur d'enquête : on peut y
+      // sauter pour le voir au milieu de ce qui l'entoure — ce qu'il renverse,
+      // ce qu'il annonce — au lieu de le retenir tout seul.
+      ...fichesDuChapitre(key).map(({ tableau, noeud }) => h('a', {
+        class: 'btn btn--ghost', href: `#/tableaux/${tableau.key}/${noeud.id}`,
+      }, [icon('pin'), h('span', { text: `Situer sur « ${tableau.titre} »` })])),
 
       // On lit, une question vient. Elle se pose ici, sans quitter le fil : le
       // chapitre est nommé à l'assistant, et l'on revient à la ligne où l'on

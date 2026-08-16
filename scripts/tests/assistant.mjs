@@ -45,10 +45,15 @@ await step("sans clé, le chapitre ne propose pas de poser une question", async 
 
 /* ------------------------------------------------- avec un fournisseur réglé */
 
+/* La chaîne posée ici n'a délibérément PAS la forme d'une clé : le garde-fou
+   anti-secrets refuse tout ce qui y ressemble dans un fichier suivi par Git, et
+   il a raison — il ne peut pas distinguer une fausse clé d'une vraie. Le
+   fournisseur est nommé explicitement dans les réglages, il n'est pas deviné
+   d'après la forme de la chaîne : l'assistant s'active donc quand même. */
 await p.evaluate(() => {
   localStorage.setItem('examen-civique.assistant', JSON.stringify({
     provider: 'anthropic',
-    keys: { anthropic: 'sk-ant-cle-de-test-sans-valeur' },
+    keys: { anthropic: 'chaine-de-test-qui-ne-vaut-rien' },
     models: { anthropic: 'modele-de-test' },
   }));
 });

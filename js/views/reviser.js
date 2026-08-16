@@ -156,6 +156,13 @@ function hub() {
       trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     }),
     LessonRow({
+      icon: 'pin',
+      title: 'Les tableaux d’enquête',
+      meta: 'Les dates, les noms et les rôles reliés entre eux',
+      href: '#/tableaux',
+      trailing: Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+    }),
+    LessonRow({
       icon: 'lightbulb',
       title: 'Les mots difficiles',
       meta: `${TOTAL_TERMES} mots expliqués simplement, en français et en arabe`,
