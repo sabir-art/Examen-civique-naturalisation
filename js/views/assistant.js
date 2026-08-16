@@ -7,12 +7,12 @@
  */
 
 import { h, icon, confirmDialog } from '../lib/dom.js';
-import { Card, Button, Badge, Icon, IconTile } from '../ds/index.js';
+import { Badge } from '../ds/index.js';
 import * as ai from '../ai.js';
 import * as fil from '../ai-thread.js';
 import { findQuestion } from '../engine.js';
-import { systemPrompt, questionContext } from '../ai-context.js';
-import { format, dots, boutonVoix } from '../components/reponse-ia.js';
+import { questionContext } from '../ai-context.js';
+import { createConverser } from '../components/converser.js';
 import { ecranPrecedent } from '../app.js';
 
 /**
@@ -80,35 +80,13 @@ const SUGGESTIONS = [
 
 function chat({ about = null, retour = '#/' }) {
   const container = h('div', { class: 'stack' });
-  const list = h('div', { class: 'chat' });
-  let busy = false;
-  let controller = null;
 
-  const field = h('textarea', {
-    class: 'input chat__field', rows: '1', placeholder: 'Votre question…',
-    'aria-label': 'Votre question',
-    oninput: (e) => {
-      e.target.style.height = 'auto';
-      e.target.style.height = `${Math.min(140, e.target.scrollHeight)}px`;
-    },
-    onkeydown: (e) => {
-      if (e.key === 'Enter' && !e.shiftKey && !busy) { e.preventDefault(); send(field.value); }
-    },
-  });
+  // Le contexte apporté par l'écran d'où l'on vient : un mot du glossaire, un
+  // chapitre. Consommé une fois, ici.
+  const c = contexteEnAttente;
+  contexteEnAttente = null;
 
-  const sendBtn = h('button', {
-    class: 'chat__send', type: 'button', 'aria-label': 'Envoyer',
-    onclick: () => (busy ? stop() : send(field.value)),
-  }, icon('play'));
-
-  function bubble(role, text) {
-    const body = h('div', { class: 'msg__body', html: format(text) });
-    const wrap = h('div', { class: `msg msg--${role}` }, body);
-    if (role === 'assistant') {
-      wrap.append(h('div', { class: 'msg__tools' }, boutonVoix(() => body.textContent)));
-    }
-    return wrap;
-  }
+  const causerie = createConverser({ forme: 'plein', suggestions: SUGGESTIONS });
 
   const head = h('div', { class: 'row row--between' });
 
@@ -125,7 +103,7 @@ function chat({ about = null, retour = '#/' }) {
               text: "L'assistant repartira de zéro : il ne se souviendra plus de ce que vous vous êtes déjà dit.",
               confirmLabel: 'Nouvelle conversation',
             });
-            if (ok) { fil.effacer(); drawThread(); }
+            if (ok) { fil.effacer(); causerie.redessiner(); drawHead(); }
           },
         }) : null,
         h('a', { class: 'linkbtn', href: '#/compte/ia', text: 'Réglages' }),
@@ -133,144 +111,16 @@ function chat({ about = null, retour = '#/' }) {
     );
   }
 
-  function drawThread() {
-    drawHead();
-    const messages = fil.messages();
-    list.replaceChildren(...messages.map((m) => bubble(m.role, m.content)));
-    if (!messages.length) list.append(welcome());
-    scrollDown();
-  }
-
-  function welcome() {
-    return h('div', { class: 'stack stack--tight' }, [
-      h('div', { class: 'card card--info card--pad-sm' }, [
-        h('p', { class: 'small', text: "Posez une question sur le programme, une réponse que vous n'avez pas comprise, ou demandez un exemple concret. L'assistant garde le fil de vos échanges sur ce téléphone : vous pouvez revenir plus tard et poursuivre." }),
-      ]),
-      h('div', { class: 'chips' }, SUGGESTIONS.map((s) => h('button', {
-        class: 'chip', type: 'button', text: s, onclick: () => send(s),
-      }))),
-    ]);
-  }
-
-  function scrollDown() {
-    requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
-  }
-
-  async function send(raw) {
-    const text = String(raw || '').trim();
-    if (!text || busy) return;
-
-    field.value = '';
-    field.style.height = 'auto';
-    fil.ajouter('user', text);
-    drawThread();
-
-    busy = true;
-    sendBtn.replaceChildren(icon('cross'));
-    sendBtn.setAttribute('aria-label', 'Arrêter');
-
-    const answer = bubble('assistant', '');
-    const body = answer.querySelector('.msg__body');
-    body.replaceChildren(dots());
-    list.append(answer);
-    scrollDown();
-
-    controller = new AbortController();
-    let received = '';
-    // Ce qu'on envoie est arrêté MAINTENANT, avant d'inscrire la réponse en
-    // cours : sinon le dernier message transmis serait la bulle vide qu'on
-    // vient d'ouvrir, et l'API refuse un tour sans contenu.
-    const envoi = fil.pourEnvoi();
-    // La réponse est inscrite vide, puis complétée au fil de l'eau : coupure de
-    // réseau ou fermeture de l'application en cours de route, ce qui est déjà
-    // arrivé sur l'écran n'est pas perdu.
-    fil.ajouter('assistant', '');
-    try {
-      const out = await ai.ask({
-        system: systemPrompt(),
-        messages: envoi,
-        signal: controller.signal,
-        onText: (_chunk, full) => {
-          received = full;
-          fil.completerDernier(full);
-          body.innerHTML = format(full);
-          scrollDown();
-        },
-      });
-      fil.completerDernier(out.text);
-      body.innerHTML = format(out.text);
-    } catch (err) {
-      if (err?.name === 'AbortError') {
-        if (received.trim()) {
-          fil.completerDernier(received);
-          body.innerHTML = format(received);
-        } else {
-          fil.retirerDernier();
-          answer.remove();
-        }
-      } else {
-        fil.retirerDernier();
-        answer.remove();
-        list.append(h('div', { class: 'msg msg--error' }, [
-          h('div', { class: 'msg__body' }, [
-            h('p', { text: err.message }),
-            /clé|refusée|modèle/i.test(err.message)
-              ? h('a', { class: 'btn btn--ghost mt', href: '#/compte/ia', text: 'Ouvrir les réglages' })
-              : null,
-          ].filter(Boolean)),
-        ]));
-      }
-    } finally {
-      busy = false;
-      controller = null;
-      sendBtn.replaceChildren(icon('play'));
-      sendBtn.setAttribute('aria-label', 'Envoyer');
-      scrollDown();
-    }
-  }
-
-  function stop() {
-    if (controller) controller.abort();
-  }
-
-  drawThread();
-
-  const barre = h('div', { class: 'chatbar' }, [
-    h('div', { class: 'chatbar__inner' }, [field, sendBtn]),
-  ]);
-  container.append(head, list, barre);
-
-  // La barre flotte au-dessus du contenu : ce qu'elle couvre doit lui être
-  // rendu. Sa hauteur est mesurée, non devinée — le champ grandit avec la
-  // question, et les dernières suggestions passaient dessous.
-  if (typeof ResizeObserver === 'function') {
-    new ResizeObserver(() => {
-      container.style.setProperty('--chatbar-h', `${Math.ceil(barre.offsetHeight)}px`);
-    }).observe(barre);
-  }
-
-  /** Écrit une demande dans le champ sans l'envoyer : on peut encore la changer. */
-  function preremplir(texte) {
-    field.value = texte;
-    requestAnimationFrame(() => {
-      field.style.height = 'auto';
-      field.style.height = `${Math.min(140, field.scrollHeight)}px`;
-      field.focus();
-      field.setSelectionRange(field.value.length, field.value.length);
-    });
-  }
+  drawHead();
+  container.append(head, causerie);
 
   // Arrivée depuis une question ratée : la demande est préparée, il ne reste
   // qu'à l'envoyer ou à la modifier.
   if (about) {
     const q = findQuestion(about);
-    if (q) preremplir(`${questionContext(q)}\nExplique-moi pourquoi, avec un exemple concret.`);
-  } else if (contexteEnAttente) {
-    // Arrivée depuis une lecture : l'assistant sait de quoi on lui parle sans
-    // qu'on ait à le lui récrire.
-    const c = contexteEnAttente;
-    contexteEnAttente = null;
-    preremplir([
+    if (q) causerie.preremplir(`${questionContext(q)}\nExplique-moi pourquoi, avec un exemple concret.`);
+  } else if (c) {
+    causerie.preremplir([
       `À propos de : ${c.sujet}`,
       c.repere ? `Le passage : « ${c.repere} »` : null,
       c.amorce || 'Explique-moi ça simplement.',

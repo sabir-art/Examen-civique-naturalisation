@@ -4,7 +4,7 @@
 
 import * as store from './store.js';
 import { amorcer } from './lib/feedback.js';
-import { h, toast } from './lib/dom.js';
+import { h, toast, fermerFeuille } from './lib/dom.js';
 import { TopBar, BottomNav } from './ds/navigation.js';
 import { Avatar } from './ds/core.js';
 import { badgesObtenus } from './lib/xp.js';
@@ -195,6 +195,10 @@ const positions = new Map();
 async function route() {
   const path = currentPath();
 
+  // Une feuille ouverte ne survit pas au changement d'écran : elle resterait
+  // posée sur le nouveau, et son verrou laisserait la page figée.
+  if (path !== lastPath) fermerFeuille();
+
   if (guard && path !== lastPath) {
     const allowed = await guard(path);
     if (!allowed) {
@@ -303,11 +307,17 @@ export function masquerOnglets() {
  * pose une question, et l'on se retrouve à la maison. Renvoie l'accueil quand
  * on arrive directement par l'adresse, faute de mieux.
  */
-export function ecranPrecedent(defaut = '#/') {
+export function ecranPrecedent(defaut = '#/', seulementSi = null) {
   if (!lastPath) return defaut;
   const hash = `#${lastPath}`;
   // Ne jamais renvoyer sur soi-même : le bouton ne ferait rien.
-  return hash.startsWith(`#${currentPath()}`) ? defaut : hash;
+  if (hash.startsWith(`#${currentPath()}`)) return defaut;
+  // `seulementSi` limite la reprise à certaines provenances : un chapitre
+  // revient à son acte, sauf s'il a été ouvert depuis un tableau d'enquête.
+  // Sans cette réserve, enchaîner deux chapitres ferait pointer le retour sur
+  // le chapitre précédent au lieu du sommaire de l'acte.
+  if (seulementSi && !seulementSi.test(hash)) return defaut;
+  return hash;
 }
 
 /** Redessine la vue courante (après un changement de données). */

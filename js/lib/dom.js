@@ -71,6 +71,20 @@ export function toast(message, ms = 2600) {
  * Feuille modale. `render(close)` doit renvoyer le contenu du panneau.
  * Renvoie une promesse résolue avec la valeur passée à close().
  */
+/**
+ * La fermeture de la feuille ouverte, s'il y en a une.
+ *
+ * Une feuille survivait à un changement d'écran : on ouvrait un mot du
+ * glossaire, on appuyait sur l'assistant en haut, et la feuille restait posée
+ * par-dessus le nouvel écran — avec le verrou du défilement, donc une page
+ * figée. Le routeur ferme désormais ce qui traîne avant de dessiner.
+ */
+let fermerCourante = null;
+
+export function fermerFeuille() {
+  if (fermerCourante) fermerCourante(undefined);
+}
+
 export function modal(render) {
   return new Promise((resolve) => {
     const root = document.getElementById('modal-root');
@@ -79,11 +93,13 @@ export function modal(render) {
     // repart du haut. On la relève avant de verrouiller, on la rend après.
     const lecture = window.scrollY || document.documentElement.scrollTop || 0;
     const close = (value) => {
+      if (fermerCourante === close) fermerCourante = null;
       root.replaceChildren();
       deverrouiller(lecture);
       document.removeEventListener('keydown', onKey);
       resolve(value);
     };
+    fermerCourante = close;
     const onKey = (e) => { if (e.key === 'Escape') close(undefined); };
     document.addEventListener('keydown', onKey);
 

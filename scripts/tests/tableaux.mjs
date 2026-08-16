@@ -191,6 +191,46 @@ await step('la ficelle écrite mène bien à l’autre bout du fil', async () =>
   if (tenue !== 'fiche-monarchie') throw new Error(`la ficelle mène à « ${tenue} » au lieu de la monarchie`);
 });
 
+/* Un chapitre peut être épinglé plusieurs fois sur le même mur — le chapitre 14
+   porte à la fois Vichy et l'appel du 18 juin. Deux boutons au même intitulé ne
+   se distinguaient plus : on ne savait pas lequel menait où. */
+await step('deux fiches du même chapitre donnent deux boutons distincts', async () => {
+  await p.goto(BASE + '#/histoire/c/ch14');
+  await p.waitForTimeout(700);
+  const libelles = await p.evaluate(() => [...document.querySelectorAll('a[href^="#/tableaux/"]')]
+    .map((a) => a.textContent.trim()));
+  if (libelles.length < 2) throw new Error(`${libelles.length} bouton(s) : le contrôle ne prouverait rien`);
+  if (new Set(libelles).size !== libelles.length) {
+    throw new Error(`deux boutons portent le même intitulé : « ${libelles[0]} »`);
+  }
+});
+
+await step('revenu d’un tableau, le chapitre y renvoie au lieu de l’acte', async () => {
+  await p.goto(BASE + '#/tableaux/regimes/bastille');
+  await p.waitForSelector('.fiche');
+  await p.waitForTimeout(700);
+  await p.locator('#fiche-bastille .fiche__lire').click();
+  await p.waitForTimeout(700);
+  if (!(await p.evaluate(() => location.hash)).startsWith('#/histoire/c/')) {
+    throw new Error("le lien n'a pas ouvert le chapitre");
+  }
+  await p.click('.ds-topbar [aria-label="Retour"]');
+  await p.waitForTimeout(700);
+  const ou = await p.evaluate(() => location.hash);
+  if (!ou.startsWith('#/tableaux/')) throw new Error(`retour sur « ${ou} » au lieu du tableau`);
+});
+
+await step('venu de l’acte, le chapitre revient bien à l’acte', async () => {
+  await p.goto(BASE + '#/histoire/a/acte-2');
+  await p.waitForTimeout(600);
+  await p.locator('a[href="#/histoire/c/ch07"]').first().click();
+  await p.waitForTimeout(700);
+  await p.click('.ds-topbar [aria-label="Retour"]');
+  await p.waitForTimeout(700);
+  const ou = await p.evaluate(() => location.hash);
+  if (ou !== '#/histoire/a/acte-2') throw new Error(`retour sur « ${ou} » au lieu de l'acte`);
+});
+
 await step('un chapitre renvoie au mur, sur sa propre fiche', async () => {
   await p.goto(BASE + '#/histoire/c/ch07');
   await p.waitForTimeout(600);

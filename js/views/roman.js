@@ -29,8 +29,9 @@ import {
 import { TOTAL_FICHES, fichesDuChapitre } from '../data/tableaux.js';
 import { runQuiz } from './reviser.js';
 import { preparerDemande } from './assistant.js';
+import { createConverser } from '../components/converser.js';
 import * as ai from '../ai.js';
-import { navigate, refresh } from '../app.js';
+import { navigate, refresh, ecranPrecedent } from '../app.js';
 import * as store from '../store.js';
 import * as fx from '../lib/feedback.js';
 
@@ -106,20 +107,15 @@ function ouvrirTerme(entree) {
     figure(images.imageDuTerme(entree.terme), 'fr', { compacte: true }),
     h('p', { class: 'glossdef', text: entree.def }),
     h('div', { class: 'glossar', dir: 'rtl', lang: 'ar' }, h('p', { text: entree.ar })),
-    // Une définition en trois lignes ne suffit pas toujours : on peut demander
-    // la suite sans avoir à récrire de quoi l'on parle.
-    ai.isConfigured() ? Button({
-      variant: 'tonal', size: 'lg', fullWidth: true, iconLeft: 'message-circle',
-      label: 'Demander à l’assistant', className: 'mt',
-      onClick: () => {
-        preparerDemande({
-          sujet: `le mot « ${entree.terme} » du glossaire`,
-          repere: entree.def,
-          amorce: 'Explique-moi ce mot autrement, avec un exemple concret de la vie en France.',
-        });
-        close();
-        navigate('#/assistant');
-      },
+    // La question se pose ICI. Ouvrir l'écran Assistant ferait perdre le mot,
+    // la page et la ligne où l'on en était pour une précision de trois phrases.
+    // Le composant est le même que celui de l'écran entier, et la mémoire
+    // aussi : ce qu'on demande ici, l'assistant s'en souviendra là-bas.
+    ai.isConfigured() ? createConverser({
+      forme: 'feuille',
+      contexte: { sujet: `le mot « ${entree.terme} » du glossaire`, repere: entree.def },
+      invite: `Une question sur « ${entree.terme} »…`,
+      suggestions: ['Explique autrement', 'Un exemple concret', 'Comment le retenir ?'],
     }) : null,
     Button({ variant: 'secondary', size: 'lg', fullWidth: true, label: 'Fermer', onClick: () => close(), className: 'mt' }),
   ].filter(Boolean));
@@ -605,23 +601,25 @@ function chapitre(key) {
       // Ce chapitre est épinglé quelque part sur un mur d'enquête : on peut y
       // sauter pour le voir au milieu de ce qui l'entoure — ce qu'il renverse,
       // ce qu'il annonce — au lieu de le retenir tout seul.
+      // Le libellé nomme la FICHE, pas le mur : un chapitre peut y être épinglé
+      // deux fois — le chapitre 14 porte à la fois Vichy et l'appel du 18 juin —
+      // et deux boutons au même intitulé ne se distinguaient plus.
       ...fichesDuChapitre(key).map(({ tableau, noeud }) => h('a', {
         class: 'btn btn--ghost', href: `#/tableaux/${tableau.key}/${noeud.id}`,
-      }, [icon('pin'), h('span', { text: `Situer sur « ${tableau.titre} »` })])),
+      }, [icon('pin'), h('span', { text: `Situer « ${noeud.titre} »` })])),
 
-      // On lit, une question vient. Elle se pose ici, sans quitter le fil : le
-      // chapitre est nommé à l'assistant, et l'on revient à la ligne où l'on
-      // s'était arrêté.
-      ai.isConfigured() ? h('button', {
-        class: 'btn btn--ghost', type: 'button',
-        onclick: () => {
-          preparerDemande({
-            sujet: `le chapitre « ${c.titre} » du récit (${stripTags(c.date)}, ${c.lieu})`,
-            amorce: 'J’ai une question sur ce chapitre : ',
-          });
-          navigate('#/assistant');
-        },
-      }, [icon('message-circle'), h('span', { text: 'Une question sur ce chapitre ?' })]) : null,
+      // On lit, une question vient. Elle se pose ICI, au bas du chapitre :
+      // partir vers l'écran Assistant ferait perdre la page. Le chapitre est
+      // nommé à l'assistant sans qu'on ait à le récrire.
+      ai.isConfigured() ? h('div', { class: 'card' }, [
+        h('h2', { class: 'card__title', style: 'font-size:16px', text: 'Une question sur ce chapitre ?' }),
+        createConverser({
+          forme: 'feuille',
+          contexte: { sujet: `le chapitre « ${c.titre} » du récit (${stripTags(c.date)}, ${c.lieu})` },
+          invite: 'Ce que vous n’avez pas compris…',
+          suggestions: ['Résume-le en trois phrases', 'Pourquoi c’est important ?', 'Que dois-je retenir pour l’examen ?'],
+        }),
+      ]) : null,
 
       lng !== 'fr' ? h('p', { class: 'hint center', text: 'Les questions sont en français, comme le jour de l’examen.' }) : null,
 
@@ -642,7 +640,14 @@ function chapitre(key) {
   // écran que l'on a déjà quitté.
   images.charger().then(() => { if (container.isConnected) draw(); });
 
-  return { node: container, title: `Chapitre ${c.num}`, back: `#/histoire/a/${c.acteKey}` };
+  // Le retour ramène à l'acte, sauf quand on est arrivé depuis un tableau
+  // d'enquête : on y était pour situer ce chapitre, on veut y revenir — et
+  // sur la fiche qu'on avait allumée, pas en haut du mur.
+  return {
+    node: container,
+    title: `Chapitre ${c.num}`,
+    back: ecranPrecedent(`#/histoire/a/${c.acteKey}`, /^#\/tableaux\//),
+  };
 }
 
 /**

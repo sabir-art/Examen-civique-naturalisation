@@ -1801,3 +1801,60 @@ body.is-locked { position: fixed; inset: 0; width: 100%; overflow: hidden; }
   .mur { --mur-gouttiere: 38px; }
   .fiche__pin { left: calc(var(--mur-gouttiere) * -1 + 19px - 13px); width: 26px; height: 26px; }
 }
+
+/* ------------------------------------------------------------- causerie */
+/* Parler à l'assistant, en plein écran ou dans une feuille. */
+.causerie { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.causerie__fil { display: flex; flex-direction: column; gap: 12px; }
+.causerie__suggestions { margin-top: 2px; }
+.causerie__absente { text-align: center; }
+
+/* La zone de saisie : UN bloc, ses boutons dedans. Auparavant un champ gris
+   pâle sur fond presque blanc — invisible — flanqué d'un bouton qui lui
+   mangeait sa largeur. Le bloc est blanc et bordé : on voit où l'on écrit. */
+.compose {
+  display: flex; align-items: flex-end; gap: 6px;
+  padding: 6px 6px 6px 14px;
+  background: var(--surface); border: 1.5px solid var(--line-strong);
+  border-radius: 26px; box-shadow: var(--shadow);
+  transition: var(--transition-control);
+}
+.compose:focus-within { border-color: var(--border-focus); }
+/* Pendant la dictée, le bloc se signale : on doit voir qu'il écoute. */
+.compose.is-ecoute { border-color: var(--brand); }
+.compose.is-ecoute .compose__mic { background: var(--brand); color: var(--on-brand); }
+
+.compose__field {
+  flex: 1; min-width: 0; border: 0; background: none; color: var(--text);
+  font-family: inherit; font-size: 16px; line-height: 1.45;
+  padding: 11px 0; margin: 0; resize: none; max-height: 148px;
+  overflow-y: auto;
+}
+.compose__field:focus { outline: none; }
+.compose__field::placeholder { color: var(--muted); }
+
+.compose__actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.compose__mic, .compose__send {
+  flex: none; width: 40px; height: 40px; border: 0; border-radius: var(--radius-circle);
+  display: grid; place-items: center; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: var(--transition-control);
+}
+.compose__mic { background: var(--surface-sunken); color: var(--text-primary); }
+.compose__send { background: var(--brand); color: var(--on-brand); }
+.compose__mic:active, .compose__send:active { transform: scale(var(--press-scale)); }
+.compose__mic svg, .compose__send svg { width: 18px; height: 18px; }
+
+/* En plein écran, la saisie est amarrée au bas de la fenêtre. */
+.causerie--plein .compose {
+  position: fixed; left: max(14px, env(safe-area-inset-left));
+  right: max(14px, env(safe-area-inset-right));
+  bottom: calc(10px + var(--safe-b)); z-index: 40;
+  max-width: 612px; margin: 0 auto;
+}
+.causerie--plein .causerie__fil { padding-bottom: calc(var(--compose-h, 76px) + 20px); }
+
+/* Dans une feuille, elle reste dans le flux, sous la réponse. */
+.causerie--feuille { margin-top: 14px; }
+.causerie--feuille .causerie__fil:empty { display: none; }
+.causerie--feuille .msg__body { max-width: 100%; }

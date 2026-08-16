@@ -32,14 +32,14 @@ await step("sans clé, l'assistant renvoie aux réglages sans rien casser", asyn
   await p.goto(BASE + '#/assistant');
   await p.waitForTimeout(400);
   if (!(await p.locator('a[href="#/compte/ia"]').count())) throw new Error('pas de renvoi vers les réglages');
-  if (await p.locator('.chatbar').count()) throw new Error('un champ de discussion sans fournisseur');
+  if (await p.locator('.compose').count()) throw new Error('un champ de discussion sans fournisseur');
 });
 
 await step("sans clé, le chapitre ne propose pas de poser une question", async () => {
   await p.goto(BASE + '#/histoire/c/ch09');
   await p.waitForTimeout(500);
-  if (await p.locator('button:has-text("Une question sur ce chapitre")').count()) {
-    throw new Error('bouton proposé alors qu’aucune IA n’est branchée');
+  if (await p.locator('.compose').count()) {
+    throw new Error('champ de discussion proposé alors qu’aucune IA n’est branchée');
   }
 });
 
@@ -128,11 +128,11 @@ await step("les suggestions ne passent pas sous la barre de saisie", async () =>
 
   // Question longue : la barre grandit, et c'est là que la réserve écrite en
   // dur ne suffisait plus.
-  await p.fill('.chat__field', 'Une question assez longue pour que le champ de saisie occupe plusieurs lignes et pousse la barre vers le haut, comme lorsqu’on colle un passage entier du récit avant de demander une explication.');
+  await p.fill('.compose__field', 'Une question assez longue pour que le champ de saisie occupe plusieurs lignes et pousse la barre vers le haut, comme lorsqu’on colle un passage entier du récit avant de demander une explication.');
   await p.waitForTimeout(400);
 
   const chevauche = await p.evaluate(() => {
-    const barre = document.querySelector('.chatbar').getBoundingClientRect();
+    const barre = document.querySelector('.compose').getBoundingClientRect();
     const perdues = [];
     for (const c of document.querySelectorAll('.chip')) {
       const r = c.getBoundingClientRect();
@@ -147,28 +147,93 @@ await step("les suggestions ne passent pas sous la barre de saisie", async () =>
 
 /* ------------------------------------------------------------- le contexte */
 
-await step("depuis une fiche de glossaire, la question part avec le mot", async () => {
+/* La demande d'origine : depuis un mot du glossaire, on parle à l'IA SUR PLACE.
+   Partir vers l'écran Assistant faisait perdre le mot, la page et la ligne. */
+await step("un mot du glossaire se discute dans sa feuille, sans la quitter", async () => {
+  await p.evaluate(async () => (await import('./js/ai-thread.js')).effacer());
   await p.goto(BASE + '#/histoire/c/ch09');
   await p.waitForSelector('.gloss');
+  const avant = await p.evaluate(() => location.hash);
   await p.locator('.gloss').first().click();
   await p.waitForSelector('.modal__panel');
-  const terme = (await p.locator('.modal__title').textContent()).trim();
-  await p.click('.modal__panel button:has-text("Demander à l’assistant")');
-  await p.waitForSelector('.chat__field');
-  const ecrit = await p.inputValue('.chat__field');
-  if (!ecrit.includes(terme)) throw new Error(`« ${terme} » absent de la demande préparée : « ${ecrit.slice(0, 80)} »`);
+  if (!(await p.locator('.modal__panel .compose__field').count())) {
+    throw new Error('aucun champ de saisie dans la feuille du mot');
+  }
+  const apres = await p.evaluate(() => location.hash);
+  if (apres !== avant) throw new Error(`l'écran a changé (${avant} → ${apres})`);
 });
 
-await step("depuis un chapitre, la question part avec le titre du chapitre", async () => {
+await step("la question posée depuis la feuille part avec le mot et sa définition", async () => {
+  let corps = null;
+  await p.route('**://api.anthropic.com/**', async (route) => {
+    try { corps = JSON.parse(route.request().postData() || '{}'); } catch { corps = {}; }
+    await route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"interrompu"}' });
+  });
+  const terme = (await p.locator('.modal__title').textContent()).trim();
+  await p.fill('.modal__panel .compose__field', 'Et concrètement ?');
+  await p.click('.modal__panel .compose__send');
+  await p.waitForTimeout(1200);
+  await p.unroute('**://api.anthropic.com/**');
+
+  if (!corps) throw new Error("aucun appel n'a été tenté");
+  const premier = (corps.messages || [])[0]?.content || '';
+  if (!premier.includes(terme)) throw new Error(`« ${terme} » absent de la demande : « ${premier.slice(0, 90)} »`);
+  if (!premier.includes('Et concrètement')) throw new Error('la question tapée ne part pas');
+});
+
+await step("la feuille reste ouverte, et l'écran derrière n'a pas bougé", async () => {
+  const etat = await p.evaluate(() => ({
+    feuille: Boolean(document.querySelector('.modal__panel')),
+    ou: location.hash,
+  }));
+  if (!etat.feuille) throw new Error('la feuille s’est fermée');
+  if (!etat.ou.startsWith('#/histoire/c/')) throw new Error(`on a quitté le chapitre (${etat.ou})`);
+});
+
+await step("changer d'écran referme la feuille et rend le défilement", async () => {
+  // La feuille est encore ouverte, héritée du contrôle précédent. Elle
+  // intercepte les appuis, donc on ne peut pas la contourner par un bouton :
+  // c'est le geste de retour du téléphone qui change d'écran par-dessous.
+  if (!(await p.locator('.modal__panel').count())) throw new Error('rien à fermer : le contrôle ne prouverait rien');
+  await p.goBack();
+  await p.waitForTimeout(800);
+  const etat = await p.evaluate(() => ({
+    feuille: Boolean(document.querySelector('.modal__panel')),
+    fige: document.body.classList.contains('is-locked'),
+    position: getComputedStyle(document.body).position,
+  }));
+  if (etat.feuille) throw new Error('la feuille est restée posée sur le nouvel écran');
+  if (etat.fige || etat.position === 'fixed') throw new Error('la page est restée figée');
+});
+
+await step("ce qui est demandé dans la feuille, l'écran Assistant s'en souvient", async () => {
+  const dansLeFil = await p.evaluate(async () => {
+    const f = await import('./js/ai-thread.js');
+    return f.messages().some((m) => m.content.includes('Et concrètement'));
+  });
+  if (!dansLeFil) throw new Error('la question posée depuis la feuille est absente de la mémoire commune');
+});
+
+await step("un chapitre se discute au bas de sa page, sans la quitter", async () => {
+  await p.evaluate(async () => (await import('./js/ai-thread.js')).effacer());
   await p.goto(BASE + '#/histoire/c/ch09');
-  await p.waitForTimeout(500);
-  const titre = (await p.locator('.chapitre__titre, .card__title, h1').first().textContent()).trim();
-  await p.click('button:has-text("Une question sur ce chapitre")');
-  await p.waitForSelector('.chat__field');
-  const ecrit = await p.inputValue('.chat__field');
-  if (!ecrit.toLowerCase().includes(titre.toLowerCase().slice(0, 12))) {
-    throw new Error(`le chapitre n'est pas nommé : « ${ecrit.slice(0, 90)} »`);
-  }
+  await p.waitForSelector('.compose__field');
+  let corps = null;
+  await p.route('**://api.anthropic.com/**', async (route) => {
+    try { corps = JSON.parse(route.request().postData() || '{}'); } catch { corps = {}; }
+    await route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"interrompu"}' });
+  });
+  await p.locator('.compose__field').scrollIntoViewIfNeeded();
+  await p.fill('.compose__field', 'Pourquoi ce chapitre compte ?');
+  await p.click('.compose__send');
+  await p.waitForTimeout(1200);
+  await p.unroute('**://api.anthropic.com/**');
+
+  if (!corps) throw new Error("aucun appel n'a été tenté");
+  const premier = (corps.messages || [])[0]?.content || '';
+  if (!/chapitre/i.test(premier)) throw new Error(`le chapitre n'est pas nommé : « ${premier.slice(0, 90)} »`);
+  const ou = await p.evaluate(() => location.hash);
+  if (!ou.startsWith('#/histoire/c/')) throw new Error(`on a quitté le chapitre (${ou})`);
 });
 
 /* --------------------------------------------------------------- la mémoire */
@@ -206,9 +271,9 @@ await step('la question part avec les échanges précédents, et sans tour vide'
   });
 
   await p.goto(BASE + '#/assistant');
-  await p.waitForSelector('.chat__field');
-  await p.fill('.chat__field', 'Et après, que s’est-il passé ?');
-  await p.click('.chat__send');
+  await p.waitForSelector('.compose__field');
+  await p.fill('.compose__field', 'Et après, que s’est-il passé ?');
+  await p.click('.compose__send');
   await p.waitForTimeout(1200);
   await p.unroute('**://api.anthropic.com/**');
 
@@ -268,7 +333,7 @@ await step('aller poser une question puis revenir rend le chapitre où on l’av
   if (avant < 200) throw new Error(`chapitre trop court pour l'épreuve (${avant})`);
 
   await p.evaluate(() => { window.location.hash = '#/assistant'; });
-  await p.waitForSelector('.chat__field');
+  await p.waitForSelector('.compose__field');
   await p.waitForTimeout(300);
 
   await p.evaluate(() => { window.location.hash = '#/histoire/c/ch09'; });
@@ -293,7 +358,7 @@ for (const d of DEPARTS) {
     await p.goto(BASE + d.url);
     await p.waitForTimeout(500);
     await p.click('.ds-topbar [aria-label="Demander à l’assistant"]');
-    await p.waitForSelector('.chat__field');
+    await p.waitForSelector('.compose__field');
     await p.waitForTimeout(400);
     await p.click('.ds-topbar [aria-label="Retour"]');
     await p.waitForTimeout(600);
@@ -302,10 +367,39 @@ for (const d of DEPARTS) {
   });
 }
 
+/* La zone de saisie doit SE VOIR : un champ gris pâle sur fond presque blanc,
+   c'est un champ qu'on ne trouve pas. */
+await step("la zone de saisie se détache du fond", async () => {
+  await p.goto(BASE + '#/assistant');
+  await p.waitForSelector('.compose');
+  await p.waitForTimeout(400);
+  const vu = await p.evaluate(() => {
+    const c = document.querySelector('.compose');
+    const s = getComputedStyle(c);
+    const fond = getComputedStyle(document.body).backgroundColor;
+    const r = c.getBoundingClientRect();
+    const envoi = document.querySelector('.compose__send').getBoundingClientRect();
+    return {
+      bordure: s.borderTopWidth, couleurBordure: s.borderTopColor,
+      remplissage: s.backgroundColor, fond,
+      envoiDedans: envoi.left >= r.left && envoi.right <= r.right + 1,
+    };
+  });
+  const lire = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  const [r1, g1, b1] = lire(vu.remplissage);
+  const [r2, g2, b2] = lire(vu.fond);
+  const contraste = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+  const bordure = parseFloat(vu.bordure) || 0;
+  if (contraste < 12 && bordure < 1) {
+    throw new Error(`ni contraste (${contraste}) ni bordure (${bordure}px) : le champ est invisible`);
+  }
+  if (!vu.envoiDedans) throw new Error("le bouton d'envoi est posé à côté du champ, pas dedans");
+});
+
 await step("arrivé directement sur l'assistant, le retour mène à l'accueil", async () => {
   await p.goto(BASE + '#/assistant');
   await p.reload({ waitUntil: 'networkidle' });
-  await p.waitForSelector('.chat__field');
+  await p.waitForSelector('.compose__field');
   await p.waitForTimeout(400);
   await p.click('.ds-topbar [aria-label="Retour"]');
   await p.waitForTimeout(500);
