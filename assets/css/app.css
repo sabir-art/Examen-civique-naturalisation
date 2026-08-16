@@ -1566,8 +1566,17 @@ mark { background: color-mix(in srgb, var(--warn) 34%, transparent); color: inhe
 }
 @keyframes pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
 
-/* Entrée de l'écran courant. */
-.app > * { animation: fadeUp .26s cubic-bezier(.2, .8, .2, 1) both; }
+/* Entrée de l'écran courant.
+ *
+ * `backwards` et non `both` : avec `both`, l'animation reste appliquée une fois
+ * finie, et une propriété `transform` animée se résout en matrice même quand la
+ * dernière image dit `none`. L'écran devenait alors le référentiel de tout
+ * élément en position fixe qu'il contient — la barre de saisie de l'assistant
+ * se calait sur la colonne de contenu au lieu de la fenêtre, laissant le texte
+ * défiler visiblement de part et d'autre. `backwards` ne pose l'état de départ
+ * qu'avant le début ; après, l'élément retrouve ses styles normaux, qui sont
+ * exactement l'état d'arrivée. Rien ne change à l'œil. */
+.app > * { animation: fadeUp .26s cubic-bezier(.2, .8, .2, 1) backwards; }
 
 /* Ouverture d'un bloc dépliant. */
 details[open] > *:not(summary) { animation: unfold .28s cubic-bezier(.2, .8, .2, 1) both; }
@@ -1845,14 +1854,17 @@ body.is-locked { position: fixed; inset: 0; width: 100%; overflow: hidden; }
 .compose__mic:active, .compose__send:active { transform: scale(var(--press-scale)); }
 .compose__mic svg, .compose__send svg { width: 18px; height: 18px; }
 
-/* En plein écran, la saisie est amarrée au bas de la fenêtre. */
-.causerie--plein .compose {
-  position: fixed; left: max(14px, env(safe-area-inset-left));
-  right: max(14px, env(safe-area-inset-right));
-  bottom: calc(10px + var(--safe-b)); z-index: 40;
-  max-width: 612px; margin: 0 auto;
+/* En plein écran, la saisie repose sur un quai amarré au bas de la fenêtre.
+   Le quai prend TOUTE la largeur et il est opaque : une pastille flottant
+   seule laissait le texte défiler de part et d'autre, à demi visible et coupé
+   au milieu d'un mot. Ce qui passe dessous disparaît maintenant proprement. */
+.causerie__quai {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  padding: 10px var(--gutter-screen) calc(10px + var(--safe-b));
+  background: var(--bg); border-top: 1px solid var(--line);
 }
-.causerie--plein .causerie__fil { padding-bottom: calc(var(--compose-h, 76px) + 20px); }
+.causerie__quai .compose { max-width: 612px; margin: 0 auto; }
+.causerie--plein .causerie__fil { padding-bottom: calc(var(--compose-h, 84px) + 20px); }
 
 /* Dans une feuille, elle reste dans le flux, sous la réponse. */
 .causerie--feuille { margin-top: 14px; }

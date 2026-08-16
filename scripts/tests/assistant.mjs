@@ -432,6 +432,67 @@ await step('aller poser une question puis revenir rend le chapitre où on l’av
   }
 });
 
+/* La saisie flotte au-dessus de la conversation. Une pastille seule laissait le
+   texte défiler DE PART ET D'AUTRE, à demi visible et coupé au milieu d'un mot.
+   Ce qui passe dessous doit disparaître, proprement. */
+await step("le texte ne déborde pas autour de la barre de saisie", async () => {
+  await p.evaluate(async () => {
+    const f = await import('./js/ai-thread.js');
+    f.effacer();
+    f.ajouter('user', 'Explique-moi la différence entre le Sénat et l’Assemblée nationale.');
+    f.ajouter('assistant', Array.from({ length: 9 }, (_, i) =>
+      `Paragraphe ${i + 1} : une explication assez longue pour que la conversation dépasse la hauteur de l’écran et vienne passer sous la zone de saisie.`).join('\n\n'));
+  });
+  await p.goto(BASE + '#/');
+  await p.goto(BASE + '#/assistant');
+  await p.waitForSelector('.compose');
+  await p.waitForTimeout(700);
+
+  const bande = await p.evaluate(() => {
+    const quai = document.querySelector('.causerie__quai');
+    if (!quai) return { absent: true };
+    const r = quai.getBoundingClientRect();
+    const s = getComputedStyle(quai);
+    const alpha = (s.backgroundColor.match(/[\d.]+/g) || [])[3];
+    return {
+      pleineLargeur: r.left <= 0.5 && r.right >= window.innerWidth - 0.5,
+      opaque: alpha === undefined || Number(alpha) === 1,
+      touchLeBas: Math.abs(r.bottom - window.innerHeight) < 1.5,
+    };
+  });
+  if (bande.absent) throw new Error("la saisie n'a pas de quai : elle flotte seule au-dessus du texte");
+  if (!bande.pleineLargeur) throw new Error('le quai ne couvre pas toute la largeur : le texte passe à côté');
+  if (!bande.opaque) throw new Error('le quai laisse voir le texte au travers');
+  if (!bande.touchLeBas) throw new Error('le quai ne touche pas le bas de l’écran : une bande de texte reste visible dessous');
+
+  // À mi-parcours comme en bas, aucune bulle ne doit mordre sur le quai.
+  for (const part of [0.4, 1]) {
+    await p.evaluate((f) => window.scrollTo(0, document.documentElement.scrollHeight * f), part);
+    await p.waitForTimeout(300);
+    const mordu = await p.evaluate(() => {
+      const q = document.querySelector('.causerie__quai').getBoundingClientRect();
+      return [...document.querySelectorAll('.msg')].some((m) => {
+        const r = m.getBoundingClientRect();
+        // On tolère le passage DERRIÈRE le quai ; ce qu'on refuse, c'est qu'une
+        // bulle dépasse au-delà de sa largeur, donc reste visible à côté.
+        return r.bottom > q.top && r.top < q.bottom && (r.left < q.left - 1 || r.right > q.right + 1);
+      });
+    });
+    if (mordu) throw new Error(`à ${Math.round(part * 100)} % du défilement, une bulle dépasse du quai`);
+  }
+
+  // Et tout en bas, le dernier message est entièrement dégagé.
+  const degage = await p.evaluate(() => {
+    const q = document.querySelector('.causerie__quai').getBoundingClientRect();
+    const msgs = [...document.querySelectorAll('.msg')];
+    const d = msgs[msgs.length - 1].getBoundingClientRect();
+    return { bas: Math.round(d.bottom), quai: Math.round(q.top) };
+  });
+  if (degage.bas > degage.quai) {
+    throw new Error(`en bas de page, le dernier message finit à ${degage.bas} sous un quai qui commence à ${degage.quai}`);
+  }
+});
+
 /* ------------------------------------------------------------- la dictée */
 
 /**

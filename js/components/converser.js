@@ -105,7 +105,7 @@ export function createConverser({
   function ajusterChamp() {
     champ.style.height = 'auto';
     champ.style.height = `${Math.min(148, champ.scrollHeight)}px`;
-    root.style.setProperty('--compose-h', `${Math.ceil(compose.offsetHeight)}px`);
+    root.style.setProperty('--compose-h', `${Math.ceil(amarre.offsetHeight)}px`);
     onActivite?.();
   }
 
@@ -123,6 +123,32 @@ export function createConverser({
     champ,
     h('div', { class: 'compose__actions' }, [micBtn, envoiBtn].filter(Boolean)),
   ]);
+
+  /**
+   * En plein écran, la saisie repose sur un quai pleine largeur et opaque.
+   *
+   * Sans lui, la pastille flottait seule au-dessus de la conversation : le
+   * texte qui défilait passait DE PART ET D'AUTRE, à demi visible, coupé au
+   * milieu d'un mot. Le quai couvre toute la largeur, donc ce qui passe
+   * dessous disparaît proprement au lieu de déborder sur les côtés.
+   */
+  const amarre = forme === 'plein'
+    ? h('div', { class: 'causerie__quai' }, compose)
+    : compose;
+
+  /**
+   * Suit la réponse qui s'écrit, sans arracher la page à qui lit plus haut.
+   *
+   * On ne descend que si l'on était DÉJÀ près du bas. Quelqu'un remonté au
+   * milieu d'une explication a une raison de s'y trouver ; le texte qui arrive
+   * ne doit pas l'en déloger.
+   */
+  function versLeBas() {
+    if (forme !== 'plein') return;
+    const restant = document.documentElement.scrollHeight - window.innerHeight - window.scrollY;
+    if (restant > 260) return;
+    requestAnimationFrame(() => window.scrollTo({ top: document.documentElement.scrollHeight }));
+  }
 
   /* ------------------------------------------------------------- dictée */
 
@@ -267,6 +293,7 @@ export function createConverser({
     ajusterChamp();
     fil.ajouter('user', complet);
     dessiner();
+    versLeBas();
 
     occupe = true;
     envoiBtn.replaceChildren(icon('cross'));
@@ -277,6 +304,7 @@ export function createConverser({
     corps.replaceChildren(dots());
     liste.append(reponse);
     onActivite?.();
+    versLeBas();
 
     // L'envoi est arrêté avant d'ouvrir la bulle vide : sinon le dernier
     // message transmis serait ce tour sans contenu, que l'API refuse.
@@ -295,6 +323,7 @@ export function createConverser({
           fil.completerDernier(tout);
           corps.innerHTML = format(tout);
           onActivite?.();
+          versLeBas();
         },
       });
       fil.completerDernier(out.text);
@@ -334,7 +363,7 @@ export function createConverser({
   }
 
   dessiner();
-  root.append(liste, compose);
+  root.append(liste, amarre);
   // Une fois posé dans la page : le bloc a enfin une hauteur mesurable.
   requestAnimationFrame(() => ajusterChamp());
 
@@ -348,7 +377,7 @@ export function createConverser({
     });
   };
   root.redessiner = dessiner;
-  root.hauteurSaisie = () => compose.offsetHeight;
+  root.hauteurSaisie = () => amarre.offsetHeight;
   /** À appeler quand l'écran disparaît : coupe la dictée et la requête. */
   root.stop = () => { arreterDictee(); arreter(); };
 
