@@ -30,8 +30,11 @@ const { estApple } = await import('../../js/lib/plateforme.js');
 await (async () => {
   const cas = [
     [{ vendor: 'Apple Computer, Inc.' }, true, 'Safari, Chrome ou Firefox sur iPhone (tous WebKit)'],
-    [{ vendor: 'Google Inc.' }, false, 'Chrome sur Android'],
-    [{ vendor: '' }, false, 'Firefox de bureau'],
+    [{ vendor: '', platform: 'iPhone' }, true, 'un navigateur qui tait son moteur mais annonce l’iPhone'],
+    [{ vendor: '', platform: 'MacIntel', maxTouchPoints: 5 }, true, 'un iPad, qui se présente comme un Mac depuis iPadOS 13'],
+    [{ vendor: '', platform: 'MacIntel', maxTouchPoints: 0 }, false, 'un vrai Mac, sans écran tactile'],
+    [{ vendor: 'Google Inc.', platform: 'Linux armv8l' }, false, 'Chrome sur Android'],
+    [{ vendor: '', platform: 'Win32' }, false, 'Firefox sur Windows'],
     [null, false, 'aucun navigateur (rendu hors ligne, tests)'],
   ];
   for (const [nav, attendu, quoi] of cas) {

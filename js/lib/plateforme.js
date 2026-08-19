@@ -33,7 +33,20 @@
  * Prend l'objet en paramètre pour être vérifiable sans navigateur.
  */
 export function estApple(nav = typeof navigator !== 'undefined' ? navigator : null) {
-  return Boolean(nav) && nav.vendor === 'Apple Computer, Inc.';
+  if (!nav) return false;
+  // Le moteur : sur iPhone, Safari, Chrome et Firefox sont tous WebKit.
+  if (nav.vendor === 'Apple Computer, Inc.') return true;
+  const socle = String(nav.platform || '');
+  if (/^(iPhone|iPad|iPod)/.test(socle)) return true;
+  // Depuis iPadOS 13, un iPad se présente comme un Mac ; seul le tactile le
+  // trahit. Un vrai Mac annonce zéro point de contact.
+  if (socle === 'MacIntel' && (nav.maxTouchPoints || 0) > 1) return true;
+  return false;
+}
+
+/** Le nom de la plateforme, tel qu'il est écrit sur la page. */
+export function nomPlateforme(nav = typeof navigator !== 'undefined' ? navigator : null) {
+  return estApple(nav) ? 'apple' : 'autre';
 }
 
 /**
@@ -45,7 +58,7 @@ export function appliquerPlateforme(
   nav = typeof navigator !== 'undefined' ? navigator : null,
 ) {
   if (!doc?.documentElement) return null;
-  const nom = estApple(nav) ? 'apple' : 'autre';
+  const nom = nomPlateforme(nav);
   doc.documentElement.dataset.plateforme = nom;
   return nom;
 }

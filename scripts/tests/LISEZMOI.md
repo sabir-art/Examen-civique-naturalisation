@@ -68,6 +68,7 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `version.mjs` | serveur injoignable rapporté comme « à jour » | 2 signalements sur le cas hors ligne |
 | `version.mjs` | `version.json` et l'application mis en désaccord | `check-version` : « version.json annonce deadbee, l'application 2d230a6 » |
 | `version.mjs` | dernière entrée du journal supprimée | « un contenu a changé le 19, le journal s'arrête au 16 » |
+| `version.mjs` | rechargement automatique retiré à l'arrivée d'un nouveau service worker | « recharge la page une fois (0) » |
 | `a11y.mjs` | badge sombre sur fond translucide clair | contraste 1,01 (le compositeur des couches voit ce qu'un fond `rgba` cache) |
 | `plateforme.mjs` | verre rendu plus transparent (0,35) | libellés à 1,9:1 sur photo sombre, 1,5:1 sur page claire |
 | `plateforme.mjs` | verre posé sur toutes les plateformes | « hors Apple, aucun flou » et « son fond est opaque » |
@@ -193,3 +194,13 @@ regarde donc pas l'écran : il compose le verre sur les DEUX extrêmes — noir
 absolu et blanc absolu — et exige 4,5:1 dans les deux. C'est ainsi qu'on a
 découvert que le gris habituel des libellés tombait à 2,5:1 dès qu'une photo
 sombre passait sous la barre.
+
+Un dernier piège, découvert parce qu'une correction publiée ne se voyait pas
+sur le téléphone qui l'attendait. Le cache hors ligne sert d'abord et se
+renouvelle derrière : la page ouverte continuait donc de faire tourner
+l'ancien JavaScript et l'ancienne feuille de style APRÈS avoir téléchargé la
+nouvelle version. Les changements n'apparaissaient qu'au deuxième lancement —
+et sur un téléphone où l'application reste ouverte des jours, cela veut dire
+jamais. La page se recharge maintenant une fois quand un nouveau service
+worker prend la main, sauf en pleine série de questions : perdre une séance
+pour un changement d'apparence serait un mauvais échange.

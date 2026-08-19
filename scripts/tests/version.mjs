@@ -136,6 +136,46 @@ verifier(!cache.entrees.some((u) => u.endsWith('/version.json')),
 verifier(cache.entrees.some((u) => u.endsWith('/js/data/build.js')),
   'alors que le reste de l’application, lui, est bien mis en cache');
 
+/* -------- 5. une nouvelle version prend la main sans attendre le lendemain */
+
+/**
+ * Le cache sert d'abord et se renouvelle derrière : sans rien de plus, la page
+ * ouverte continue de faire tourner l'ancien JavaScript et l'ancienne feuille
+ * de style APRÈS le téléchargement de la nouvelle version. Sur un téléphone où
+ * l'application reste ouverte des jours, cela veut dire des corrections
+ * publiées et jamais vues.
+ *
+ * On éprouve donc la réaction de la page au moment où un nouveau service
+ * worker prend la main — et la réserve qui va avec : une série de questions en
+ * cours ne doit pas être emportée par un changement d'apparence.
+ */
+const page3 = await ctx2.newPage();
+await page3.goto(BASE, { waitUntil: 'networkidle' });
+await page3.waitForSelector('#boot', { state: 'hidden' });
+await page3.waitForSelector('.accueil__hero');
+await page3.waitForTimeout(1500);
+
+let chargements = 0;
+page3.on('load', () => { chargements += 1; });
+
+await page3.evaluate(() => navigator.serviceWorker.dispatchEvent(new Event('controllerchange')));
+await page3.waitForTimeout(1200);
+verifier(chargements === 1, `un nouveau service worker recharge la page une fois (${chargements})`);
+
+// Deuxième cas : en pleine série, on ne recharge pas — on attend l'écran suivant.
+await page3.goto(`${BASE}#/reviser/t/institutions`);
+await page3.waitForSelector('button:has-text("Commencer")');
+await page3.click('button:has-text("Commencer")');
+await page3.waitForSelector('.ds-qcard__q');
+chargements = 0;
+await page3.evaluate(() => navigator.serviceWorker.dispatchEvent(new Event('controllerchange')));
+await page3.waitForTimeout(1000);
+verifier(chargements === 0, `pendant une série de questions, la page ne se recharge pas (${chargements})`);
+
+await page3.evaluate(() => { window.location.hash = '#/'; });
+await page3.waitForTimeout(1200);
+verifier(chargements === 1, `elle se recharge en arrivant sur l'écran suivant (${chargements})`);
+
 await browser.close();
 console.log(erreurs.length ? `\n${erreurs.length} erreur(s) :\n- ${erreurs.join('\n- ')}` : '\nAucune erreur.');
 process.exit(erreurs.length ? 1 : 0);

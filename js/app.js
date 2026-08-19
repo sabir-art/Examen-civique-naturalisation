@@ -136,7 +136,7 @@ export function applyTheme() {
   if (pref === 'auto') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', pref);
   const dark = pref === 'dark' || (pref === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0a1120' : '#ffffff');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#101312' : '#E9F1EF');
 }
 
 /* ----------------------------------------------------------------- routeur */
@@ -469,6 +469,47 @@ document.addEventListener('visibilitychange', () => {
 /* --------------------------------------------------------- service worker */
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  /*
+   * Une mise à jour ne se voyait qu'au DEUXIÈME lancement.
+   *
+   * Le cache sert d'abord et se renouvelle derrière : la page affichée
+   * continuait donc de faire tourner l'ancien JavaScript et l'ancienne feuille
+   * de style, même une fois la nouvelle version téléchargée. Sur un téléphone
+   * où l'application reste ouverte des jours, cela veut dire des corrections
+   * publiées et jamais vues — c'est exactement ce qui s'est produit avec le
+   * verre de la barre du bas.
+   *
+   * Quand un nouveau service worker prend la main, la page se recharge donc
+   * une fois. Sauf en pleine série de questions : perdre une séance en cours
+   * pour un changement d'apparence serait un mauvais échange. Dans ce cas on
+   * attend le prochain écran.
+   */
+  const avaitUnControleur = Boolean(navigator.serviceWorker.controller);
+  let rechargeDemandee = false;
+
+  const recharger = () => {
+    if (!rechargeDemandee) return;
+    rechargeDemandee = false;
+    window.location.reload();
+  };
+
+  /** Vrai si une série de questions est à l'écran. */
+  const enPleineSeance = () => Boolean(document.querySelector('.quiz'));
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    // À la toute première visite, le worker prend la main sans qu'il y ait de
+    // version précédente : il n'y a rien à recharger.
+    if (!avaitUnControleur || rechargeDemandee) return;
+    rechargeDemandee = true;
+    if (!enPleineSeance()) recharger();
+  });
+
+  // Le rendez-vous manqué : si la séance était en cours, on recharge en
+  // arrivant sur l'écran suivant.
+  window.addEventListener('hashchange', () => {
+    if (rechargeDemandee && !enPleineSeance()) recharger();
+  });
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => { /* hors ligne indisponible : sans gravité */ });
   });

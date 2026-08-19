@@ -16,6 +16,7 @@ import { PRATIQUE } from '../data/programme.js';
 import { PUBLICATION, CONTENUS } from '../data/build.js';
 import { NOUVEAUTES } from '../data/nouveautes.js';
 import { chercherUneMiseAJour, installerLaMiseAJour } from '../lib/maj.js';
+import { nomPlateforme } from '../lib/plateforme.js';
 import { applyTheme, refresh, navigate, canInstall, promptInstall, ecranPrecedent } from '../app.js';
 import renderReglagesIA from './reglages-ia.js';
 
@@ -462,6 +463,16 @@ function versionView() {
     h('h2', { class: 'card__title', text: "Version de l'application" }),
     h('p', { class: 'card__sub', text: `Dernière mise à jour le ${formatDate(PUBLICATION.date)}.` }),
     h('p', { class: 'hint', style: 'margin-top:4px', text: `Repère de version : ${PUBLICATION.commit}` }),
+    /* Ce que l'application reconnaît de l'appareil. Écrit noir sur blanc parce
+       que c'est invérifiable autrement : quand la barre du bas n'a pas
+       l'apparence attendue, c'est ici qu'on voit si le téléphone a été reconnu
+       ou si c'est le matériau qui manque. */
+    h('p', {
+      class: 'hint',
+      text: nomPlateforme() === 'apple'
+        ? 'Appareil Apple reconnu : barres en verre, comme celles du système.'
+        : 'Appareil non Apple : barres pleines, comme celles du système.',
+    }),
     h('div', { style: 'margin-top:12px' }, bouton),
     resultat,
     actions,

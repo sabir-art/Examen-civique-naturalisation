@@ -4,7 +4,7 @@
  * en arrière-plan. Changer CACHE force le rechargement des fichiers.
  */
 
-const CACHE = 'examen-civique-v31';
+const CACHE = 'examen-civique-v32';
 
 const ASSETS = [
   './',
