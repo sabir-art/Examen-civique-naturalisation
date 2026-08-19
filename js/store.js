@@ -55,6 +55,11 @@ function migrate(s) {
 }
 
 let saveTimer;
+let echecSauvegarde = false;
+
+/** Vrai si le navigateur a refusé d'enregistrer la progression. */
+export function sauvegardeEchouee() { return echecSauvegarde; }
+
 function persist() {
   const payload = JSON.stringify(state);
   try {
@@ -64,6 +69,11 @@ function persist() {
       try { localStorage.setItem(MIRROR, payload); } catch { /* quota : la copie est optionnelle */ }
     }, 1500);
   } catch (err) {
+    // Navigation privée, stockage désactivé, quota plein : la progression ne
+    // survivra pas à la fermeture. Perdre une heure de révision sans avoir été
+    // prévenu est bien pire que d'être prévenu — l'application reste
+    // utilisable, mais elle doit le dire.
+    echecSauvegarde = true;
     console.warn('Sauvegarde impossible', err);
   }
   listeners.forEach((fn) => fn(state));

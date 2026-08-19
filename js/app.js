@@ -194,6 +194,8 @@ export function navigate(hash, { replace = false } = {}) {
 const ECRANS_DE_LECTURE = /^\/(histoire\/(c|a)\/|livret\/|cours\/|histoire\/glossaire|tableaux)/;
 const positions = new Map();
 
+let prevenuSauvegarde = false;
+
 async function route() {
   const path = currentPath();
 
@@ -214,6 +216,14 @@ async function route() {
     show({ node: renderOnboarding({ onDone: () => { applyTheme(); route(); } }), title: 'Bienvenue', chrome: false });
     lastPath = path;
     return;
+  }
+
+  // Un navigateur qui refuse d'enregistrer (navigation privée, stockage
+  // désactivé) laisse l'application parfaitement utilisable — et fait perdre
+  // toute la séance à la fermeture. On le dit une fois, sans bloquer.
+  if (store.sauvegardeEchouee() && !prevenuSauvegarde) {
+    prevenuSauvegarde = true;
+    toast('Ce navigateur refuse d’enregistrer : votre progression sera perdue en fermant. Essayez hors navigation privée.', 6000);
   }
 
   // Les badges sont calculés, mais leur date d'obtention ne se devine pas :

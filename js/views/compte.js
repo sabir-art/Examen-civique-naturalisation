@@ -545,10 +545,25 @@ function aboutView() {
         ]),
         h('p', { class: 'hint mt', text: PRATIQUE.note }),
       ]),
+      /* Vie privée. L'application va être partagée : ceux qui la reçoivent ont
+         le droit de savoir ce qu'elle fait de ce qu'ils y mettent, sans avoir
+         à lire le code. Tout est vérifiable dans le dépôt. */
+      h('div', { class: 'card' }, [
+        h('h2', { class: 'card__title', text: 'Vos données' }),
+        h('ul', { class: 'prose small', style: 'margin-top:8px' }, [
+          h('li', { html: '<strong>Tout reste sur votre appareil.</strong> Prénom, progression, examens passés, réglages : enregistrés dans le navigateur, sur ce téléphone ou cet ordinateur. Rien n\'est envoyé nulle part.' }),
+          h('li', { html: 'Aucun compte, aucune inscription, aucune adresse e-mail demandée.' }),
+          h('li', { html: 'Aucune publicité, aucun traceur, aucun cookie de mesure d\'audience.' }),
+          h('li', { html: '<strong>Synchronisation</strong> (facultative) : elle envoie votre progression vers <em>votre</em> propre espace, dont vous fournissez l\'adresse. Ni l\'auteur de l\'application ni personne d\'autre n\'y a accès.' }),
+          h('li', { html: '<strong>Assistant IA</strong> (facultatif) : votre clé reste sur cet appareil et n\'est jamais transmise ailleurs qu\'au fournisseur que vous avez choisi. Sans clé, l\'assistant est simplement absent — le reste fonctionne.' }),
+          h('li', { html: 'Effacer vos données : « Réinitialiser » plus haut dans Mon compte, ou vider les données du site dans les réglages du navigateur. Il n\'y a rien à effacer ailleurs.' }),
+        ]),
+        h('p', { class: 'hint mt', text: "Application gratuite, sans but lucratif, publiée en logiciel libre (licence MIT). Le code est public : tout ce qui est écrit ici s'y vérifie." }),
+      ]),
       h('div', { class: 'card' }, [
         h('h2', { class: 'card__title', text: 'À propos' }),
         h('p', { class: 'card__sub', text: `Application libre et gratuite d'entraînement : ${QUESTIONS.length} questions d'examen, ${LIVRET_QUESTIONS.length} sur le livret du citoyen et ${ROMAN_QUESTIONS.length} sur le récit « La France racontée ». Elle fonctionne hors ligne et ne collecte aucune donnée : votre progression reste sur votre appareil.` }),
-        h('p', { class: 'card__sub', style: 'margin-top:8px', text: "Elle ne remplace ni le livret du citoyen, ni les informations officielles, ni l'examen lui-même." }),
+        h('p', { class: 'card__sub', style: 'margin-top:8px', text: "Elle n'est ni éditée, ni approuvée, ni contrôlée par le ministère de l'Intérieur, et ne remplace ni le livret du citoyen, ni les informations officielles, ni l'examen lui-même. En cas de doute, le document officiel fait foi." }),
         h('p', { class: 'card__sub', style: 'margin-top:8px', text: "L'assistant IA est facultatif. Aucune clé n'est incluse dans l'application : vous fournissez la vôtre, elle reste sur cet appareil et n'est jamais transmise ailleurs qu'à l'API d'Anthropic." }),
       ]),
     ]),
