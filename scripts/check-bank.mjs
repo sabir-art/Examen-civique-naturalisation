@@ -110,6 +110,59 @@ for (const c of ROMAN_CHAPITRES) {
   else console.log(`  ✓ ${label.slice(0, 62).padEnd(64)} ${String(n).padStart(3)} questions`);
 }
 
+/* -------------------------------------- l'indice donné par la longueur ---- */
+
+/*
+ * Le défaut le plus grave d'un QCM ne se voit pas en le lisant.
+ *
+ * Si la bonne réponse est nettement plus fournie que les autres, on peut la
+ * désigner sans rien savoir. On s'entraîne alors à repérer la réponse la plus
+ * bavarde — réflexe inutile le jour de l'épreuve —, et le pourcentage de
+ * préparation annonce un niveau qui n'existe pas. C'est la pire façon pour
+ * cette application d'échouer : en donnant confiance.
+ *
+ * Mesuré avant correction : la bonne réponse était la plus longue dans 75 %
+ * des questions d'examen, et un candidat qui ne connaissait rien obtenait 27
+ * sur 40 en cochant toujours la plus longue. La barre de réussite est à 32.
+ *
+ * Deux réserves dans la mesure, pour ne compter que les indices RÉELS :
+ *   — en deçà de vingt-cinq caractères, trois lettres d'écart entre « Vichy »
+ *     et « Londres » ne renseignent personne ;
+ *   — l'écart doit dépasser un cinquième, sinon l'œil ne le voit pas.
+ */
+const MARGE_VISIBLE = 1.2;
+const LONGUEUR_MINIMALE = 25;
+/* On est à zéro après correction ; le seuil laisse la place à quelques
+   questions ajoutées à la va-vite, pas au retour du défaut. Cinq pour cent de
+   la banque d'examen, c'est dix-huit questions. */
+const PART_TOLEREE = 0.05;
+
+console.log('\nIndice donné par la longueur des propositions');
+{
+  const banques = [
+    ["Banque d'examen", QUESTIONS],
+    ['Livret', LIVRET_QUESTIONS],
+    ['Récit', ROMAN_QUESTIONS],
+  ];
+  for (const [nom, banque] of banques) {
+    const trahies = banque.filter((q) => {
+      const tailles = q.c.map((c) => c.length);
+      const plusLongue = Math.max(...tailles);
+      if (plusLongue < LONGUEUR_MINIMALE) return false;
+      const pireFausse = Math.max(...tailles.filter((_, i) => i !== q.a));
+      return tailles[q.a] > pireFausse * MARGE_VISIBLE;
+    });
+    const part = trahies.length / banque.length;
+    const ligne = `${nom.padEnd(16)} ${String(trahies.length).padStart(3)}/${banque.length} question(s) où la bonne réponse se voit à sa longueur (${Math.round(part * 100)} %)`;
+    if (part > PART_TOLEREE) {
+      fail(`${ligne} — au-delà de ${Math.round(PART_TOLEREE * 100)} %, on peut réussir sans savoir`);
+      trahies.slice(0, 3).forEach((q) => console.error(`      ex. ${q.c[q.a].slice(0, 70)}`));
+    } else {
+      console.log(`  ✓ ${ligne}`);
+    }
+  }
+}
+
 /* ------------------------------------------- rattachement aux thèmes ---- */
 
 /* Une question sans thème ne compte dans aucune barre de progression, et rien

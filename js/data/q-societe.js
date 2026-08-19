@@ -244,7 +244,7 @@ const quotidien = [
   },
   {
     q: "Le tri des déchets en France :",
-    c: ["est organisé par les communes et fait partie des gestes civiques attendus", "est interdit dans les immeubles", "n'existe que dans les grandes villes et leurs agglomérations", "est facultatif et sans réel intérêt écologique"],
+    c: ["est organisé par les communes et fait partie des gestes civiques attendus", "est interdit dans les immeubles", "n'existe que dans les grandes villes et dans leurs agglomérations", "est facultatif et sans réel intérêt écologique"],
     a: 0,
     why: "Les dépôts sauvages sont sanctionnés par des amendes. La Charte de l'environnement de 2004 a valeur constitutionnelle.",
   },

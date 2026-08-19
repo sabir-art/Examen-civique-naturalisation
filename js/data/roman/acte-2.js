@@ -52,7 +52,7 @@ export default {
         "<strong>Louis XVI</strong> est le roi renversé par la Révolution.",
       ],
       questions: [
-        { q: 'Que commémore la fête nationale du 14 juillet ?', c: ['La prise de la Bastille en 1789 et la fête de la Fédération de 1790', "L'armistice de 1918", 'La proclamation de la République en 1958', "L'abolition de l'esclavage"], a: 0, why: "Le 14 juillet 1789 marque le début de la Révolution française ; la fête de la Fédération, un an plus tard, célébrait l'unité de la nation." },
+        { q: 'Que commémore la fête nationale du 14 juillet ?', c: ["La prise de la Bastille en 1789 et la fête de la Fédération de 1790", "La proclamation de la République et l'adoption de la Constitution en 1958", "L'armistice de 1918 et la fin de la Première Guerre mondiale", "L'abolition de l'esclavage dans les colonies françaises"], a: 0, why: "Le 14 juillet 1789 marque le début de la Révolution française ; la fête de la Fédération, un an plus tard, célébrait l'unité de la nation." },
         { q: 'Quelle est la date de la fête nationale française ?', c: ['Le 14 juillet', 'Le 11 novembre', 'Le 8 mai', 'Le 1er mai'], a: 0, why: "Le 11 novembre et le 8 mai sont des commémorations, le 1er mai la fête du travail : la fête nationale, elle, est le 14 juillet." },
         { q: 'Quel roi régnait en France au début de la Révolution française ?', c: ['Louis XVI', 'Louis XIV', 'Henri IV', 'Charles X'], a: 0, why: "Louis XVI a convoqué les États généraux en 1789 ; il sera guillotiné en 1793." },
         { q: 'En quelle année la Première République a-t-elle été proclamée ?', c: ['1792', '1789', '1804', '1848'], a: 0, why: "La royauté est abolie en septembre 1792, trois ans après la prise de la Bastille." },
@@ -105,9 +105,9 @@ export default {
       ],
       questions: [
         { q: "En quelle année la Déclaration des droits de l'homme et du citoyen a-t-elle été adoptée ?", c: ['1789', '1792', '1848', '1958'], a: 0, why: "Elle est adoptée le 26 août 1789, six semaines après la prise de la Bastille." },
-        { q: "Par quelle phrase commence l'article premier de la Déclaration de 1789 ?", c: ['« Les hommes naissent et demeurent libres et égaux en droits »', '« La France est une République indivisible »', '« Liberté, Égalité, Fraternité »', '« La souveraineté appartient au peuple »'], a: 0, why: "C'est la rupture avec une société d'ordres où la naissance déterminait les droits." },
-        { q: "La Déclaration de 1789 a-t-elle encore une valeur juridique aujourd'hui ?", c: ['Oui, elle a valeur constitutionnelle via le préambule de la Constitution de 1958', 'Non, c\'est un texte purement historique', 'Uniquement pour les lois pénales', 'Uniquement en cas de guerre'], a: 0, why: "Le Conseil constitutionnel peut censurer une loi contraire à la Déclaration de 1789." },
-        { q: 'Que signifie la présomption d\'innocence ?', c: ['Toute personne est considérée innocente tant que sa culpabilité n\'a pas été établie par un tribunal', "L'accusé doit prouver son innocence", 'Un innocent ne peut jamais être arrêté', "La police ne peut pas enquêter sans preuve"], a: 0, why: "C'est un principe issu de la Déclaration de 1789, toujours au cœur de la justice française." },
+        { q: "Par quelle phrase commence l'article premier de la Déclaration de 1789 ?", c: ["« Les hommes naissent et demeurent libres et égaux en droits »", "« La France est une République indivisible, laïque et sociale »", "« Liberté, Égalité, Fraternité »", "« La souveraineté appartient au peuple »"], a: 0, why: "C'est la rupture avec une société d'ordres où la naissance déterminait les droits." },
+        { q: "La Déclaration de 1789 a-t-elle encore une valeur juridique aujourd'hui ?", c: ["Oui, elle a valeur constitutionnelle par le préambule de la Constitution", "Non, c'est un texte purement historique, sans portée juridique", "Uniquement pour les lois pénales votées par le Parlement", "Uniquement en cas de guerre ou d'état d'urgence"], a: 0, why: "Le Conseil constitutionnel peut censurer une loi contraire à la Déclaration de 1789." },
+        { q: 'Que signifie la présomption d\'innocence ?', c: ["Toute personne est innocente tant qu'un tribunal n'a pas prouvé sa culpabilité", "La police ne peut pas ouvrir d'enquête avant d'avoir réuni une preuve", "Un innocent ne peut jamais être arrêté ni placé en garde à vue", "L'accusé doit prouver lui-même son innocence"], a: 0, why: "C'est un principe issu de la Déclaration de 1789, toujours au cœur de la justice française." },
       ],
     },
 
@@ -150,7 +150,7 @@ export default {
         { q: 'Quel texte de 1804 unifie le droit civil français et reste en vigueur aujourd\'hui ?', c: ['Le Code civil', 'La Constitution', 'La Déclaration des droits de l\'homme', 'Le Code du travail'], a: 0, why: "Voulu par Napoléon, il fixe les règles du mariage, de la propriété, des successions et de la responsabilité." },
         { q: 'En quelle année Napoléon Bonaparte est-il devenu empereur ?', c: ['1804', '1789', '1799', '1815'], a: 0, why: "Il prend le pouvoir en 1799 et se fait sacrer empereur en 1804, l'année du Code civil." },
         { q: 'Quelle institution Napoléon a-t-il créée pour représenter l\'État dans chaque département ?', c: ['Le préfet', 'Le maire', 'Le député', 'Le sénateur'], a: 0, why: "Le préfet est nommé par le Président de la République et représente l'État dans le département." },
-        { q: 'Quelle décision de Napoléon marque un recul des droits ?', c: ["Le rétablissement de l'esclavage en 1802", "L'abolition des privilèges", 'La création du baccalauréat', "L'unification du droit"], a: 0, why: "L'esclavage, aboli en 1794, est rétabli en 1802 ; son abolition définitive datera de 1848." },
+        { q: 'Quelle décision de Napoléon marque un recul des droits ?', c: ["Le rétablissement de l'esclavage en 1802", "L'abolition des privilèges de la noblesse", "La création du baccalauréat", "L'unification du droit"], a: 0, why: "L'esclavage, aboli en 1794, est rétabli en 1802 ; son abolition définitive datera de 1848." },
       ],
     },
 
@@ -187,7 +187,7 @@ export default {
         "Le droit de vote des femmes ne viendra qu'en <strong>1944</strong>.",
       ],
       questions: [
-        { q: "Qui est à l'origine du décret d'abolition de l'esclavage de 1848 ?", c: ['Victor Schœlcher', 'Victor Hugo', 'Jules Ferry', 'Léon Gambetta'], a: 0, why: "Son combat aboutit au décret d'avril 1848 : « L'esclavage est un attentat contre la dignité humaine. »" },
+        { q: "Qui est à l'origine du décret d'abolition de l'esclavage de 1848 ?", c: ["Victor Schœlcher", "Victor Hugo", "Jules Ferry", "Léon Gambetta"], a: 0, why: "Son combat aboutit au décret d'avril 1848 : « L'esclavage est un attentat contre la dignité humaine. »" },
         { q: "En quelle année l'esclavage a-t-il été définitivement aboli en France ?", c: ['1848', '1794', '1802', '1889'], a: 0, why: "Aboli une première fois en 1794, il fut rétabli par Napoléon en 1802 avant l'abolition définitive de 1848." },
         { q: 'Quelle avancée démocratique majeure date également de 1848 ?', c: ['Le suffrage universel masculin', 'Le droit de vote des femmes', "L'école gratuite et obligatoire", 'La séparation des Églises et de l\'État'], a: 0, why: "Le vote censitaire, réservé aux plus imposés, disparaît : le nombre d'électeurs passe de 200 000 à 9 millions." },
         { q: 'Quelle République est proclamée en 1848 ?', c: ['La Deuxième République', 'La Première République', 'La Troisième République', 'La Cinquième République'], a: 0, why: "La Première date de 1792, la Deuxième de 1848, la Troisième de 1870, la Quatrième de 1946 et la Cinquième de 1958." },
@@ -230,7 +230,7 @@ export default {
         { q: "Qui a rendu l'école primaire gratuite, obligatoire et laïque ?", c: ['Jules Ferry', 'Victor Schœlcher', 'Jules Grévy', 'Léon Blum'], a: 0, why: "Les lois de 1881 (gratuité) et 1882 (obligation et laïcité) portent son nom." },
         { q: "Quels sont les trois caractères de l'école publique instaurés au début des années 1880 ?", c: ['Gratuite, obligatoire et laïque', 'Payante, facultative et religieuse', 'Gratuite, facultative et religieuse', 'Obligatoire, mixte et professionnelle'], a: 0, why: "Ces trois principes fondent l'école républicaine, encore aujourd'hui." },
         { q: "Entre quels âges l'instruction est-elle obligatoire en France aujourd'hui ?", c: ['De 3 à 16 ans', 'De 6 à 16 ans', 'De 3 à 18 ans', 'De 6 à 14 ans'], a: 0, why: "L'instruction est obligatoire dès 3 ans, et une obligation de formation court jusqu'à 18 ans." },
-        { q: "Pourquoi la Troisième République a-t-elle fait de l'école une priorité ?", c: ["Parce qu'une république a besoin de citoyens instruits, capables de juger par eux-mêmes", "Pour former des soldats", 'Pour remplacer les Églises', "Pour supprimer les langues régionales"], a: 0, why: "L'école devait donner à chacun les moyens d'exercer sa citoyenneté." },
+        { q: "Pourquoi la Troisième République a-t-elle fait de l'école une priorité ?", c: ["Parce qu'une république a besoin de citoyens instruits, capables de juger seuls", "Pour faire disparaître les langues régionales parlées dans les campagnes", "Pour remplacer les Églises dans l'éducation des enfants", "Pour former des soldats prêts à défendre le pays"], a: 0, why: "L'école devait donner à chacun les moyens d'exercer sa citoyenneté." },
       ],
     },
 
@@ -278,8 +278,8 @@ export default {
       ],
       questions: [
         { q: 'De quand date la loi de séparation des Églises et de l\'État ?', c: ['1905', '1882', '1789', '1958'], a: 0, why: "La loi du 9 décembre 1905 fonde la laïcité française." },
-        { q: 'Que signifie la laïcité en France ?', c: ["La neutralité de l'État et la liberté de croire ou de ne pas croire", "L'interdiction de toute religion", "L'obligation d'être athée", "La reconnaissance d'une religion officielle"], a: 0, why: "La loi de 1905 garantit d'abord la liberté de conscience, puis pose la neutralité de l'État." },
-        { q: "Un agent public (enseignant, agent de mairie) peut-il porter un signe religieux pendant son service ?", c: ['Non, il est tenu à la neutralité', 'Oui, sans restriction', 'Oui, s\'il est discret', 'Cela dépend de la commune'], a: 0, why: "L'obligation de neutralité des agents publics protège l'égalité de traitement des usagers." },
+        { q: 'Que signifie la laïcité en France ?', c: ["La neutralité de l'État et la liberté de croire ou de ne pas croire", "L'interdiction de toute religion", "L'obligation d'être athée", "La reconnaissance officielle d'une religion majoritaire par l'État"], a: 0, why: "La loi de 1905 garantit d'abord la liberté de conscience, puis pose la neutralité de l'État." },
+        { q: "Un agent public (enseignant, agent de mairie) peut-il porter un signe religieux pendant son service ?", c: ["Non, il est tenu à la neutralité", "Oui, sans aucune restriction", "Oui, si le signe reste discret", "Cela dépend de la commune"], a: 0, why: "L'obligation de neutralité des agents publics protège l'égalité de traitement des usagers." },
         { q: "Dans quel article de la Constitution la laïcité est-elle inscrite ?", c: ["L'article 1er", "L'article 2", "L'article 5", "Le préambule uniquement"], a: 0, why: "« La France est une République indivisible, laïque, démocratique et sociale. »" },
       ],
     },
@@ -315,8 +315,8 @@ export default {
         "Le <strong>11 novembre</strong> est un jour férié qui rend hommage aux morts pour la France ; le <strong>8 mai</strong> commémore la victoire de 1945.",
       ],
       questions: [
-        { q: 'Que commémore le 11 novembre ?', c: ["L'armistice de 1918, fin de la Première Guerre mondiale", 'La victoire de 1945', 'La prise de la Bastille', "L'appel du général de Gaulle"], a: 0, why: "L'armistice a été signé le 11 novembre 1918 dans la forêt de Compiègne." },
-        { q: 'Que commémore le 8 mai ?', c: ['La victoire de 1945 et la fin de la Seconde Guerre mondiale en Europe', "L'armistice de 1918", 'La fête du travail', 'La fête nationale'], a: 0, why: "Le 8 mai 1945 marque la capitulation de l'Allemagne nazie." },
+        { q: 'Que commémore le 11 novembre ?', c: ["L'armistice de 1918, fin de la Première Guerre mondiale", "La victoire de 1945", "La prise de la Bastille", "L'appel lancé par le général de Gaulle depuis Londres"], a: 0, why: "L'armistice a été signé le 11 novembre 1918 dans la forêt de Compiègne." },
+        { q: 'Que commémore le 8 mai ?', c: ["La victoire de 1945 et la fin de la guerre en Europe", "L'armistice de 1918, signé dans la clairière de Rethondes", "La fête du travail et des travailleurs", "La fête nationale de la République"], a: 0, why: "Le 8 mai 1945 marque la capitulation de l'Allemagne nazie." },
         { q: 'Quelles sont les dates de la Première Guerre mondiale ?', c: ['1914-1918', '1939-1945', '1870-1871', '1905-1914'], a: 0, why: "La Seconde Guerre mondiale, elle, se déroule de 1939 à 1945." },
         { q: 'Comment surnommait-on les soldats français de la Première Guerre mondiale ?', c: ['Les Poilus', 'Les Sans-culottes', 'Les Hussards noirs', 'Les Communards'], a: 0, why: "Ils vécurent des années dans les tranchées, dans des conditions extrêmes." },
       ],
@@ -357,8 +357,8 @@ export default {
         "La <strong>Sécurité sociale</strong> est créée en 1945, issue du programme du Conseil national de la Résistance.",
       ],
       questions: [
-        { q: "Qui a lancé l'Appel du 18 juin 1940 ?", c: ['Le général Charles de Gaulle', 'Le maréchal Pétain', 'Jean Moulin', 'Georges Clemenceau'], a: 0, why: "Depuis Londres, il appelle les Français à refuser la défaite et à poursuivre le combat." },
-        { q: "Depuis quelle ville l'Appel du 18 juin a-t-il été lancé ?", c: ['Londres', 'Paris', 'Alger', 'Vichy'], a: 0, why: "De Gaulle avait rejoint Londres la veille et parla au micro de la BBC." },
+        { q: "Qui a lancé l'Appel du 18 juin 1940 ?", c: ["Le général Charles de Gaulle", "Le maréchal Philippe Pétain", "Georges Clemenceau", "Jean Moulin"], a: 0, why: "Depuis Londres, il appelle les Français à refuser la défaite et à poursuivre le combat." },
+        { q: "Depuis quelle ville l'Appel du 18 juin a-t-il été lancé ?", c: ["Londres", "Alger", "Vichy", "Paris"], a: 0, why: "De Gaulle avait rejoint Londres la veille et parla au micro de la BBC." },
         { q: 'Quel résistant a unifié les mouvements de la Résistance française ?', c: ['Jean Moulin', 'Victor Schœlcher', 'Léon Blum', 'Jules Ferry'], a: 0, why: "Il crée le Conseil national de la Résistance en 1943 ; arrêté et torturé, il meurt la même année." },
         { q: 'Quelle institution majeure est créée en 1945 à la sortie de la guerre ?', c: ['La Sécurité sociale', 'La Banque de France', 'Le Conseil constitutionnel', 'Les préfets'], a: 0, why: "Issue du programme du Conseil national de la Résistance, elle protège contre la maladie, la vieillesse et les accidents du travail." },
       ],

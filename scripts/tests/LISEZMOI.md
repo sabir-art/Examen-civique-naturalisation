@@ -60,6 +60,7 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `themes.mjs` | thèmes recalculés sur la seule banque d'examen | 4 questions du récit et 18 du livret répondues, compteur du thème à 0 |
 | `themes.mjs` | un chapitre du récit retiré de la table de rattachement | `check-bank` : « 4 questions sans thème » |
 | `themes.mjs` | avancement du thème recompté sur la seule banque d'examen | carte à « 0/209 vues » après quatre réponses, récit à 0/48 |
+| `check-bank.mjs` | deux fichiers de questions remis dans leur état d'avant | « 54/363 questions où la bonne réponse se voit à sa longueur » |
 | `version.mjs` | `version.json` remis dans le cache hors ligne | il apparaît dans le cache : la recherche de mise à jour ne détecterait plus rien |
 | `version.mjs` | serveur injoignable rapporté comme « à jour » | 2 signalements sur le cas hors ligne |
 | `version.mjs` | `version.json` et l'application mis en désaccord | `check-version` : « version.json annonce deadbee, l'application 2d230a6 » |
@@ -142,3 +143,17 @@ peuvent donc pas se désynchroniser de ce qu'elles décrivent. Et
 `check-version.mjs` refuse qu'un contenu change sans que le journal des
 versions en dise un mot : l'application afficherait sinon une date de mise à
 jour toute fraîche à côté d'un journal muet.
+
+Un dernier contrôle n'a rien d'une vérification d'interface et vaut pourtant
+tous les autres : **la longueur des propositions**. Un QCM peut échouer d'une
+façon qui ne se voit pas en le lisant — si la bonne réponse est nettement plus
+fournie que les autres, on la désigne sans rien savoir. C'était le cas de cette
+banque : bonne réponse la plus longue dans 75 % des questions, et un candidat
+ignorant tout obtenait 27 sur 40 à l'examen blanc en cochant toujours la plus
+bavarde, pour une barre de réussite à 32. Il aurait vu son niveau grimper et
+découvert le jour de l'épreuve que le réflexe ne servait à rien.
+
+`check-bank.mjs` mesure donc cet indice, en ne comptant que ce qu'un œil peut
+réellement voir : au moins un cinquième d'écart, et pas en deçà de vingt-cinq
+caractères — trois lettres entre « Vichy » et « Londres » ne renseignent
+personne.

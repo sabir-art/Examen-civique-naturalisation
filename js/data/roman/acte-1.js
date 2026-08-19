@@ -53,7 +53,7 @@ export default {
         { q: "Quel chef gaulois s'est opposé à Jules César à Alésia ?", c: ['Vercingétorix', 'Clovis', 'Charlemagne', 'Hugues Capet'], a: 0, why: "En 52 av. J.-C., Vercingétorix avait réuni plusieurs peuples gaulois contre les légions romaines." },
         { q: 'En quelle année a eu lieu la bataille d\'Alésia ?', c: ['52 avant Jésus-Christ', '496 après Jésus-Christ', '800 après Jésus-Christ', '52 après Jésus-Christ'], a: 0, why: "Cette défaite marque le début de cinq siècles de Gaule romaine." },
         { q: 'Que signifie le mot « République », venu du latin res publica ?', c: ['La chose publique', 'Le pouvoir du roi', "L'armée du peuple", 'La cité fortifiée'], a: 0, why: "La République est le régime où le pouvoir est une affaire commune, exercée dans l'intérêt général." },
-        { q: 'Quel héritage majeur les Romains ont-ils laissé à la France ?', c: ['Leur langue (le latin, ancêtre du français) et leur droit écrit', "L'écriture arabe et les chiffres", 'La monarchie héréditaire', 'Le christianisme comme religion d\'État'], a: 0, why: "Le français descend du latin, et l'idée de règles écrites identiques pour tous vient du droit romain." },
+        { q: 'Quel héritage majeur les Romains ont-ils laissé à la France ?', c: ["Leur langue (le latin, ancêtre du français) et leur droit écrit", "L'écriture arabe et les chiffres", "La monarchie héréditaire", "Le christianisme, devenu religion officielle de l'Empire"], a: 0, why: "Le français descend du latin, et l'idée de règles écrites identiques pour tous vient du droit romain." },
       ],
     },
 
@@ -92,8 +92,8 @@ export default {
       questions: [
         { q: 'Quel roi franc a été baptisé à Reims vers 496 ?', c: ['Clovis', 'Charlemagne', 'Hugues Capet', 'Saint Louis'], a: 0, why: "Clovis unifie une grande partie de la Gaule et adopte la religion chrétienne." },
         { q: 'Dans quelle ville les rois de France étaient-ils sacrés ?', c: ['Reims', 'Paris', 'Versailles', 'Orléans'], a: 0, why: "La tradition remonte au baptême de Clovis dans cette ville." },
-        { q: "Quel était l'apport politique de Clovis à la construction de la France ?", c: ["Il a unifié plusieurs royaumes francs, formant l'unité du territoire", "Il a écrit la première constitution", "Il a fondé la République", "Il a chassé les Romains de Gaule"], a: 0, why: "Le pays des Francs deviendra plus tard la France." },
-        { q: "Selon la Constitution actuelle, à qui appartient la souveraineté nationale ?", c: ['Au peuple, qui l\'exerce par ses représentants et par référendum', 'Au président de la République', 'Au Parlement', 'Aux collectivités territoriales'], a: 0, why: "C'est l'article 3 de la Constitution de 1958 — l'exact contraire d'un pouvoir venu de Dieu." },
+        { q: "Quel était l'apport politique de Clovis à la construction de la France ?", c: ["Il a unifié plusieurs royaumes francs, formant l'unité du territoire", "Il a écrit la première constitution du royaume des Francs", "Il a fondé la République", "Il a chassé les Romains de Gaule"], a: 0, why: "Le pays des Francs deviendra plus tard la France." },
+        { q: "Selon la Constitution actuelle, à qui appartient la souveraineté nationale ?", c: ["Au peuple, qui l'exerce par ses représentants et par référendum", "Au président de la République, élu au suffrage universel", "Au Parlement", "Aux collectivités territoriales"], a: 0, why: "C'est l'article 3 de la Constitution de 1958 — l'exact contraire d'un pouvoir venu de Dieu." },
       ],
     },
 
@@ -167,9 +167,9 @@ export default {
       ],
       questions: [
         { q: "Quel roi a signé l'édit de Nantes en 1598 ?", c: ['Henri IV', 'Louis XIV', 'François Ier', 'Louis XVI'], a: 0, why: "Ce décret met fin aux guerres de religion entre catholiques et protestants." },
-        { q: "Que garantissait l'édit de Nantes ?", c: ['Le droit pour les protestants de pratiquer leur religion', "L'interdiction de toutes les religions", "La séparation de l'Église et de l'État", "La liberté de la presse"], a: 0, why: "Pour la première fois, deux religions coexistaient sous la même loi dans le royaume." },
+        { q: "Que garantissait l'édit de Nantes ?", c: ["Le droit pour les protestants de pratiquer leur religion", "L'interdiction de toutes les religions dans le royaume", "La séparation de l'Église et de l'État", "La liberté de la presse"], a: 0, why: "Pour la première fois, deux religions coexistaient sous la même loi dans le royaume." },
         { q: "Quel roi a révoqué l'édit de Nantes en 1685 ?", c: ['Louis XIV', 'Henri IV', 'Louis XVI', 'Napoléon'], a: 0, why: "La révocation provoqua l'exil de nombreux protestants." },
-        { q: "Quelle loi apportera bien plus tard une réponse durable à la question religieuse ?", c: ['La loi de 1905 sur la séparation des Églises et de l\'État', 'La loi de 1901 sur les associations', 'La loi de 1881 sur la presse', 'La loi de 2004 sur les signes religieux'], a: 0, why: "La laïcité ne demande à personne de renoncer à sa foi : elle sépare l'État des cultes." },
+        { q: "Quelle loi apportera bien plus tard une réponse durable à la question religieuse ?", c: ["La loi de 1905 sur la séparation des Églises et de l'État", "La loi de 1901 sur les associations", "La loi de 1881 sur la presse", "La loi de 2004 sur les signes religieux à l'école"], a: 0, why: "La laïcité ne demande à personne de renoncer à sa foi : elle sépare l'État des cultes." },
       ],
     },
 
@@ -207,7 +207,7 @@ export default {
         { q: 'Quel roi est surnommé le « Roi-Soleil » ?', c: ['Louis XIV', 'Louis XVI', 'Henri IV', 'François Ier'], a: 0, why: "Il règne de 1643 à 1715 et fait construire le château de Versailles." },
         { q: 'Quelles sont les dates du règne de Louis XIV ?', c: ['De 1643 à 1715', 'De 1589 à 1610', 'De 1715 à 1774', 'De 1774 à 1792'], a: 0, why: "C'est le règne le plus long de l'histoire de France." },
         { q: 'Quel château Louis XIV a-t-il fait construire ?', c: ['Le château de Versailles', 'Le château de Chambord', 'Le Louvre', 'Le palais des Papes'], a: 0, why: "Joyau de l'architecture classique, il servait aussi à tenir la noblesse sous contrôle." },
-        { q: "Qu'appelle-t-on la monarchie absolue ?", c: ['Un régime où le roi concentre tous les pouvoirs sans rendre de comptes', 'Un régime où le roi partage le pouvoir avec un parlement', 'Un régime où le roi est élu', 'Un régime sans roi'], a: 0, why: "L'Ancien Régime est marqué par cette concentration des pouvoirs dans une seule main." },
+        { q: "Qu'appelle-t-on la monarchie absolue ?", c: ["Un régime où le roi concentre tous les pouvoirs sans rendre de comptes", "Un régime où le roi partage le pouvoir avec un parlement élu", "Un régime où le roi est élu", "Un régime sans roi"], a: 0, why: "L'Ancien Régime est marqué par cette concentration des pouvoirs dans une seule main." },
       ],
     },
 
@@ -243,10 +243,10 @@ export default {
         "Leurs idées inspirent directement la Révolution française et la Déclaration des droits de l'homme et du citoyen.",
       ],
       questions: [
-        { q: 'Quel philosophe des Lumières a théorisé la séparation des pouvoirs ?', c: ['Montesquieu', 'Voltaire', 'Rousseau', 'Diderot'], a: 0, why: "Dans « De l'esprit des lois » (1748), il distingue les pouvoirs exécutif, législatif et judiciaire." },
+        { q: 'Quel philosophe des Lumières a théorisé la séparation des pouvoirs ?', c: ["Montesquieu", "Jean-Jacques Rousseau", "Voltaire", "Diderot"], a: 0, why: "Dans « De l'esprit des lois » (1748), il distingue les pouvoirs exécutif, législatif et judiciaire." },
         { q: 'Quels sont les trois pouvoirs séparés dans une démocratie ?', c: ['Exécutif, législatif et judiciaire', 'Militaire, religieux et civil', 'National, régional et local', 'Économique, social et culturel'], a: 0, why: "Cette séparation évite la concentration du pouvoir entre les mêmes mains." },
-        { q: 'Pour quoi les philosophes des Lumières se sont-ils battus ?', c: ["La tolérance, la liberté de pensée et le refus de l'arbitraire", 'Le renforcement de la monarchie absolue', 'Le retour de la religion d\'État', "L'expansion coloniale"], a: 0, why: "Leur pensée a directement inspiré les idéaux de liberté, d'égalité et de fraternité." },
-        { q: 'Quel philosophe des Lumières a explicitement dénoncé l\'esclavage ?', c: ['Montesquieu', 'Louis XIV', 'Napoléon', 'Richelieu'], a: 0, why: "Le livret du citoyen le mentionne parmi les apports majeurs de Montesquieu." },
+        { q: 'Pour quoi les philosophes des Lumières se sont-ils battus ?', c: ["La tolérance, la liberté de pensée et le refus de l'arbitraire", "Le renforcement de la monarchie absolue et du pouvoir royal", "Le retour de la religion d'État", "L'expansion coloniale"], a: 0, why: "Leur pensée a directement inspiré les idéaux de liberté, d'égalité et de fraternité." },
+        { q: 'Quel philosophe des Lumières a explicitement dénoncé l\'esclavage ?', c: ["Montesquieu", "Colbert, ministre de Louis XIV", "Bossuet, évêque et précepteur royal", "Vauban, ingénieur du roi"], a: 0, why: "Le livret du citoyen le mentionne parmi les apports majeurs de Montesquieu." },
       ],
     },
   ],

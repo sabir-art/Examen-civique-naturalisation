@@ -63,7 +63,7 @@ export default {
       ],
       questions: [
         { q: 'Quelle est la devise de la République française ?', c: ['Liberté, Égalité, Fraternité', 'Un peuple, un État, une nation', 'Honneur et Patrie', 'Travail, Famille, Patrie'], a: 0, why: "Elle figure à l'article 2 de la Constitution et sur le fronton des bâtiments publics." },
-        { q: "Qui a composé « La Marseillaise » ?", c: ['Rouget de Lisle', 'Victor Hugo', 'Berlioz', 'Rousseau'], a: 0, why: "Écrit à Strasbourg en 1792, ce chant fut repris par des volontaires marseillais, d'où son nom." },
+        { q: "Qui a composé « La Marseillaise » ?", c: ["Rouget de Lisle", "Victor Hugo", "Hector Berlioz", "Jean-Jacques Rousseau"], a: 0, why: "Écrit à Strasbourg en 1792, ce chant fut repris par des volontaires marseillais, d'où son nom." },
         { q: 'Que représente Marianne ?', c: ['La République française', 'La première reine de France', 'La ville de Paris', "La déesse de la justice"], a: 0, why: "Coiffée du bonnet phrygien, son buste est présent dans toutes les mairies." },
         { q: 'Pour combien de temps le conseil municipal est-il élu ?', c: ['6 ans', '5 ans', '4 ans', '7 ans'], a: 0, why: "Les conseillers municipaux élisent ensuite le maire parmi eux." },
       ],
@@ -114,9 +114,9 @@ export default {
         "Président : 5 ans, suffrage <strong>direct</strong>. Députés : 5 ans, direct. Sénateurs : 6 ans, suffrage <strong>indirect</strong>. Municipales, départementales, régionales : 6 ans.",
       ],
       questions: [
-        { q: 'Quelles sont les conditions pour voter en France ?', c: ['Être français, avoir 18 ans, jouir de ses droits civiques et être inscrit sur les listes électorales', 'Avoir 16 ans et résider en France', 'Payer des impôts en France', 'Être né en France'], a: 0, why: "L'inscription sur les listes électorales de sa commune est indispensable." },
+        { q: 'Quelles sont les conditions pour voter en France ?', c: ["Être français, majeur, jouir de ses droits civiques et être inscrit sur les listes", "Avoir seize ans révolus et résider en France depuis plus d'une année complète", "Payer des impôts en France sur ses revenus du travail", "Être né sur le territoire de la République"], a: 0, why: "L'inscription sur les listes électorales de sa commune est indispensable." },
         { q: 'À quelles élections un citoyen européen résidant en France peut-il voter ?', c: ['Aux élections municipales et européennes', 'À toutes les élections', "À l'élection présidentielle uniquement", 'À aucune élection'], a: 0, why: "Les élections présidentielle et législatives sont réservées aux citoyens français." },
-        { q: 'Comment les sénateurs sont-ils élus ?', c: ['Au suffrage universel indirect, par de grands électeurs', 'Au suffrage universel direct', 'Ils sont nommés par le Président', 'Ils sont tirés au sort'], a: 0, why: "Les sénateurs sont élus pour six ans par un collège de grands électeurs, majoritairement des élus locaux." },
+        { q: 'Comment les sénateurs sont-ils élus ?', c: ["Au suffrage universel indirect, par de grands électeurs", "Au suffrage universel direct, par tous les électeurs", "Ils sont nommés par le Président", "Ils sont tirés au sort"], a: 0, why: "Les sénateurs sont élus pour six ans par un collège de grands électeurs, majoritairement des élus locaux." },
         { q: 'Quelles sont les caractéristiques du vote en France ?', c: ['Universel, égal, secret et libre', 'Obligatoire, public et payant', 'Réservé aux contribuables', 'Indirect et nominatif'], a: 0, why: "Le secret du vote, garanti par l'isoloir et l'enveloppe, en assure la liberté." },
       ],
     },
@@ -162,8 +162,8 @@ export default {
       ],
       questions: [
         { q: "Un élève d'un lycée public peut-il porter un signe religieux ostensible ?", c: ['Non, la loi du 15 mars 2004 l\'interdit', 'Oui, sans condition', "Oui, avec l'accord de ses parents", 'Uniquement pendant les fêtes religieuses'], a: 0, why: "Les élèves gardent leur liberté de conscience, mais les signes religieux ostensibles sont interdits dans les écoles, collèges et lycées publics." },
-        { q: 'Un parent peut-il refuser que son enfant suive un cours au nom de sa religion ?', c: ['Non, aucune conviction ne dispense d\'un enseignement obligatoire', 'Oui, sur simple demande écrite', 'Oui, pour le sport uniquement', 'Oui, si le directeur l\'accepte'], a: 0, why: "La loi de la République prime sur les règles religieuses ; l'instruction est obligatoire." },
-        { q: 'À qui la neutralité religieuse s\'impose-t-elle en France ?', c: ['Aux agents publics dans l\'exercice de leurs fonctions', 'À tous les citoyens en permanence', 'Aux seuls élus', 'Aux commerçants'], a: 0, why: "Les usagers du service public, eux, restent libres de leurs convictions." },
+        { q: 'Un parent peut-il refuser que son enfant suive un cours au nom de sa religion ?', c: ["Non, aucune conviction ne dispense d'un enseignement obligatoire", "Oui, sur simple demande écrite adressée au directeur de l'école", "Oui, pour le sport uniquement", "Oui, si le directeur l'accepte"], a: 0, why: "La loi de la République prime sur les règles religieuses ; l'instruction est obligatoire." },
+        { q: 'À qui la neutralité religieuse s\'impose-t-elle en France ?', c: ["Aux agents publics dans l'exercice de leurs fonctions", "À tous les citoyens, en permanence et en tous lieux", "Aux seuls élus", "Aux commerçants"], a: 0, why: "Les usagers du service public, eux, restent libres de leurs convictions." },
         { q: "Peut-on refuser d'être soigné par un professionnel de santé en raison de son sexe à l'hôpital public ?", c: ['Non', 'Oui, sur demande', 'Oui, pour motif religieux', 'Uniquement en maternité'], a: 0, why: "Le principe d'égalité et la neutralité du service public l'interdisent." },
       ],
     },
@@ -219,7 +219,7 @@ export default {
       questions: [
         { q: 'Quel numéro appeler pour joindre la police ou la gendarmerie ?', c: ['Le 17', 'Le 15', 'Le 18', 'Le 119'], a: 0, why: "Le 15 est le SAMU, le 18 les pompiers, le 112 le numéro d'urgence européen." },
         { q: 'Quel numéro est dédié aux femmes victimes de violences ?', c: ['Le 3919', 'Le 115', 'Le 119', 'Le 3977'], a: 0, why: "Anonyme et gratuit, il oriente vers les associations et les services compétents." },
-        { q: "Que garantit l'aide juridictionnelle ?", c: ["La prise en charge des frais d'avocat pour les personnes aux revenus modestes", 'La gratuité des amendes', "L'annulation des dettes", 'Une aide au logement'], a: 0, why: "Elle rend effectif le droit à la défense, quels que soient les moyens de la personne." },
+        { q: "Que garantit l'aide juridictionnelle ?", c: ["La prise en charge des frais d'avocat pour les revenus modestes", "L'annulation des dettes contractées auprès des banques", "La gratuité des amendes pour les personnes sans emploi", "Une aide au paiement du loyer et des charges"], a: 0, why: "Elle rend effectif le droit à la défense, quels que soient les moyens de la personne." },
         { q: "La polygamie est-elle autorisée en France ?", c: ['Non, elle est interdite et punie par la loi', 'Oui, si le mariage a été célébré à l\'étranger', 'Oui, avec l\'accord des épouses', 'Uniquement pour les résidents étrangers'], a: 0, why: "Le droit français ne reconnaît qu'un seul mariage à la fois ; aucune tradition ne prime sur la loi." },
       ],
     },
@@ -261,7 +261,7 @@ export default {
         "Les <strong>impôts</strong> financent les services publics : école, santé, sécurité, transports.",
       ],
       questions: [
-        { q: 'À quoi sert la carte Vitale ?', c: ["Elle permet le remboursement des soins par l'Assurance maladie", "C'est une pièce d'identité", 'Elle sert à voter', "C'est un titre de transport"], a: 0, why: "La Sécurité sociale, créée en 1945, prend en charge une grande partie des dépenses de santé." },
+        { q: 'À quoi sert la carte Vitale ?', c: ["Elle permet le remboursement des soins par l'Assurance maladie", "C'est une pièce d'identité valable dans toute l'Europe", "Elle sert à voter", "C'est un titre de transport"], a: 0, why: "La Sécurité sociale, créée en 1945, prend en charge une grande partie des dépenses de santé." },
         { q: 'Quelle est la durée légale du travail hebdomadaire en France ?', c: ['35 heures', '39 heures', '40 heures', '37 heures'], a: 0, why: "C'est la durée de référence ; les heures au-delà sont des heures supplémentaires." },
         { q: 'Combien de semaines de congés payés un salarié a-t-il au minimum ?', c: ['5 semaines', '4 semaines', '3 semaines', '6 semaines'], a: 0, why: "Soit cinq semaines par an, acquises à raison de 2,5 jours ouvrables par mois travaillé." },
         { q: 'Quelle autorité peut être saisie gratuitement en cas de discrimination ?', c: ['Le Défenseur des droits', 'Le Conseil constitutionnel', 'Le préfet', 'La Cour des comptes'], a: 0, why: "Autorité indépendante, il protège les droits et lutte contre les discriminations." },
@@ -310,7 +310,7 @@ export default {
       ],
       questions: [
         { q: 'Combien de pays comptent aujourd\'hui l\'Union européenne ?', c: ['27', '25', '28', '15'], a: 0, why: "Ils étaient six à l'origine ; le Royaume-Uni a quitté l'Union en 2020." },
-        { q: 'Que représente le drapeau européen ?', c: ['Douze étoiles dorées en cercle sur fond bleu', 'Une étoile par pays membre', 'Vingt-sept étoiles blanches', 'Trois bandes bleu, blanc, rouge'], a: 0, why: "Le nombre douze est un symbole d'unité et de perfection, indépendant du nombre d'États membres." },
+        { q: 'Que représente le drapeau européen ?', c: ["Douze étoiles dorées en cercle sur fond bleu", "Une étoile dorée par pays membre de l'Union", "Vingt-sept étoiles blanches", "Trois bandes bleu, blanc, rouge"], a: 0, why: "Le nombre douze est un symbole d'unité et de perfection, indépendant du nombre d'États membres." },
         { q: 'Quel traité a créé l\'Union européenne et la citoyenneté européenne ?', c: ['Le traité de Maastricht (1992)', 'Le traité de Rome (1957)', 'Le traité de Lisbonne (2007)', 'Le traité de Versailles (1919)'], a: 0, why: "Le traité de Rome avait créé le marché commun ; Maastricht fonde l'Union et la citoyenneté européenne." },
         { q: 'Dans quelle ville siège le Parlement européen ?', c: ['Strasbourg', 'Bruxelles', 'Paris', 'Luxembourg'], a: 0, why: "La Commission européenne, elle, siège à Bruxelles." },
       ],
