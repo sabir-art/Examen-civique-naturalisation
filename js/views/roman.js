@@ -265,10 +265,10 @@ function sommaire() {
   const lecture = Math.round((termines / o.chapitres) * 100);
   // `StatTile` : le composant du système pour « un chiffre et son intitulé ».
   const kpis = h('div', { class: 'tiles-3' }, [
-    ['chapitres terminés', `${termines}/${o.chapitres}`],
-    ['mémorisation', `${o.mastery} %`],
-    ['bonnes réponses', o.accuracy === null ? '—' : `${o.accuracy} %`],
-  ].map(([lab, val]) => StatTile({ value: val, label: lab, surface: 'white', align: 'center' })));
+    ['chapitres terminés', termines, `/${o.chapitres}`],
+    ['mémorisation', o.mastery, '%'],
+    ['bonnes réponses', o.accuracy === null ? '—' : o.accuracy, o.accuracy === null ? null : '%'],
+  ].map(([lab, val, u]) => StatTile({ value: val, unit: u, label: lab, surface: 'white', align: 'center' })));
 
   /*
    * La reprise est une carte encre, pas un bouton : le titre d'un chapitre ne

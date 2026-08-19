@@ -38,6 +38,8 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | --- | --- | --- |
 | `sweep.mjs` | feuille de style rendue défaillante | 135 signalements |
 | `sweep.mjs` | libellé du cadran allongé au-delà du cadre SVG | « sort du cadre (-114…242 pour 0…128) » |
+| `sweep.mjs` | chiffre des tuiles remis à la taille d'un titre | « le chiffre « 233/735 » ne tient pas dans sa tuile (81 px pour 79) » |
+| `sweep.mjs` | plancher de largeur retiré aux intitulés | trois intitulés débordant à 430 px |
 | `a11y.mjs` | règle rendant les boutons secondaires blancs sur blanc | contraste de 1,00 |
 | `bugs.mjs` | barre d'action laissée collée en bas | chevauchement détecté |
 | `erreurs.mjs` | retour à l'ancienne règle des boîtes | questions restées dans la liste |
@@ -157,3 +159,19 @@ découvert le jour de l'épreuve que le réflexe ne servait à rien.
 réellement voir : au moins un cinquième d'écart, et pas en deçà de vingt-cinq
 caractères — trois lettres entre « Vichy » et « Londres » ne renseignent
 personne.
+
+Le contrôle des tuiles chiffrées (`StatTile`) mérite une note, parce qu'il a
+échappé trois fois à ce balayage avant d'être signalé depuis un téléphone.
+La page ne défile pas — les colonnes de la grille gardent leur largeur —, le
+texte n'est pas « tronqué » au sens de `scrollWidth` sur l'élément feuille, et
+le débordement se mesurait par rapport au cadre de l'application, pas à la
+tuile. Le chiffre sortait pourtant de sa carte pour se poser sur la voisine.
+
+Deux mesures le trahissent, et les deux sont faites : la boîte du chiffre ne
+contient pas son propre texte, et l'encre déborde de la zone utile de la
+tuile — les marges intérieures se font manger bien avant que la page ne bouge.
+
+Une quatrième raison expliquait la cécité : le balayage remplissait le
+stockage APRÈS le démarrage de l'application, sans recharger. Les écrans
+étaient donc parcourus vides, avec « 30/735 » là où l'utilisateur avait
+« 233/735 ». Un contrôle ne vaut que par les données sur lesquelles il tourne.

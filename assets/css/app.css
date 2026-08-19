@@ -1094,6 +1094,15 @@ a.themestat__row { min-height: 44px; }
 /* Grille de trois tuiles de chiffres — la disposition, le composant fait le
    reste. */
 .tiles-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--stack-card); }
+/* Trois tuiles sur un écran de 320 px : il ne reste que cinquante-six pixels
+   utiles par tuile avec la marge intérieure du système. On la resserre, et le
+   chiffre descend d'un cran de plus, plutôt que de laisser déborder. La règle
+   vise les rangées de trois, d'où qu'elles viennent. */
+@media (max-width: 360px) {
+  .tiles-3 .ds-stat, .accueil__tiles .ds-stat { padding: 13px 8px; }
+  .ds-stat__value--moyen { font: var(--type-h3); letter-spacing: -0.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .ds-stat__value--petit { font: var(--weight-bold) var(--text-body)/1.15 var(--font-sans); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+}
 
 /* Carte de reprise : même composition que la séance du jour sur l'accueil. */
 .reprise { display: flex; align-items: center; gap: 14px; }

@@ -11,7 +11,7 @@
    l'appui, le focus clavier et le thème sombre sans repasser par du
    JavaScript, et il empêche le navigateur de mettre les règles en cache.
 
-   DEUX ADAPTATIONS, et elles sont nommées.
+   TROIS ADAPTATIONS, et elles sont nommées.
 
    La première. Le système désigne par `ink` deux
    choses différentes : « la surface encre » (barre de navigation, puce
@@ -26,6 +26,16 @@
    parce qu'il y repose sur le fond teinté de la page. Dans l'application il
    vit à l'intérieur d'une carte blanche, où il disparaissait. Le détail est
    écrit au-dessus de la règle.
+
+   La troisième : le chiffre de `StatTile`. Le système le montre toujours
+   court — « 12 », « 87 % » — dans une tuile large. Ici trois tuiles se
+   partagent la largeur d'un téléphone et le chiffre peut valoir
+   « 233/735 » : à la taille h1, il sortait de sa carte et passait par-dessus
+   la voisine. Le chiffre garde donc sa taille tant qu'il est court, et
+   descend d'un cran, puis de deux, à mesure qu'il s'allonge ; l'unité
+   (« % », « /735 », « questions ») devient un élément à part, plus petit,
+   pour que le nombre reste le nombre. Le détail est écrit au-dessus des
+   règles.
    ========================================================================= */
 
 /* ═══════════════════════════════════════════════════════════════ core */
@@ -352,6 +362,9 @@ button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); 
   display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
   padding: 16px; border-radius: var(--radius-card-inner);
   text-decoration: none; color: var(--text-primary);
+  /* Trois tuiles dans une grille : sans cela, la plus bavarde impose sa
+     largeur minimale aux deux autres et la rangée déborde de l'écran. */
+  min-width: 0;
 }
 .ds-stat--center { align-items: center; text-align: center; }
 .ds-stat--white { background: var(--surface-card); box-shadow: var(--shadow-xs); }
@@ -362,12 +375,46 @@ button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); 
 .ds-stat--blush { background: var(--surface-blush); color: var(--text-on-tint); }
 .ds-stat--ink { background: var(--surface-ink); color: var(--text-inverse); }
 .ds-stat__icon { color: var(--text-muted); }
-.ds-stat__value { font: var(--type-h1); letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
-.ds-stat__foot { display: flex; align-items: center; gap: 5px; }
-.ds-stat__label { font: var(--type-caption); font-weight: var(--weight-medium); color: var(--text-muted); }
+.ds-stat__value {
+  font: var(--type-h1); letter-spacing: -0.03em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  /* Le nombre et son unité tiennent sur une ligne : coupés, « 233/735 »
+     devenait « 233/73 » puis « 5 » à la ligne suivante. C'est la taille qui
+     s'adapte, jamais la césure. */
+  max-width: 100%; white-space: nowrap;
+}
+/* Le chiffre descend d'un cran à partir de quatre caractères, de deux à
+   partir de six. La classe est posée par le composant, qui seul connaît la
+   longueur de la valeur — aucune règle CSS ne sait compter des lettres. */
+.ds-stat__value--moyen { font: var(--type-h2); letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.ds-stat__value--petit { font: var(--type-h3); letter-spacing: -0.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+/* Dernier cran, pour une valeur qu'on n'avait pas prévue : mieux vaut un
+   chiffre petit qu'un chiffre coupé ou débordant. */
+.ds-stat__value--minuscule { font: var(--weight-bold) var(--text-body)/1.15 var(--font-sans); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+/* L'unité accompagne le nombre sans lui disputer la place. */
+.ds-stat__unit { font-size: 0.55em; font-weight: var(--weight-bold); letter-spacing: 0; color: var(--text-muted); margin-left: 0.14em; }
+/* `align-items: center` sur la colonne laisse chaque enfant prendre la largeur
+   de son contenu : sans plafond, l'intitulé s'étalait au-delà de la tuile au
+   lieu de passer à la ligne. C'est ce plafond qui rend la césure possible. */
+.ds-stat__foot { display: flex; align-items: center; gap: 5px; max-width: 100%; min-width: 0; }
+.ds-stat__label {
+  font: var(--type-caption); font-weight: var(--weight-medium); color: var(--text-muted);
+  /* « mémorisation » ne rentre pas dans le tiers d'un écran de 320 px et
+     n'offre aucun endroit où passer à la ligne : sans césure, il sortait de
+     sa tuile. `hyphens` coupe joliment quand le navigateur sait le faire —
+     la page est en français —, et `overflow-wrap` garantit le reste : mieux
+     vaut un mot coupé sans tiret qu'un mot qui sort de sa carte. */
+  hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word;
+  /* Élément d'une rangée souple : sans ce plancher à zéro, il refuse de
+     devenir plus étroit que son plus long mot, et la césure ne sert à rien. */
+  min-width: 0; max-width: 100%;
+}
 .ds-stat--lavender .ds-stat__label, .ds-stat--mint .ds-stat__label,
-.ds-stat--butter .ds-stat__label, .ds-stat--blush .ds-stat__label { color: inherit; opacity: .72; }
-.ds-stat--ink .ds-stat__label, .ds-stat--ink .ds-stat__icon { color: var(--text-inverse-muted); }
+.ds-stat--butter .ds-stat__label, .ds-stat--blush .ds-stat__label,
+.ds-stat--lavender .ds-stat__unit, .ds-stat--mint .ds-stat__unit,
+.ds-stat--butter .ds-stat__unit, .ds-stat--blush .ds-stat__unit { color: inherit; opacity: .72; }
+.ds-stat--ink .ds-stat__label, .ds-stat--ink .ds-stat__icon,
+.ds-stat--ink .ds-stat__unit { color: var(--text-inverse-muted); }
 .ds-stat__delta { font: var(--type-micro); color: var(--state-correct-fg); }
 
 /* --------------------------------------------------- StreakCalendar */

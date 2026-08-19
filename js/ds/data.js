@@ -73,14 +73,32 @@ export function ProgressRing({
 
 /** Un chiffre et son intitulé — la grille de statistiques du profil. */
 export function StatTile({
-  value, label, icon: nom, surface = 'white', delta, align = 'left', href, className = '',
+  value, unit, label, icon: nom, surface = 'white', delta, align = 'left', href, className = '',
 } = {}) {
+  const chiffre = String(value);
+  // Le chiffre garde sa taille tant qu'il est court, puis descend d'un cran,
+  // de deux, de trois : trois tuiles se partagent la largeur d'un téléphone,
+  // et « 233/735 » à la taille d'un titre sortait de sa carte pour se poser
+  // sur la voisine. Aucune règle CSS ne sait compter des caractères ; c'est
+  // donc ici, où la valeur est connue, que la mesure se fait.
+  //
+  // La longueur qui compte est celle du TOUT, unité comprise : « 233 » tient
+  // largement, « 233/735 » non, et c'est pourtant ce qui est affiché.
+  const largeur = chiffre.length + String(unit || '').length;
+  const cran = largeur >= 12 ? ' ds-stat__value--minuscule'
+    : largeur >= 8 ? ' ds-stat__value--petit'
+      : largeur >= 5 ? ' ds-stat__value--moyen' : '';
   return h(href ? 'a' : 'div', {
     class: `ds-stat ds-stat--${surface}${align === 'center' ? ' ds-stat--center' : ''}${className ? ` ${className}` : ''}`,
     href: href || null,
   }, [
     nom ? Icon({ name: nom, size: 18, className: 'ds-stat__icon' }) : null,
-    h('span', { class: 'ds-stat__value', text: String(value) }),
+    h('span', { class: `ds-stat__value${cran}` }, [
+      h('span', { text: chiffre }),
+      // L'unité est un élément à part, plus petit : « 233 » reste un nombre
+      // qu'on lit d'un coup d'œil, « /735 » l'accompagne sans l'écraser.
+      unit ? h('span', { class: 'ds-stat__unit', text: unit }) : null,
+    ].filter(Boolean)),
     h('span', { class: 'ds-stat__foot' }, [
       h('span', { class: 'ds-stat__label', text: label }),
       delta ? h('span', { class: 'ds-stat__delta', text: delta }) : null,

@@ -42,24 +42,36 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
   await page.click('button[type=submit]');
   await page.waitForSelector('.accueil__hero');
 
-  // Un peu de progression pour que les écrans ne soient pas tous vides.
-  await page.evaluate(() => {
+  /* Un peu de progression pour que les écrans ne soient pas tous vides — et
+     assez pour que les compteurs atteignent trois chiffres. Avec trente
+     questions vues, « 30/735 » tenait dans sa tuile et le balayage ne pouvait
+     rien voir ; c'est « 233/735 » qui débordait sur l'écran de l'utilisateur.
+     Un contrôle ne vaut que par les données sur lesquelles il tourne. */
+  await page.evaluate(async () => {
+    const { TOUTES_LES_QUESTIONS } = await import('./js/data/banques.js');
     const raw = JSON.parse(localStorage.getItem('examen-civique.v1'));
     for (const p of Object.values(raw.profiles)) {
       p.goalDate = '2026-08-28';
       p.read = { ch01: Date.now(), ch02: Date.now() };
       p.exams = [{ id: 'x', mode: 'officiel', date: Date.now(), score: 34, total: 40, durationSec: 1500, byTheme: {} }];
-      for (let i = 0; i < 30; i++) p.progress[`sym${String(i + 1).padStart(2, '0')}`] = { box: 3, seen: 2, ok: 1, ko: 1, last: Date.now(), due: 0 };
+      for (const q of TOUTES_LES_QUESTIONS.slice(0, 233)) {
+        p.progress[q.id] = { box: 3, seen: 3, ok: 2, ko: 1, lastOk: true, last: Date.now(), due: 0 };
+      }
     }
     localStorage.setItem('examen-civique.v1', JSON.stringify(raw));
   });
+  /* Recharger, sinon rien de tout cela ne s'affiche : l'application a lu le
+     stockage à son démarrage, et les écrans suivants montreraient un compte
+     vierge. Le balayage a longtemps cru parcourir des écrans remplis. */
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('.accueil__hero');
 
   for (const route of ROUTES) {
     await page.goto(BASE + route);
     await page.waitForTimeout(320);
 
     const r = await page.evaluate(() => {
-      const out = { debordement: null, tronques: [], recouverts: [], vides: [] };
+      const out = { debordement: null, tronques: [], recouverts: [], vides: [], sortis: [] };
       const doc = document.documentElement;
       if (doc.scrollWidth > doc.clientWidth + 1) out.debordement = `${doc.scrollWidth} > ${doc.clientWidth}`;
 
@@ -97,6 +109,30 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
         if (b.right > doc.clientWidth + 2) {
           out.recouverts.push(`${nom(el)} déborde jusqu'à ${Math.round(b.right)}`);
         }
+        /* Un chiffre trop long pour sa tuile.
+           Le défaut ne fait pas défiler la page — les colonnes de la grille
+           gardent leur largeur —, il déborde simplement par-dessus la tuile
+           voisine. Et il échappe aux deux contrôles précédents : le texte
+           « coupé » ne regarde que les éléments sans enfants (le chiffre en a
+           deux : le nombre et son unité), et le débordement à droite se
+           mesure par rapport au cadre de l'application, pas à la tuile.
+           On mesure donc les deux choses qui le trahissent : la boîte du
+           chiffre ne contient pas son propre texte, et l'encre déborde de la
+           zone utile de la tuile — les marges intérieures se font manger en
+           premier, bien avant que la page ne défile. */
+        if (el.classList.contains('ds-stat__value') && el.scrollWidth > el.clientWidth + 1) {
+          out.sortis.push(`le chiffre « ${el.textContent.trim().slice(0, 20)} » ne tient pas dans sa tuile (${el.scrollWidth} px pour ${el.clientWidth})`);
+        }
+        const tuile = el.closest('.ds-stat');
+        if (tuile && tuile !== el) {
+          const cs2 = getComputedStyle(tuile);
+          const t = tuile.getBoundingClientRect();
+          const gauche = t.left + parseFloat(cs2.paddingLeft);
+          const droite = t.right - parseFloat(cs2.paddingRight);
+          if (b.right > droite + 0.5 || b.left < gauche - 0.5) {
+            out.sortis.push(`« ${el.textContent.trim().slice(0, 20)} » déborde de sa tuile (${Math.round(b.width)} px pour ${Math.round(droite - gauche)})`);
+          }
+        }
         // bouton sans libellé ni icône
         if ((el.tagName === 'BUTTON' || (el.tagName === 'A' && el.className.includes('btn')))
             && !el.textContent.trim() && !el.querySelector('svg, img')) {
@@ -110,6 +146,7 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
     for (const t of r.tronques.slice(0, 3)) note(`${largeur}px ${route} — texte tronqué : ${t}`);
     for (const t of r.recouverts.slice(0, 3)) note(`${largeur}px ${route} — ${t}`);
     for (const t of r.vides.slice(0, 3)) note(`${largeur}px ${route} — bouton vide : ${t}`);
+    for (const t of r.sortis.slice(0, 3)) note(`${largeur}px ${route} — ${t}`);
 
     // la barre d'onglets ne doit jamais recouvrir le dernier élément utile
     const cache = await page.evaluate(() => {

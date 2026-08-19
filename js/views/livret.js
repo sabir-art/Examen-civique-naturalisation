@@ -35,10 +35,10 @@ function sommaire() {
 
   const termines = CHAPITRES.filter((c) => livretChapitreProgres(c.key).termine).length;
   const kpis = h('div', { class: 'tiles-3' }, [
-    ['chapitres terminés', `${termines}/${o.chapters}`],
-    ['maîtrise du livret', `${o.mastery} %`],
-    ['bonnes réponses', o.accuracy === null ? '—' : `${o.accuracy} %`],
-  ].map(([lab, val]) => StatTile({ value: val, label: lab, surface: 'white', align: 'center' })));
+    ['chapitres terminés', termines, `/${o.chapters}`],
+    ['maîtrise du livret', o.mastery, '%'],
+    ['bonnes réponses', o.accuracy === null ? '—' : o.accuracy, o.accuracy === null ? null : '%'],
+  ].map(([lab, val, u]) => StatTile({ value: val, unit: u, label: lab, surface: 'white', align: 'center' })));
 
   const actions = h('div', { class: 'stack stack--tight' }, [
     Button({

@@ -22,10 +22,15 @@ export default function renderOnboarding({ onDone }) {
     onDone();
   }
 
+  // Le nombre d'un côté, son unité de l'autre : « 40 questions » écrit d'un
+  // bloc à la taille d'un titre ne tient pas dans un tiers d'écran.
+  // Le nombre seul reste grand ; l'unité passe dans l'intitulé plutôt que de
+  // disputer la place au chiffre. « 40 questions » écrit d'un bloc à la
+  // taille d'un titre ne tenait pas dans un tiers de la largeur d'un écran.
   const facts = [
-    [`${EXAM.questions} questions`, 'à choix multiples'],
-    [`${EXAM.minutes} minutes`, 'de temps maximum'],
-    [`${EXAM.passing}/${EXAM.questions}`, `soit ${EXAM.passingPct} % pour réussir`],
+    [EXAM.questions, null, 'questions à choix multiples'],
+    [EXAM.minutes, null, 'minutes au maximum'],
+    [EXAM.passing, `/${EXAM.questions}`, `pour réussir, soit ${EXAM.passingPct}\u00A0%`],
   ];
 
   return h('div', { class: 'stack', style: 'padding:22px 16px 40px;max-width:560px;margin:0 auto' }, [
@@ -38,7 +43,7 @@ export default function renderOnboarding({ onDone }) {
     ]),
 
     h('div', { class: 'tiles-3' },
-      facts.map(([v, l]) => StatTile({ value: v, label: l, surface: 'white', align: 'center' }))),
+      facts.map(([v, u, l]) => StatTile({ value: v, unit: u, label: l, surface: 'white', align: 'center' }))),
 
     h('form', { class: 'card stack', onsubmit: submit }, [
       h('div', {}, [

@@ -32,14 +32,16 @@ export default function renderProgres() {
     h('div', { style: 'margin-top:12px' }, ProgressBar({ value: r, height: 10, tone: tone === 'ok' ? 'correct' : 'ink' })),
   ] });
 
+  // Chaque tuile : le nombre, puis son unité en plus petit. Écrits d'un bloc,
+  // « 233/735 » ou « 89 % » débordaient de leur carte sur un téléphone.
   const kpis = h('div', { class: 'tiles-3' }, [
-    ['questions vues', `${o.seen}/${o.bankSize}`],
-    ['réponses données', String(o.answers)],
-    ['taux de réussite', o.accuracy === null ? '—' : `${o.accuracy} %`],
-    ['questions acquises', String(o.mastered)],
-    ['examens blancs', String(o.exams)],
-    ['meilleur score', o.best === null ? '—' : `${o.best}/${EXAM.questions}`],
-  ].map(([lab, val]) => StatTile({ value: val, label: lab, surface: 'white', align: 'center' })));
+    ['questions vues', o.seen, `/${o.bankSize}`],
+    ['réponses données', o.answers, null],
+    ['taux de réussite', o.accuracy === null ? '—' : o.accuracy, o.accuracy === null ? null : '%'],
+    ['questions acquises', o.mastered, null],
+    ['examens blancs', o.exams, null],
+    ['meilleur score', o.best === null ? '—' : o.best, o.best === null ? null : `/${EXAM.questions}`],
+  ].map(([lab, val, u]) => StatTile({ value: val, unit: u, label: lab, surface: 'white', align: 'center' })));
 
   const themes = Card({ surface: 'white', elevation: 'xs', children: [
     h('h2', { class: 'card__title', text: 'Maîtrise par thème' }),

@@ -130,9 +130,9 @@ export default function renderHome() {
    * progression — c'est là que le système le place.
    */
   const chiffres = h('div', { class: 'accueil__tiles' }, [
-    StatTile({ value: String(o.seen), label: `sur ${o.bankSize} questions`, surface: 'white' }),
-    StatTile({ value: o.accuracy === null ? '—' : `${o.accuracy} %`, label: 'de bonnes réponses', surface: 'white' }),
-    StatTile({ value: o.last ? `${o.last.score}` : '—', label: 'dernier examen blanc', surface: 'white' }),
+    StatTile({ value: o.seen, unit: `/${o.bankSize}`, label: 'questions vues', surface: 'white' }),
+    StatTile({ value: o.accuracy === null ? '—' : o.accuracy, unit: o.accuracy === null ? null : '%', label: 'de bonnes réponses', surface: 'white' }),
+    StatTile({ value: o.last ? o.last.score : '—', unit: o.last ? `/${EXAM.questions}` : null, label: 'dernier examen blanc', surface: 'white' }),
   ]);
 
   /* -------------------------------------------------------------- niveau */
