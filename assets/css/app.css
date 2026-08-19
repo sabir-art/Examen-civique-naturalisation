@@ -164,6 +164,9 @@
   /* Neutres complémentaires, demandés par les composants du système. */
   --nuit-desactive: #6E7876;
   --nuit-inverse-faible: #8D9793;
+  /* Libellé des onglets sur le verre sombre : le gris ci-dessus tombe à
+     2,6:1 quand le verre laisse remonter une page blanche. */
+  --nuit-verre-texte: #D3D9D7;
   --nuit-encre-survol: #2F3634;
 }
 
@@ -1094,6 +1097,86 @@ a.themestat__row { min-height: 44px; }
 /* Grille de trois tuiles de chiffres — la disposition, le composant fait le
    reste. */
 .tiles-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--stack-card); }
+/* ═════════════════════════════════════════ le verre des appareils Apple ═══
+   Depuis iOS 26, les barres d'onglets natives sont en « Liquid Glass » : un
+   matériau qui floute ce qui passe dessous, en reprend les couleurs et renvoie
+   la lumière. Une page web n'a PAS accès à ce matériau du système — WhatsApp
+   l'obtient parce que c'est une application native. Mais `backdrop-filter`
+   produit la même optique, et sur un iPhone la barre appartient alors
+   visiblement à la même famille que celles du système.
+
+   Sur Android, rien ne change : la barre y reste pleine et encrée, comme
+   celles du système. Une application qui porte le verre d'Apple sur un
+   Samsung n'a l'air d'être de nulle part.
+
+   Le verre est CLAIR, et pas une version transparente de notre barre encre.
+   Un noir à 78 % posé sur une page blanche ne se lit pas comme du verre mais
+   comme une dalle grise ; le matériau d'Apple, lui, s'éclaircit. C'est donc
+   la barre entière qui s'inverse sur ces appareils : fond clair, glyphes
+   sombres, pastille blanche sur l'onglet courant.
+
+   Les opacités ne sont pas choisies à l'œil, mais sur le PIRE cas — une barre
+   posée sur une photo noire en thème clair, sur une page blanche en thème
+   sombre. À 0,70 (clair) et 0,80 (sombre), le texte des onglets garde plus de
+   5:1 de contraste dans ces deux extrêmes, tout en laissant passer les formes
+   et les couleurs de ce qui défile dessous.
+   ═════════════════════════════════════════════════════════════════════════ */
+@supports ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
+  :root[data-plateforme="apple"] {
+    --verre-fond: rgba(255, 255, 255, .70);
+    --verre-eclat: rgba(255, 255, 255, .65);
+    --verre-cerne: rgba(20, 20, 20, .07);
+    /* Pas le gris habituel des libellés : posé sur un verre clair qui laisse
+       remonter une photo sombre, il tombe à 2,5:1. Celui-ci tient 6,5:1 dans
+       ce pire cas, et l'onglet courant reste distinct par sa pastille — comme
+       dans les barres du système. */
+    --verre-texte: var(--ink-700);
+    --verre-texte-actif: var(--text-primary);
+    --verre-pastille: rgba(255, 255, 255, .92);
+    --verre-flou: blur(22px) saturate(180%);
+  }
+  /* En thème sombre le verre s'assombrit, comme le fait le système. */
+  :root[data-plateforme="apple"][data-theme="dark"],
+  :root[data-plateforme="apple"]:not([data-theme="light"]) {
+    --verre-fond: rgba(34, 40, 38, .80);
+    --verre-eclat: rgba(255, 255, 255, .10);
+    --verre-cerne: rgba(255, 255, 255, .08);
+    /* Même raison, en sens inverse : au-dessus d'une page blanche, le gris
+       de nuit habituel tombe à 2,6:1. */
+    --verre-texte: var(--nuit-verre-texte);
+    --verre-texte-actif: var(--nuit-text);
+    --verre-pastille: rgba(255, 255, 255, .14);
+  }
+  /* `:not([data-theme="light"])` couvre aussi le réglage « automatique » ; il
+     faut donc rendre le verre clair quand l'appareil, lui, est en clair. */
+  @media (prefers-color-scheme: light) {
+    :root[data-plateforme="apple"]:not([data-theme="dark"]) {
+      --verre-fond: rgba(255, 255, 255, .70);
+      --verre-eclat: rgba(255, 255, 255, .65);
+      --verre-cerne: rgba(20, 20, 20, .07);
+      --verre-texte: var(--ink-700);
+      --verre-texte-actif: var(--text-primary);
+      --verre-pastille: rgba(255, 255, 255, .92);
+    }
+  }
+
+  :root[data-plateforme="apple"] .ds-bottomnav__bar,
+  :root[data-plateforme="apple"] .ds-bottomnav__action {
+    background: var(--verre-fond);
+    -webkit-backdrop-filter: var(--verre-flou);
+    backdrop-filter: var(--verre-flou);
+    /* Le liseré clair en haut est la lumière que le matériau renvoie : c'est
+       lui qui fait voir du verre plutôt qu'un voile. Le cerne, lui, détache la
+       barre de ce qui passe dessous. */
+    box-shadow: var(--shadow-nav), inset 0 1px 0 var(--verre-eclat), inset 0 0 0 1px var(--verre-cerne);
+  }
+  :root[data-plateforme="apple"] .ds-bottomnav__tab { color: var(--verre-texte); }
+  :root[data-plateforme="apple"] .ds-bottomnav__tab[aria-current="page"] {
+    background: var(--verre-pastille); color: var(--verre-texte-actif);
+  }
+  :root[data-plateforme="apple"] .ds-bottomnav__action { color: var(--verre-texte-actif); }
+}
+
 /* Trois tuiles sur un écran de 320 px : il ne reste que cinquante-six pixels
    utiles par tuile avec la marge intérieure du système. On la resserre, et le
    chiffre descend d'un cran de plus, plutôt que de laisser déborder. La règle

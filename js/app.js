@@ -6,6 +6,7 @@ import * as store from './store.js';
 import { amorcer } from './lib/feedback.js';
 import { h, toast, fermerFeuille } from './lib/dom.js';
 import { annoterRomains } from './lib/chiffres.js';
+import { appliquerPlateforme } from './lib/plateforme.js';
 import { TopBar, BottomNav } from './ds/navigation.js';
 import { Avatar } from './ds/core.js';
 import { badgesObtenus } from './lib/xp.js';
@@ -32,6 +33,10 @@ const bootEl = document.getElementById('boot');
 const bootTextEl = document.getElementById('boot-text');
 const hautEl = document.getElementById('chrome-top');
 const basEl = document.getElementById('chrome-bottom');
+
+// Aussi tôt que possible : la barre du bas prend le matériau de la plateforme
+// dès le premier rendu, sans le changer sous les yeux de l'utilisateur.
+appliquerPlateforme();
 
 /* --------------------------------------------------------------- châssis */
 

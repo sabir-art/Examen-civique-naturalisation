@@ -1,6 +1,6 @@
 # Contrôles automatiques de l'interface
 
-Dix-sept scripts Playwright, à lancer avec l'application servie sur le port 8099 :
+Dix-huit scripts Playwright, à lancer avec l'application servie sur le port 8099 :
 
 ```bash
 npx http-server -p 8099 -c-1 &
@@ -22,6 +22,7 @@ node scripts/tests/tableaux.mjs   # les tableaux d'enquête : liens, sens de lec
 node scripts/tests/chiffres.mjs   # les chiffres romains doublés de leur valeur
 node scripts/tests/themes.mjs     # un thème compte ses questions dans les trois banques
 node scripts/tests/version.mjs    # date de mise à jour, recherche d'une version plus récente
+node scripts/tests/plateforme.mjs # le verre d'iOS, et seulement là où il existe
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -68,6 +69,8 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `version.mjs` | `version.json` et l'application mis en désaccord | `check-version` : « version.json annonce deadbee, l'application 2d230a6 » |
 | `version.mjs` | dernière entrée du journal supprimée | « un contenu a changé le 19, le journal s'arrête au 16 » |
 | `a11y.mjs` | badge sombre sur fond translucide clair | contraste 1,01 (le compositeur des couches voit ce qu'un fond `rgba` cache) |
+| `plateforme.mjs` | verre rendu plus transparent (0,35) | libellés à 1,9:1 sur photo sombre, 1,5:1 sur page claire |
+| `plateforme.mjs` | verre posé sur toutes les plateformes | « hors Apple, aucun flou » et « son fond est opaque » |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.
@@ -175,3 +178,18 @@ Une quatrième raison expliquait la cécité : le balayage remplissait le
 stockage APRÈS le démarrage de l'application, sans recharger. Les écrans
 étaient donc parcourus vides, avec « 30/735 » là où l'utilisateur avait
 « 233/735 ». Un contrôle ne vaut que par les données sur lesquelles il tourne.
+
+`plateforme.mjs` garde une adaptation dont le risque est particulier. Depuis
+iOS 26, les barres d'onglets natives sont en « Liquid Glass » ; une page web
+n'a pas accès à ce matériau du système, mais `backdrop-filter` en produit
+l'optique, et sur un iPhone la barre appartient alors à la même famille que
+celles du système. Sur Android elle reste pleine, comme les barres de ce
+système-là.
+
+Un matériau translucide prend la couleur de ce qui passe dessous : le défaut
+n'apparaît qu'au-dessus d'une certaine photo, à un certain endroit du
+défilement, et aucune capture ne le montrera de façon fiable. Le contrôle ne
+regarde donc pas l'écran : il compose le verre sur les DEUX extrêmes — noir
+absolu et blanc absolu — et exige 4,5:1 dans les deux. C'est ainsi qu'on a
+découvert que le gris habituel des libellés tombait à 2,5:1 dès qu'une photo
+sombre passait sous la barre.
