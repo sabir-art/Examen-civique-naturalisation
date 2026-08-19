@@ -36,6 +36,8 @@ jobs:
         run: node scripts/check-workflows.mjs
       - name: Respect du système de design
         run: node scripts/check-design.mjs
+      - name: Date de publication et journal des versions
+        run: node scripts/check-version.mjs
 
   deployer:
     name: Publication
@@ -45,7 +47,19 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Historique complet : la date de chaque contenu se lit dans les commits
+      # qui l'ont touché. Un clone superficiel n'en contient qu'un seul et
+      # laisserait toutes ces dates vides.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Le site publié porte la date du commit d'où il sort, calculée ici et
+      # jamais saisie à la main.
+      - name: Dater la publication
+        run: node scripts/make-version.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

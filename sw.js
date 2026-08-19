@@ -4,7 +4,7 @@
  * en arrière-plan. Changer CACHE force le rechargement des fichiers.
  */
 
-const CACHE = 'examen-civique-v29';
+const CACHE = 'examen-civique-v30';
 
 const ASSETS = [
   './',
@@ -114,6 +114,7 @@ const ASSETS = [
   './js/lib/rappel.js',
   './js/lib/util.js',
   './js/lib/chiffres.js',
+  './js/lib/maj.js',
   './js/components/quiz.js',
   './js/components/results.js',
   './js/components/reponse-ia.js',
@@ -137,6 +138,8 @@ const ASSETS = [
   './js/views/reglages-ia.js',
   './js/data/programme.js',
   './js/data/banques.js',
+  './js/data/build.js',
+  './js/data/nouveautes.js',
   './js/data/questions.js',
   './js/data/cours.js',
   './js/data/livret.js',
@@ -192,6 +195,11 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // synchronisation : toujours réseau
+
+  // `version.json` dit ce qui est publié SUR LE SERVEUR. Le servir depuis le
+  // cache lui ferait répondre la version qu'on a déjà, quelle que soit la
+  // question posée — l'application se croirait éternellement à jour.
+  if (url.pathname.endsWith('/version.json')) return;
 
   // Navigation : on sert la coquille de l'application.
   if (request.mode === 'navigate') {

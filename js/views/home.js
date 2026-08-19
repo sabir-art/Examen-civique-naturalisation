@@ -9,7 +9,7 @@
  */
 
 import { h, spot } from '../lib/dom.js';
-import { daysBetween, plural } from '../lib/util.js';
+import { daysBetween, plural, formatDate } from '../lib/util.js';
 import * as store from '../store.js';
 import * as ai from '../ai.js';
 import {
@@ -18,6 +18,7 @@ import {
 } from '../engine.js';
 import { niveau, badgesObtenus } from '../lib/xp.js';
 import { EXAM, THEMES } from '../data/programme.js';
+import { PUBLICATION } from '../data/build.js';
 import {
   Card, Button, Chip, Badge, IconTile, SectionHeader, Icon,
   ProgressBar, StatTile, ThemeCard, LessonRow, ResultBanner,
@@ -272,5 +273,11 @@ export default function renderHome() {
     recit,
     examen,
     raccourcis,
+    // Un contenu qui suit un programme officiel doit dire de quand il date,
+    // sans qu'on ait à le chercher. La ligne est discrète et mène au détail.
+    h('a', {
+      class: 'pied', href: '#/compte/nouveautes',
+      text: `Application mise à jour le ${formatDate(PUBLICATION.date)} — voir les nouveautés`,
+    }),
   ].filter(Boolean));
 }

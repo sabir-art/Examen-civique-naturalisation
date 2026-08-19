@@ -1,6 +1,6 @@
 # Contrôles automatiques de l'interface
 
-Seize scripts Playwright, à lancer avec l'application servie sur le port 8099 :
+Dix-sept scripts Playwright, à lancer avec l'application servie sur le port 8099 :
 
 ```bash
 npx http-server -p 8099 -c-1 &
@@ -21,6 +21,7 @@ node scripts/tests/assistant.mjs  # l'assistant : retour au bon écran, saisie q
 node scripts/tests/tableaux.mjs   # les tableaux d'enquête : liens, sens de lecture, renvois
 node scripts/tests/chiffres.mjs   # les chiffres romains doublés de leur valeur
 node scripts/tests/themes.mjs     # un thème compte ses questions dans les trois banques
+node scripts/tests/version.mjs    # date de mise à jour, recherche d'une version plus récente
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -58,6 +59,11 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `progression.mjs` | bouton d'accueil réaffichant les questions dues | annonce 10, séance de 20 |
 | `themes.mjs` | thèmes recalculés sur la seule banque d'examen | 4 questions du récit et 18 du livret répondues, compteur du thème à 0 |
 | `themes.mjs` | un chapitre du récit retiré de la table de rattachement | `check-bank` : « 4 questions sans thème » |
+| `version.mjs` | `version.json` remis dans le cache hors ligne | il apparaît dans le cache : la recherche de mise à jour ne détecterait plus rien |
+| `version.mjs` | serveur injoignable rapporté comme « à jour » | 2 signalements sur le cas hors ligne |
+| `version.mjs` | `version.json` et l'application mis en désaccord | `check-version` : « version.json annonce deadbee, l'application 2d230a6 » |
+| `version.mjs` | dernière entrée du journal supprimée | « un contenu a changé le 19, le journal s'arrête au 16 » |
+| `a11y.mjs` | badge sombre sur fond translucide clair | contraste 1,01 (le compositeur des couches voit ce qu'un fond `rgba` cache) |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.
@@ -72,6 +78,7 @@ node scripts/check-traduction.mjs  # la traduction arabe suit la structure du fr
 node scripts/check-images.mjs      # chaque ancre d'image tombe sur un seul paragraphe
 node scripts/check-workflows.mjs   # les workflows GitHub se parsent vraiment
 node scripts/check-secrets.mjs     # aucune clé dans les fichiers suivis par Git
+node scripts/check-version.mjs     # date de publication, dates des contenus, journal des versions
 ```
 
 `check-traduction.mjs` mérite un mot : le mode bilingue pose chaque paragraphe
@@ -119,3 +126,18 @@ chemins — un chapitre du récit, un chapitre du livret, puis un thème entier
 posé comme acquis — et exige que le même compteur bouge à chaque fois. Il
 vérifie aussi l'inverse : l'examen blanc officiel doit continuer de ne tirer
 que dans la banque d'examen, sa composition étant celle de l'épreuve réelle.
+
+`version.mjs` traite d'un défaut qu'on ne voit jamais depuis un poste de
+développement : une application ajoutée à l'écran d'accueil est servie depuis
+son cache, et peut afficher pendant des semaines une version d'il y a un mois
+sans rien en dire. Pour un contenu qui suit un programme officiel, c'est le
+défaut lui-même. Trois cas sont donc joués : le serveur a la même version, il
+en a une plus récente, il est injoignable. Le dernier est le plus important —
+répondre « vous êtes à jour » faute de réponse serait commode et faux.
+
+Deux règles s'ajoutent, hors navigateur. Aucune date n'est saisie à la main :
+elles viennent toutes de l'historique Git (`scripts/make-version.mjs`), et ne
+peuvent donc pas se désynchroniser de ce qu'elles décrivent. Et
+`check-version.mjs` refuse qu'un contenu change sans que le journal des
+versions en dise un mot : l'application afficherait sinon une date de mise à
+jour toute fraîche à côté d'un journal muet.

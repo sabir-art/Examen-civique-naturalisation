@@ -19,6 +19,7 @@ const ROUTES = [
   '#/cours', '#/cours/principes-valeurs',
   '#/livret', '#/livret/p/p1', '#/livret/c/p1-i',
   '#/progres', '#/parcours', '#/compte', '#/compte/ia', '#/compte/synchronisation', '#/compte/a-propos',
+  '#/compte/nouveautes', '#/tableaux', '#/tableaux/regimes',
   '#/assistant', '#/cartes', '#/recherche', '#/activite',
 ];
 

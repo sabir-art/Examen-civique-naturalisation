@@ -182,22 +182,32 @@ Le dépôt contient un workflow qui publie le site à chaque `push`.
    affiche le déploiement et l'URL publique, de la forme
    `https://<utilisateur>.github.io/Examen-civique-naturalisation/`
 
-Le workflow lance d'abord deux contrôles ; un déploiement échoue si l'un des
-deux tombe :
+Le workflow lance d'abord une série de contrôles ; un déploiement échoue si
+l'un d'eux tombe :
 
 - `scripts/check-secrets.mjs` — recherche de clés d'API dans les fichiers suivis ;
-- `scripts/check-bank.mjs` — cohérence des trois banques et faisabilité du tirage.
+- `scripts/check-bank.mjs` — cohérence des trois banques, faisabilité du tirage
+  et rattachement de chaque question à un thème ;
+- `scripts/check-version.mjs` — date de publication, dates des contenus et
+  journal des versions.
+
+Au moment de publier, `scripts/make-version.mjs` réécrit `js/data/build.js` et
+`version.json` d'après l'historique Git : le site en ligne porte toujours la
+date du commit d'où il sort, et chaque bloc de contenu la date de son dernier
+changement réel. Aucune de ces dates n'est saisie à la main — une date écrite à
+la main est fausse le lendemain, et personne ne s'en aperçoit.
 
 ## Contrôles automatiques
 
-Onze suites Playwright couvrent les 27 écrans à trois largeurs, les contrastes
+Dix-sept suites Playwright couvrent les écrans à trois largeurs, les contrastes
 dans les six combinaisons de thème, la lecture dans les trois langues, et les
 bugs déjà signalés. Chacune a été vérifiée en cassant volontairement ce qu'elle
 surveille — voir `scripts/tests/LISEZMOI.md`.
 
 ```bash
 npx http-server -p 8099 -c-1 &
-for t in sweep a11y bugs erreurs cartes parcours recherche activite langue images progression; do
+for t in sweep a11y bugs erreurs cartes parcours recherche activite langue images \
+         progression lisibilite assistant tableaux chiffres themes version; do
   node scripts/tests/$t.mjs || echo "échec : $t"
 done
 ```
@@ -218,9 +228,11 @@ Scripts utiles :
 node scripts/check-secrets.mjs      # aucune clé d'API dans les fichiers suivis par Git
 node scripts/check-bank.mjs         # intégrité des banques + couverture du plan de tirage
 node scripts/check-design.mjs       # aucun écart au système de design
+node scripts/check-version.mjs      # dates de publication, de contenu et journal
+node scripts/make-version.mjs       # réécrit ces dates d'après l'historique Git
 node scripts/make-icons.mjs         # régénère les icônes PNG de l'application
 node scripts/make-illustrations.mjs # régénère les 22 illustrations du récit
-npm run check                       # les deux contrôles à la suite
+npm run check                       # tous les contrôles à la suite
 ```
 
 Pour que le contrôle anti-secrets tourne aussi avant chaque commit local :

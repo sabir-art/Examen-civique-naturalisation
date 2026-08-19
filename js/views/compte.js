@@ -13,7 +13,10 @@ import { QUESTIONS } from '../data/questions.js';
 import { LIVRET_QUESTIONS } from '../data/q-livret.js';
 import { ROMAN_QUESTIONS } from '../data/roman.js';
 import { PRATIQUE } from '../data/programme.js';
-import { applyTheme, refresh, navigate, canInstall, promptInstall } from '../app.js';
+import { PUBLICATION, CONTENUS } from '../data/build.js';
+import { NOUVEAUTES } from '../data/nouveautes.js';
+import { chercherUneMiseAJour, installerLaMiseAJour } from '../lib/maj.js';
+import { applyTheme, refresh, navigate, canInstall, promptInstall, ecranPrecedent } from '../app.js';
 import renderReglagesIA from './reglages-ia.js';
 
 function rappelEtat() {
@@ -27,6 +30,7 @@ export default function renderCompte({ params }) {
   if (params[0] === 'ia') return renderReglagesIA();
   if (params[0] === 'synchronisation') return cloudView();
   if (params[0] === 'a-propos') return aboutView();
+  if (params[0] === 'nouveautes') return versionView();
   return mainView();
 }
 
@@ -153,6 +157,14 @@ function mainView() {
       ]),
       Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
     ]) : null,
+    h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/compte/nouveautes' }, [
+      IconTile({ icon: 'refresh', tone: 'sunken', size: 38 }),
+      h('div', { class: 'ds-lesson__body' }, [
+        h('div', { class: 'ds-lesson__title ds-lesson__titre--long', text: 'Version et nouveautés' }),
+        h('div', { class: 'ds-lesson__meta', text: `Mise à jour du ${formatDate(PUBLICATION.date)}` }),
+      ]),
+      Icon({ name: 'chevron-right', size: 18, className: 'ds-lesson__chev' }),
+    ]),
     h('a', { class: 'ds-lesson ds-lesson--tap', href: '#/compte/a-propos' }, [
       IconTile({ icon: 'info', tone: 'sunken', size: 38 }),
       h('div', { class: 'ds-lesson__body' }, [
@@ -392,6 +404,108 @@ function cloudView() {
 }
 
 /* ---------------------------------------------------------------- about */
+
+/* ------------------------------------------------- version et nouveautés */
+
+/** Combien de questions dans chaque bloc de contenu — pour ceux qui en ont. */
+const VOLUME = {
+  examen: () => `${QUESTIONS.length} questions`,
+  livret: () => `${LIVRET_QUESTIONS.length} questions · 16 chapitres`,
+  recit: () => `${ROMAN_QUESTIONS.length} questions · 22 chapitres`,
+};
+
+/**
+ * « Ces informations datent de quand ? »
+ *
+ * La question est légitime pour un contenu qui suit un programme officiel, et
+ * elle a deux moitiés : la date de l'application qu'on a EN MAIN — celle-ci
+ * peut dormir dans le cache d'un téléphone pendant des semaines —, et la date
+ * de chaque contenu. Les deux sont ici, et aucune n'est saisie à la main :
+ * elles viennent de l'historique du dépôt (voir scripts/make-version.mjs).
+ */
+function versionView() {
+  const resultat = h('p', { class: 'hint', style: 'margin-top:10px' });
+  const actions = h('div', { class: 'stack stack--tight', style: 'margin-top:10px' });
+
+  const bouton = Button({
+    variant: 'secondary', size: 'lg', fullWidth: true, iconLeft: 'refresh',
+    label: 'Rechercher une mise à jour',
+    onClick: async () => {
+      bouton.disabled = true;
+      resultat.textContent = 'Vérification en cours…';
+      actions.replaceChildren();
+      const r = await chercherUneMiseAJour();
+      bouton.disabled = false;
+      if (r.etat === 'a-jour') {
+        resultat.className = 'hint hint--ok';
+        resultat.textContent = `Vous avez la dernière version, publiée le ${formatDate(PUBLICATION.date)}.`;
+      } else if (r.etat === 'nouvelle') {
+        resultat.className = 'hint';
+        resultat.textContent = r.publiee
+          ? `Une version plus récente existe, publiée le ${formatDate(r.publiee)}.`
+          : 'Une version plus récente existe.';
+        actions.replaceChildren(Button({
+          variant: 'primary', size: 'lg', fullWidth: true, iconLeft: 'download',
+          label: 'Installer et recharger',
+          // Vider le cache puis recharger : sans cela l'application resservirait
+          // les fichiers qu'on veut justement remplacer.
+          onClick: () => installerLaMiseAJour(),
+        }));
+      } else {
+        resultat.className = 'hint';
+        resultat.textContent = "Serveur injoignable. Vous êtes peut-être hors ligne : l'application continue de fonctionner, réessayez une fois connecté.";
+      }
+    },
+  });
+
+  const version = Card({ surface: 'white', elevation: 'xs', children: [
+    h('h2', { class: 'card__title', text: "Version de l'application" }),
+    h('p', { class: 'card__sub', text: `Dernière mise à jour le ${formatDate(PUBLICATION.date)}.` }),
+    h('p', { class: 'hint', style: 'margin-top:4px', text: `Repère de version : ${PUBLICATION.commit}` }),
+    h('div', { style: 'margin-top:12px' }, bouton),
+    resultat,
+    actions,
+  ] });
+
+  const contenus = Card({ surface: 'white', elevation: 'xs', children: [
+    h('h2', { class: 'card__title', text: 'De quand datent les contenus' }),
+    h('p', { class: 'card__sub', text: "Chaque bloc porte la date de sa dernière modification réelle. Une date qui ne bouge pas veut dire que rien n'a changé — pas que personne ne regarde." }),
+    h('div', { class: 'stack stack--tight mt' }, CONTENUS.map((c) => h('div', { class: 'row row--between' }, [
+      h('span', { class: 'grow small' }, [
+        h('strong', { text: c.libelle }),
+        VOLUME[c.cle] ? h('span', { class: 'muted', text: ` · ${VOLUME[c.cle]()}` }) : null,
+      ].filter(Boolean)),
+      h('span', { class: 'hint', text: c.date ? formatDate(c.date) : '—' }),
+    ]))),
+    h('p', { class: 'hint mt', text: "Les sources officielles — décret, arrêté, livret du citoyen — sont listées dans « À propos »." }),
+    h('div', { style: 'margin-top:10px' }, Button({
+      variant: 'ghost', size: 'md', fullWidth: true, href: '#/compte/a-propos',
+      label: 'Voir les sources',
+    })),
+  ] });
+
+  const journal = h('div', { class: 'stack stack--tight' }, NOUVEAUTES.map((n) => Card({
+    surface: 'white', elevation: 'xs', children: [
+      h('p', { class: 'label', text: formatDate(n.date) }),
+      h('h3', { class: 'card__title', style: 'font-size:16px;margin-top:2px', text: n.titre }),
+      h('ul', { class: 'prose small', style: 'margin-top:6px' }, n.lignes.map((l) => h('li', { text: l }))),
+    ],
+  })));
+
+  return {
+    node: h('div', { class: 'stack' }, [
+      version,
+      contenus,
+      h('p', { class: 'section-title', text: 'Nouveautés' }),
+      journal,
+    ]),
+    title: 'Version et nouveautés',
+    // Deux portes mènent ici : la liste « Mon compte » et le pied de l'accueil.
+    // Le retour ramène d'où l'on vient, sinon on se retrouve dans un écran
+    // qu'on n'a jamais ouvert.
+    back: ecranPrecedent('#/compte'),
+  };
+}
 
 function aboutView() {
   const rows = [

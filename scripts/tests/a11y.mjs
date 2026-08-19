@@ -41,25 +41,51 @@ for (const [scheme, choix] of CAS) {
   // « ghost », « quiet » et « danger ».
   for (const route of ['#/', '#/reviser', '#/examen', '#/progres', '#/parcours', '#/histoire',
                        '#/compte', '#/compte/ia', '#/livret', '#/cours',
-                       '#/recherche', '#/activite', '#/histoire/glossaire']) {
+                       '#/recherche', '#/activite', '#/histoire/glossaire',
+                       '#/compte/nouveautes', '#/tableaux']) {
     await p.goto(BASE + route);
     await p.waitForTimeout(350);
 
     // contraste du texte
     const bad = await p.evaluate(() => {
       const out = [];
+      /* Empile les couches translucides sur la première couleur opaque.
+         Un fond `rgba(255, 255, 255, .10)` posé sur un pastel sombre est un
+         gris foncé, pas du blanc : s'arrêter à la première couleur venue
+         faisait rendre un contraste de 1,10 pour un texte parfaitement
+         lisible, et cette fausse alerte aurait fini par faire ignorer les
+         vraies. */
+      const aplatir = (couches) => {
+        let [r, g, b] = couches[couches.length - 1];
+        for (let i = couches.length - 2; i >= 0; i -= 1) {
+          const [cr, cg, cb, ca] = couches[i];
+          r = ca * cr + (1 - ca) * r;
+          g = ca * cg + (1 - ca) * g;
+          b = ca * cb + (1 - ca) * b;
+        }
+        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+      };
       // Renvoie null si un ancêtre porte un dégradé : la couleur derrière le
       // texte n'est alors pas mesurable de façon fiable, on ne juge pas.
       const bgOf = (el) => {
+        const couches = [];
         let n = el;
         while (n && n !== document.documentElement) {
           const cs = getComputedStyle(n);
           if (cs.backgroundImage && cs.backgroundImage !== 'none') return null;
-          const c = cs.backgroundColor;
-          if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) return c;
+          const m = (cs.backgroundColor || '').match(/[\d.]+/g);
+          if (m) {
+            const a = m.length > 3 ? parseFloat(m[3]) : 1;
+            if (a > 0) {
+              couches.push([+m[0], +m[1], +m[2], a]);
+              if (a >= 1) return aplatir(couches);
+            }
+          }
           n = n.parentElement;
         }
-        return getComputedStyle(document.body).backgroundColor;
+        const f = (getComputedStyle(document.body).backgroundColor.match(/[\d.]+/g) || ['255', '255', '255']).map(Number);
+        couches.push([f[0], f[1], f[2], 1]);
+        return aplatir(couches);
       };
       for (const el of document.querySelectorAll('.app *')) {
         if (!el.childNodes.length) continue;

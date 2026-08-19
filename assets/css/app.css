@@ -919,6 +919,19 @@ a.themestat__row { min-height: 44px; }
 .hint--ok { color: var(--ok); font-weight: 600; }
 .hint--bad { color: var(--bad); font-weight: 600; }
 
+/* Pied de page : la date de mise à jour, en bas de l'accueil. Discrète —
+   c'est un renseignement qu'on va chercher, pas une annonce — mais cliquable
+   sur toute la largeur, et donc assez haute pour le doigt. */
+.pied {
+  display: block;
+  padding: 14px 4px 2px;
+  text-align: center;
+  font: var(--type-caption);
+  color: var(--faint);
+  text-decoration: none;
+}
+.pied:hover { color: var(--muted); }
+
 /* Sélecteur segmenté : une pilule dans une pilule, l'onglet retenu en encre.
    C'est la seule tache d'encre de l'écran où il apparaît. */
 /* `minmax(0, 1fr)` et non la largeur automatique : sans cela une colonne dont
