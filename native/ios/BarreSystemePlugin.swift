@@ -26,6 +26,7 @@
 
 import Foundation
 import UIKit
+import WebKit
 import Capacitor
 
 @objc(BarreSystemePlugin)
@@ -87,7 +88,9 @@ public class BarreSystemePlugin: CAPPlugin, CAPBridgedPlugin {
         DispatchQueue.main.async { [weak self] in
             let barre = self?.barre?.frame.height ?? 0
             let sure = self?.bridge?.viewController?.view.safeAreaInsets.bottom ?? 0
-            call.resolve(["hauteur": barre + sure])
+            // Double, et non CGFloat : Capacitor ne sérialise vers la page que
+            // les types qui se conforment à JSValue, et CGFloat n'en est pas.
+            call.resolve(["hauteur": Double(barre + sure)])
         }
     }
 

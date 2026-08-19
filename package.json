@@ -10,11 +10,12 @@
     "check:secrets": "node scripts/check-secrets.mjs",
     "icons": "node scripts/make-icons.mjs",
     "dater": "node scripts/make-version.mjs",
-    "natif:sync": "npm run dist && npx cap sync",
+    "natif:sync": "npm run dist && npm run natif:greffons && npx cap sync",
     "natif:ios": "npx cap open ios",
     "natif:android": "npx cap open android",
     "dist": "node scripts/make-dist.mjs",
-    "natif:preparer": "bash native/preparer-ios.sh"
+    "natif:preparer": "bash native/preparer-ios.sh",
+    "natif:greffons": "node scripts/copier-greffons.mjs"
   },
   "license": "MIT",
   "devDependencies": {

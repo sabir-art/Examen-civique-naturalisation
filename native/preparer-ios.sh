@@ -121,7 +121,7 @@ cible="ios/App/App"
 [ -d "$cible" ] || echec "Le dossier $cible n'existe pas." \
   "Le projet iOS n'a pas été créé complètement. Supprimez le dossier « ios »" \
   "et relancez ce script."
-cp native/ios/BarreSystemePlugin.swift "$cible/"
+npm run --silent natif:greffons || echec "La copie du greffon a échoué."
 vert "greffon copié dans $cible"
 
 npm run natif:sync || echec "La synchronisation a échoué. Le message ci-dessus dit pourquoi."
