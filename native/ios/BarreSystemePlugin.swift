@@ -14,7 +14,7 @@
 //   reproduite : elles sont obtenues.
 //
 //   iOS 26 et au-delà : `UIGlassEffect`, le matériau Liquid Glass lui-même.
-//   iOS 13 à 18      : `UIBlurEffect(style: .systemChromeMaterial)`, le
+//   iOS 14 à 25      : `UIBlurEffect(style: .systemChromeMaterial)`, le
 //                      matériau des barres du système avant Liquid Glass.
 //   L'application ne dépend donc d'aucune version : elle demande le meilleur
 //   matériau disponible et se contente du précédent sinon.
@@ -122,7 +122,12 @@ public class BarreSystemePlugin: CAPPlugin, CAPBridgedPlugin {
             apparence.backgroundEffect = UIBlurEffect(style: .systemChromeMaterial)
         }
         barre.standardAppearance = apparence
-        barre.scrollEdgeAppearance = apparence
+        // scrollEdgeAppearance n'existe sur UITabBar qu'à partir d'iOS 15,
+        // et Capacitor 7 descend jusqu'à iOS 14. Sans ce test, le projet ne
+        // compile pas. En dessous d'iOS 15, standardAppearance sert seule.
+        if #available(iOS 15.0, *) {
+            barre.scrollEdgeAppearance = apparence
+        }
 
         hote.addSubview(barre)
         NSLayoutConstraint.activate([
