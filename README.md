@@ -212,6 +212,21 @@ for t in sweep a11y bugs erreurs cartes parcours recherche activite langue image
 done
 ```
 
+## La coque native (facultative)
+
+L'application est d'abord un site : on ouvre un lien et tout fonctionne, hors
+ligne compris. C'est ainsi que la plupart des gens l'utiliseront.
+
+Une coque Capacitor est prévue pour ceux qui veulent les **matériaux du
+système** plutôt que leur imitation : dans cette coque, la barre d'onglets est
+rendue par iOS (`UIGlassEffect`, ou `systemChromeMaterial` avant iOS 26) ou par
+Android (Material 3), et le système gère alors seul le flou, la profondeur, le
+contraste, le clair/sombre et les réglages d'accessibilité.
+
+Une seule interface : seule la barre change de main. Voir `native/LISEZMOI.md`
+pour l'architecture, les étapes de construction et ce qui n'a pas pu être
+vérifié sans Mac.
+
 ## Développement local
 
 Aucune dépendance, aucune étape de compilation. Il faut simplement servir les

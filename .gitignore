@@ -19,3 +19,8 @@ secrets.json
 # `node scripts/tests/*.mjs`, et versionner des images d'écran ferait grossir
 # le dépôt sans rien apporter à la relecture.
 scripts/tests/captures/
+
+# Coque native : engendrés par Capacitor, jamais versionnés.
+/ios/
+/android/
+/node_modules/

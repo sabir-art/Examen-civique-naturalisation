@@ -7,6 +7,9 @@ import { amorcer } from './lib/feedback.js';
 import { h, toast, fermerFeuille } from './lib/dom.js';
 import { annoterRomains } from './lib/chiffres.js';
 import { appliquerPlateforme } from './lib/plateforme.js';
+import {
+  hoteNatif, barreDeleguee, installerBarreNative, majOngletActif, hauteurBarreNative,
+} from './lib/pont-natif.js';
 import { TopBar, BottomNav } from './ds/navigation.js';
 import { Avatar } from './ds/core.js';
 import { badgesObtenus } from './lib/xp.js';
@@ -46,11 +49,14 @@ appliquerPlateforme();
  * depuis Réviser et depuis l'accueil.
  */
 const ONGLETS = [
-  { value: '/', icon: 'house', label: 'Accueil', href: '#/' },
-  { value: '/histoire', icon: 'star', label: 'Histoire', href: '#/histoire' },
-  { value: '/reviser', icon: 'book-open', label: 'Réviser', href: '#/reviser' },
-  { value: '/examen', icon: 'timer', label: 'Examen', href: '#/examen' },
-  { value: '/progres', icon: 'chart-column', label: 'Progrès', href: '#/progres' },
+  // `sfSymbol` ne sert que dans la coque iOS : le système y dessine ses propres
+  // glyphes, qui suivent la graisse et la taille choisies par l'utilisateur.
+  // Le navigateur, lui, garde les icônes du système de design.
+  { value: '/', icon: 'house', sfSymbol: 'house', label: 'Accueil', href: '#/' },
+  { value: '/histoire', icon: 'star', sfSymbol: 'star', label: 'Histoire', href: '#/histoire' },
+  { value: '/reviser', icon: 'book-open', sfSymbol: 'book', label: 'Réviser', href: '#/reviser' },
+  { value: '/examen', icon: 'timer', sfSymbol: 'timer', label: 'Examen', href: '#/examen' },
+  { value: '/progres', icon: 'chart-column', sfSymbol: 'chart.bar', label: 'Progrès', href: '#/progres' },
 ];
 
 /**
@@ -121,11 +127,42 @@ function salutation() {
   return new Date().getHours() < 18 ? 'Bonjour' : 'Bonsoir';
 }
 
-/** Dessine la barre d'onglets avec le composant `BottomNav` du système. */
+/**
+ * La barre d'onglets.
+ *
+ * Dans une coque native, elle n'est pas dessinée ici : l'hôte la rend avec le
+ * matériau du système — verre d'iOS ou Material d'Android — et se contente de
+ * signaler les appuis. La page ne dessine la sienne que dans un navigateur.
+ */
 function dessinerBas(tab) {
+  if (barreDeleguee()) { majOngletActif(tab || null); return; }
   basEl.replaceChildren();
   if (!tab) return;
   basEl.append(BottomNav({ items: ONGLETS, value: tab }));
+}
+
+/**
+ * Confie la barre du bas à l'hôte natif, s'il y en a un.
+ *
+ * La hauteur revient du système et non d'une constante : une barre d'onglets
+ * ne fait pas la même hauteur d'un appareil à l'autre, et se tromper, c'est
+ * cacher le dernier bouton de chaque écran.
+ */
+async function confierLaBarre() {
+  if (!hoteNatif()) return;
+  const pris = await installerBarreNative({
+    onglets: ONGLETS,
+    actif: currentPath(),
+    onChoix: (valeur) => {
+      const onglet = ONGLETS.find((o) => o.value === valeur);
+      if (onglet) navigate(onglet.href);
+    },
+  });
+  if (!pris) return;
+  document.documentElement.dataset.barre = 'systeme';
+  basEl.replaceChildren();
+  const h = await hauteurBarreNative();
+  if (h > 0) document.documentElement.style.setProperty('--tabbar-h', `${h}px`);
 }
 
 /* ------------------------------------------------------------------ thème */
@@ -544,5 +581,8 @@ if (accueilli) {
 }
 
 route();
+// La barre du système, s'il y a un système pour la rendre. Après le premier
+// rendu : rien dans l'application n'attend qu'elle existe.
+confierLaBarre().catch(() => { /* pas de coque native : la barre de la page suffit */ });
 rappel.verifier().catch(() => { /* notification refusée : sans conséquence */ });
 

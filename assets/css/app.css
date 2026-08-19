@@ -1121,6 +1121,12 @@ a.themestat__row { min-height: 44px; }
    5:1 de contraste dans ces deux extrêmes, tout en laissant passer les formes
    et les couleurs de ce qui défile dessous.
    ═════════════════════════════════════════════════════════════════════════ */
+/* Quand l'hôte natif rend lui-même la barre du bas, la page n'a plus rien à
+   dessiner là : ni matériau, ni marge. Le système s'en charge, y compris de la
+   zone sûre au bas de l'écran. */
+:root[data-barre="systeme"] #chrome-bottom { display: none; }
+:root[data-barre="systeme"] { --bottomnav-inset: 0px; }
+
 @supports ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
   :root[data-plateforme="apple"] {
     --verre-fond: rgba(255, 255, 255, .70);
@@ -1204,6 +1210,7 @@ a.themestat__row { min-height: 44px; }
   /* La barre du haut appartient à la même famille. Sur iOS, le contenu passe
      DERRIÈRE elle et on le voit défiler à travers ; une barre opaque qui
      pousse le contenu devant elle est la marque d'une page web. */
+  :root[data-plateforme="apple"][data-barre="systeme"] .ds-bottomnav__bar { backdrop-filter: none; }
   :root[data-plateforme="apple"] #chrome-top {
     background: var(--verre-fond);
     -webkit-backdrop-filter: var(--verre-flou);

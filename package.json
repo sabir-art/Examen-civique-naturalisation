@@ -9,7 +9,16 @@
     "check": "node scripts/check-secrets.mjs && node scripts/check-bank.mjs && node scripts/check-design.mjs && node scripts/check-version.mjs",
     "check:secrets": "node scripts/check-secrets.mjs",
     "icons": "node scripts/make-icons.mjs",
-    "dater": "node scripts/make-version.mjs"
+    "dater": "node scripts/make-version.mjs",
+    "natif:sync": "npx cap sync",
+    "natif:ios": "npx cap open ios",
+    "natif:android": "npx cap open android"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/android": "^7.0.0"
+  }
 }

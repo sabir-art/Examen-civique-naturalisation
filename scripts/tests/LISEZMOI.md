@@ -1,6 +1,6 @@
 # Contrôles automatiques de l'interface
 
-Dix-huit scripts Playwright, à lancer avec l'application servie sur le port 8099 :
+Dix-neuf scripts Playwright, à lancer avec l'application servie sur le port 8099 :
 
 ```bash
 npx http-server -p 8099 -c-1 &
@@ -23,6 +23,7 @@ node scripts/tests/chiffres.mjs   # les chiffres romains doublés de leur valeur
 node scripts/tests/themes.mjs     # un thème compte ses questions dans les trois banques
 node scripts/tests/version.mjs    # date de mise à jour, recherche d'une version plus récente
 node scripts/tests/plateforme.mjs # le verre d'iOS, et seulement là où il existe
+node scripts/tests/pont.mjs       # la barre confiée au système dans une coque native
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -72,6 +73,8 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `a11y.mjs` | badge sombre sur fond translucide clair | contraste 1,01 (le compositeur des couches voit ce qu'un fond `rgba` cache) |
 | `plateforme.mjs` | verre rendu plus transparent (0,35) | libellés à 1,9:1 sur photo sombre, 1,5:1 sur page claire |
 | `plateforme.mjs` | verre posé sur toutes les plateformes | « hors Apple, aucun flou » et « son fond est opaque » |
+| `pont.mjs` | la page dessine sa barre malgré la coque | « et ne dessine plus la sienne (1 barre en CSS) » |
+| `pont.mjs` | le routeur court-circuité par le greffon | les deux appuis sur la barre du système ne mènent nulle part |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.
@@ -204,3 +207,16 @@ et sur un téléphone où l'application reste ouverte des jours, cela veut dire
 jamais. La page se recharge maintenant une fois quand un nouveau service
 worker prend la main, sauf en pleine série de questions : perdre une séance
 pour un changement d'apparence serait un mauvais échange.
+
+`pont.mjs` éprouve une chose qu'on ne peut pas compiler ici : l'abstraction de
+plateforme. Dans une coque native, la barre d'onglets est rendue par le
+système — verre d'iOS, Material d'Android — et la page ne doit plus dessiner la
+sienne, tout en continuant de router : le greffon signale un appui, il ne
+navigue pas. Le test installe donc un faux hôte AVANT le premier script de la
+page, exactement comme Capacitor s'annonce, et vérifie les deux sens : la barre
+de la page disparaît, les appuis venus du système font naviguer l'application —
+et, à l'inverse, qu'un navigateur ordinaire ne voie jamais rien de tout cela.
+
+Le code Swift et Kotlin, lui, n'a pas pu être compilé : ce dépôt est travaillé
+sous Linux, sans Xcode ni Android Studio. C'est dit dans `native/LISEZMOI.md`,
+là où quelqu'un qui va compiler le lira.

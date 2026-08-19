@@ -1,0 +1,15 @@
+{
+  "appId": "fr.examencivique.app",
+  "appName": "Examen civique",
+  "webDir": ".",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#E9F1EF"
+  },
+  "android": {
+    "backgroundColor": "#E9F1EF"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
