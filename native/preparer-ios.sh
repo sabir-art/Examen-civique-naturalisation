@@ -37,10 +37,35 @@ command -v node >/dev/null 2>&1 || echec "Node.js n'est pas installé." \
   "    brew install node        (ou https://nodejs.org)"
 vert "Node.js $(node --version)"
 
-xcode-select -p >/dev/null 2>&1 || echec "Les outils Xcode ne sont pas installés." \
-  "    xcode-select --install" \
-  "Puis ouvrez Xcode une fois, pour qu'il accepte sa licence."
-vert "outils Xcode en place"
+chemin_dev=$(xcode-select -p 2>/dev/null || true)
+if [ -z "$chemin_dev" ]; then
+  echec "Xcode n'est pas installé." \
+    "" \
+    "Xcode est le logiciel d'Apple qui fabrique les applications iPhone." \
+    "Il est gratuit, dans l'App Store du Mac — comptez une dizaine de Go" \
+    "et un bon moment de téléchargement." \
+    "" \
+    "Une fois installé, ouvrez-le une première fois : il demande d'accepter" \
+    "sa licence et installe ses composants. Puis relancez ce script."
+fi
+# Piège fréquent : les « outils en ligne de commande » suffisent à git et à
+# node, mais pas à fabriquer une application iPhone. Ils répondent pourtant à
+# `xcode-select -p`, et l'échec arrive alors bien plus tard, sans rapport
+# apparent.
+case "$chemin_dev" in
+  *CommandLineTools*)
+    echec "Vous avez les outils en ligne de commande, mais pas Xcode lui-même." \
+      "" \
+      "Ils suffisent à git et à Node, pas à fabriquer une application iPhone." \
+      "" \
+      "  1. Installez Xcode depuis l'App Store du Mac (gratuit)." \
+      "  2. Ouvrez-le une fois, acceptez la licence." \
+      "  3. Puis indiquez-le au système :" \
+      "         sudo xcode-select -s /Applications/Xcode.app" \
+      "  4. Relancez ce script."
+    ;;
+esac
+vert "Xcode en place ($chemin_dev)"
 
 if ! command -v pod >/dev/null 2>&1; then
   echec "CocoaPods manque : Capacitor s'en sert pour assembler le projet iOS." \
