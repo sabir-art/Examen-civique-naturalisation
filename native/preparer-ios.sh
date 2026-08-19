@@ -77,17 +77,26 @@ if ! command -v pod >/dev/null 2>&1; then
   else
     echec "CocoaPods manque : Capacitor s'en sert pour assembler le projet iOS." \
       "" \
-      "    sudo gem install cocoapods" \
+      "Le chemin le plus sûr passe par Homebrew, parce que le Ruby livré" \
+      "avec macOS (version 2.6) est trop ancien : « sudo gem install" \
+      "cocoapods » s'arrête sur « ffi requires Ruby version >= 3.0 »." \
+      "Homebrew installe CocoaPods avec son propre Ruby, à jour." \
       "" \
-      "Le mot de passe demandé est celui de votre session Mac." \
+      "Trois commandes, dans cet ordre :" \
+      "" \
+      "  1. /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"" \
+      "  2. echo 'eval \"\$(/opt/homebrew/bin/brew shellenv)\"' >> ~/.zprofile && eval \"\$(/opt/homebrew/bin/brew shellenv)\"" \
+      "  3. brew install cocoapods" \
+      "" \
+      "La première demande le mot de passe de votre session Mac." \
       "RIEN NE S'AFFICHE pendant que vous le tapez : ni points, ni étoiles," \
       "ni curseur qui avance. C'est voulu, et c'est déroutant la première" \
-      "fois. Tapez-le en aveugle, puis Entrée." \
+      "fois. Tapez-le en aveugle, puis Entrée. Si « Sorry, try again »" \
+      "revient, relancez la commande entière plutôt que de retaper dans le" \
+      "vide : une fois la commande terminée, ce que vous tapez s'affiche en" \
+      "clair et part dans l'historique du terminal." \
       "" \
-      "Si « Sorry, try again » revient trois fois, la commande s'arrête et" \
-      "rend la main : ce que vous tapez ensuite s'affiche en clair et part" \
-      "dans l'historique du terminal. Relancez la commande plutôt que de" \
-      "retaper le mot de passe." \
+      "Sur un Mac Intel, remplacez /opt/homebrew par /usr/local à l'étape 2." \
       "" \
       "Puis relancez ce script."
   fi
