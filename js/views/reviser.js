@@ -25,6 +25,7 @@ const SUJET = {
 };
 import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
+import { TOUTES_LES_QUESTIONS, poolTheme, phraseComposition } from '../data/banques.js';
 import { CHAPITRES } from '../data/livret.js';
 import { TOTAL_TERMES } from '../data/glossaire.js';
 import { buildTraining, mastery, coverage, planRevision, planErreurs, compositionSeance, resteSeance } from '../engine.js';
@@ -111,7 +112,7 @@ function hub() {
       key, t,
       m: Math.round(mastery(key) * 100),
       cov: Math.round(coverage(key) * 100),
-      n: pool({ theme: key }).length,
+      n: poolTheme(key).length,
     }));
     const f = FILTRES.find((x) => x.key === filtre);
     const visibles = lignes.filter(f.match);
@@ -178,7 +179,7 @@ function hub() {
         children: [
           h('div', { class: 'banner__text' }, [
             h('p', { class: 'banner__title', text: 'Réviser' }),
-            h('p', { class: 'banner__sub', text: `${pool({}).length} questions, reprises quand il le faut` }),
+            h('p', { class: 'banner__sub', text: `${TOUTES_LES_QUESTIONS.length} questions, reprises quand il le faut` }),
           ]),
           spot('revision'),
         ],
@@ -200,15 +201,17 @@ function hub() {
 
 function themeSetup(theme, preSub) {
   const t = THEMES[theme];
-  const all = pool({ theme });
-  const subs = [...new Set(all.map((q) => q.sub))];
+  // Le thème entier — les trois banques —, mais les sous-thèmes ne viennent
+  // que de la banque d'examen : elle seule en porte.
+  const all = poolTheme(theme);
+  const subs = [...new Set(pool({ theme }).map((q) => q.sub))];
   let chosenSub = preSub && subs.includes(preSub) ? preSub : null;
   let count = 20;
 
   const container = h('div', { class: 'stack' });
 
   function draw() {
-    const available = pool({ theme, sub: chosenSub }).length;
+    const available = chosenSub ? pool({ theme, sub: chosenSub }).length : all.length;
     const counts = COUNTS.filter((c) => c <= available);
     if (!counts.includes(count)) count = counts[counts.length - 1] || available;
 
@@ -219,6 +222,9 @@ function themeSetup(theme, preSub) {
           h('h2', { class: 'card__title', text: t.label }),
           h('p', { class: 'card__sub', text: t.blurb }),
           h('p', { class: 'card__sub', style: 'margin-top:8px', text: `${t.count} des 40 questions de l'examen portent sur ce thème.` }),
+          // Sur quoi porte le pourcentage affiché ailleurs : dit ici une fois,
+          // plutôt que laissé à deviner.
+          h('p', { class: 'card__sub', style: 'margin-top:4px', text: phraseComposition(theme) }),
         ],
       }),
 
@@ -236,6 +242,7 @@ function themeSetup(theme, preSub) {
             onClick: () => { chosenSub = x; draw(); },
           })),
         ]),
+        h('p', { class: 'hint', text: "Les sous-thèmes ne découpent que les questions d'examen ; le livret et le récit restent dans « tout le thème »." }),
       ]) : null,
 
       h('div', { class: 'stack stack--tight' }, [

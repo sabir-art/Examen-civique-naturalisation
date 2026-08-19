@@ -3,8 +3,11 @@
  *
  * Banque SÉPARÉE de la banque d'examen : chaque question porte sur un passage
  * précis du livret officiel et sert à en vérifier la maîtrise chapitre par
- * chapitre. Elle n'entre pas dans la composition des examens blancs.
+ * chapitre. Elle n'entre pas dans la composition de l'examen blanc officiel,
+ * mais elle compte dans la maîtrise du thème auquel sa partie se rattache.
  */
+
+import { CHAPITRE_BY_KEY } from './livret.js';
 
 const Q = {
   /* ------------------------------------ Partie 1 — I. Devise et symboles */
@@ -348,12 +351,16 @@ const Q = {
   ],
 };
 
+/* Chaque question reçoit le thème de sa partie du livret (voir
+   THEME_DE_PARTIE). Une question travaillée ici compte donc dans son thème :
+   c'est le même programme, lu autrement. */
 const out = [];
 let n = 0;
 for (const [chapter, items] of Object.entries(Q)) {
+  const theme = CHAPITRE_BY_KEY.get(chapter)?.theme || null;
   for (const item of items) {
     n += 1;
-    out.push({ ...item, id: `lv${String(n).padStart(3, '0')}`, chapter, source: 'livret' });
+    out.push({ ...item, id: `lv${String(n).padStart(3, '0')}`, chapter, theme, source: 'livret' });
   }
 }
 

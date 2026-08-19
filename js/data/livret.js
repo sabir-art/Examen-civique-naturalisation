@@ -22,9 +22,37 @@ export const LIVRET = {
 
 export const PARTIES = LIVRET.parties;
 
+/**
+ * À quel thème du programme chaque partie du livret se rattache.
+ *
+ * Ce n'est pas une interprétation : les cinq parties du livret portent les
+ * titres EXACTS des cinq thèmes de l'arrêté, dans le même ordre. Les annexes
+ * — Déclaration de 1789, Charte des droits et devoirs — relèvent des droits et
+ * devoirs, et l'examen blanc « livret » les compte déjà ainsi (voir
+ * LIVRET_BLUEPRINT dans engine.js, où p3 et les annexes alimentent la même
+ * ligne de onze questions).
+ *
+ * De ce rattachement dépend le fait qu'une question travaillée dans le livret
+ * compte dans le thème correspondant, et pas seulement dans le livret.
+ */
+export const THEME_DE_PARTIE = {
+  p1: 'principes-valeurs',
+  p2: 'institutions',
+  p3: 'droits-devoirs',
+  p4: 'histoire-geo-culture',
+  p5: 'vivre-societe',
+  annexes: 'droits-devoirs',
+};
+
 /** Tous les chapitres, à plat, avec un renvoi vers leur partie. */
 export const CHAPITRES = PARTIES.flatMap((partie) =>
-  partie.chapters.map((ch) => ({ ...ch, partieKey: partie.key, partieTitle: partie.title, icon: partie.icon })),
+  partie.chapters.map((ch) => ({
+    ...ch,
+    partieKey: partie.key,
+    partieTitle: partie.title,
+    icon: partie.icon,
+    theme: THEME_DE_PARTIE[partie.key] || null,
+  })),
 );
 
 export const CHAPITRE_BY_KEY = new Map(CHAPITRES.map((c) => [c.key, c]));

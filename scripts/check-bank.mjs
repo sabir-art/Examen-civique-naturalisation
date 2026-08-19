@@ -12,6 +12,9 @@ import {
   ACTES, CHAPITRES as ROMAN_CHAPITRES, TOTAL_MINUTES,
   ROMAN_QUESTIONS, questionsOf as romanQuestionsOf,
 } from '../js/data/roman.js';
+import {
+  TOUTES_LES_QUESTIONS, poolTheme, compositionTheme, audit as auditThemes,
+} from '../js/data/banques.js';
 
 let failed = false;
 const fail = (msg) => { console.error(`  ✗ ${msg}`); failed = true; };
@@ -105,6 +108,26 @@ for (const c of ROMAN_CHAPITRES) {
   if (!Array.isArray(c.retenir) || !c.retenir.length) fail(`${label} : encadré « à retenir » manquant`);
   if (n < 3) fail(`${label} : ${n} question(s), 3 minimum`);
   else console.log(`  ✓ ${label.slice(0, 62).padEnd(64)} ${String(n).padStart(3)} questions`);
+}
+
+/* ------------------------------------------- rattachement aux thèmes ---- */
+
+/* Une question sans thème ne compte dans aucune barre de progression, et rien
+   à l'écran ne le dit : elle se contente de manquer. C'est la panne qu'on a
+   corrigée — quarante questions du récit qui ne déplaçaient rien —, donc elle
+   se vérifie ici. */
+console.log('\nRattachement aux thèmes du programme');
+const orphelines = auditThemes();
+if (orphelines.length === 0) console.log('  ✓ les trois banques sont rattachées');
+else orphelines.slice(0, 10).forEach(fail);
+
+for (const [key, t] of Object.entries(THEMES)) {
+  const c = compositionTheme(key);
+  console.log(`  ${String(c.total).padStart(3)} ${t.short.padEnd(22)} ${String(c.examen).padStart(3)} examen · ${String(c.livret).padStart(3)} livret · ${String(c.recit).padStart(2)} récit`);
+}
+const rattachees = Object.keys(THEMES).reduce((n, k) => n + poolTheme(k).length, 0);
+if (rattachees !== TOUTES_LES_QUESTIONS.length) {
+  fail(`${rattachees} questions rattachées sur ${TOUTES_LES_QUESTIONS.length}`);
 }
 
 console.log(`\nTotal des trois banques : ${QUESTIONS.length + LIVRET_QUESTIONS.length + ROMAN_QUESTIONS.length} questions`);

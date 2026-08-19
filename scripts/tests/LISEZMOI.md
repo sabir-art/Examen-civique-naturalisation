@@ -1,6 +1,6 @@
 # Contrôles automatiques de l'interface
 
-Onze scripts Playwright, à lancer avec l'application servie sur le port 8099 :
+Seize scripts Playwright, à lancer avec l'application servie sur le port 8099 :
 
 ```bash
 npx http-server -p 8099 -c-1 &
@@ -16,6 +16,11 @@ node scripts/tests/activite.mjs   # journal, pastille, rappel quotidien, écran 
 node scripts/tests/langue.mjs     # lecture en arabe, mode bilingue, glossaire par chapitre
 node scripts/tests/images.mjs     # illustrations : ancrage, légendes, provenance, poids
 node scripts/tests/progression.mjs # chapitre, acte, livret, et le nombre annoncé avant une séance
+node scripts/tests/lisibilite.mjs # rien de caché derrière une barre, aucun bouton sur deux lignes
+node scripts/tests/assistant.mjs  # l'assistant : retour au bon écran, saisie qui ne recouvre rien
+node scripts/tests/tableaux.mjs   # les tableaux d'enquête : liens, sens de lecture, renvois
+node scripts/tests/chiffres.mjs   # les chiffres romains doublés de leur valeur
+node scripts/tests/themes.mjs     # un thème compte ses questions dans les trois banques
 ```
 
 ## La méthode : vérifier chaque contrôle en cassant ce qu'il surveille
@@ -51,6 +56,8 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `progression.mjs` | barre de l'acte remise sur la maîtrise moyenne | 5 % avec les six chapitres terminés |
 | `progression.mjs` | barre du livret remise sur la maîtrise | chapitre jamais marqué terminé |
 | `progression.mjs` | bouton d'accueil réaffichant les questions dues | annonce 10, séance de 20 |
+| `themes.mjs` | thèmes recalculés sur la seule banque d'examen | 4 questions du récit et 18 du livret répondues, compteur du thème à 0 |
+| `themes.mjs` | un chapitre du récit retiré de la table de rattachement | `check-bank` : « 4 questions sans thème » |
 
 Le contrôle du texte dans les SVG mérite une note : `scrollWidth` ne veut rien
 dire dans un `<svg>`, où c'est le cadre de vue qui découpe et non `overflow`.
@@ -60,7 +67,7 @@ tous les libellés d'anneau, ou aucun.
 Cinq contrôles de données complètent l'ensemble, sans navigateur :
 
 ```bash
-node scripts/check-bank.mjs        # intégrité des trois banques de questions
+node scripts/check-bank.mjs        # intégrité des trois banques et rattachement aux thèmes
 node scripts/check-traduction.mjs  # la traduction arabe suit la structure du français
 node scripts/check-images.mjs      # chaque ancre d'image tombe sur un seul paragraphe
 node scripts/check-workflows.mjs   # les workflows GitHub se parsent vraiment
@@ -102,3 +109,13 @@ le sens affiché qui était faux. Le contrôle joue donc un chapitre pour de vra
 jusqu'à ce que toutes les réponses soient justes, et exige que la barre soit
 pleine à la fin — au niveau du chapitre, de l'acte et du livret, car la même
 confusion existait aux trois.
+
+`themes.mjs` vient d'une question d'usage qui n'appelait aucun message d'erreur :
+« je viens de faire quarante questions sur principes et valeurs et ça ne bouge
+pas, sur quoi c'est calculé ? ». Le pourcentage ne portait que sur la banque
+d'examen ; le livret et le récit posent pourtant les mêmes questions, sur le
+même programme, et n'y comptaient pour rien. Le contrôle joue donc les trois
+chemins — un chapitre du récit, un chapitre du livret, puis un thème entier
+posé comme acquis — et exige que le même compteur bouge à chaque fois. Il
+vérifie aussi l'inverse : l'examen blanc officiel doit continuer de ne tirer
+que dans la banque d'examen, sa composition étant celle de l'épreuve réelle.

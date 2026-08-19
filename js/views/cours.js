@@ -4,7 +4,7 @@ import { h, icon } from '../lib/dom.js';
 import { Card, Button, Icon, IconTile, LessonRow, ProgressBar } from '../ds/index.js';
 import { COURS, COURS_BY_KEY } from '../data/cours.js';
 import { THEMES } from '../data/programme.js';
-import { pool } from '../data/questions.js';
+import { poolTheme } from '../data/banques.js';
 import { mastery, livretOverview } from '../engine.js';
 import { LIVRET, PARTIES, CHAPITRES } from '../data/livret.js';
 
@@ -96,7 +96,7 @@ function fiche(key) {
 
       theme ? h('a', {
         class: 'ds-btn ds-btn--primary ds-btn--lg ds-btn--full', href: `#/reviser/t/${c.theme}`,
-      }, [icon('play'), h('span', { text: `S'entraîner sur ce thème (${pool({ theme: c.theme }).length} questions)` })]) : null,
+      }, [icon('play'), h('span', { text: `S'entraîner sur ce thème (${poolTheme(c.theme).length} questions)` })]) : null,
 
       Button({ variant: 'secondary', size: 'lg', fullWidth: true, href: '#/cours', label: 'Toutes les fiches' }),
     ].filter(Boolean)),

@@ -25,7 +25,7 @@ export default function renderProgres() {
     h('div', { class: 'row row--between' }, [
       h('div', {}, [
         h('h2', { class: 'card__title', text: 'Préparation globale' }),
-        h('p', { class: 'card__sub', text: 'Maîtrise des questions, pondérée par le poids de chaque thème à l\'examen.' }),
+        h('p', { class: 'card__sub', text: 'Maîtrise des questions des trois banques, pondérée par le poids de chaque thème à l\'examen.' }),
       ]),
       Badge({ tone: tone === 'ok' ? 'correct' : tone === 'warn' ? 'warning' : 'wrong', label: `${r} %` }),
     ]),
@@ -43,7 +43,7 @@ export default function renderProgres() {
 
   const themes = Card({ surface: 'white', elevation: 'xs', children: [
     h('h2', { class: 'card__title', text: 'Maîtrise par thème' }),
-    h('p', { class: 'card__sub', text: 'Travaillez en priorité les barres les plus courtes.' }),
+    h('p', { class: 'card__sub', text: "Examen, livret et récit comptent dans le même thème. Travaillez en priorité les barres les plus courtes." }),
     h('div', { class: 'themestat mt' }, stats
       .slice()
       .sort((a, b) => a.mastery - b.mastery)
@@ -60,8 +60,9 @@ export default function renderProgres() {
       })),
   ] });
 
-  // Les deux sections annexes sont suivies séparément : elles ne modifient ni
-  // la préparation globale ni la maîtrise par thème affichées plus haut.
+  // Les deux sections ont leur propre avancement — des chapitres lus, pas des
+  // questions —, mais leurs questions comptent bien dans les barres du haut :
+  // un thème est l'ensemble de ses questions, d'où qu'elles viennent.
   const lv = livretOverview();
   const rm = romanOverview();
   // La barre montre l'AVANCEMENT (chapitres terminés), pas la maîtrise : celle-ci
@@ -73,7 +74,7 @@ export default function renderProgres() {
 
   const autres = Card({ surface: 'white', elevation: 'xs', children: [
     h('h2', { class: 'card__title', text: 'Les autres sections' }),
-    h('p', { class: 'card__sub', text: "Suivies à part : elles n'entrent pas dans l'estimation de préparation à l'épreuve." }),
+    h('p', { class: 'card__sub', text: "Leur avancement se compte en chapitres. Les questions qu'elles posent, elles, comptent dans les thèmes ci-dessus." }),
     h('div', { class: 'themestat mt' }, [
       {
         href: '#/histoire', name: 'La France racontée',

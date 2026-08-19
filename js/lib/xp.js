@@ -11,7 +11,7 @@
  */
 
 import * as store from '../store.js';
-import { QUESTIONS } from '../data/questions.js';
+import { TOUTES_LES_QUESTIONS, tailleTheme } from '../data/banques.js';
 import { LIVRET_QUESTIONS } from '../data/q-livret.js';
 import { CHAPITRES as ROMAN_CHAPITRES } from '../data/roman.js';
 import { THEMES, EXAM } from '../data/programme.js';
@@ -109,16 +109,15 @@ export function badges() {
   const serie = store.streak();
   const jours = Object.keys(p.days || {}).length;
 
-  // Un thème est « touché » dès qu'une de ses questions a été vue.
+  // Un thème est « touché » dès qu'une de ses questions a été vue — dans
+  // n'importe laquelle des trois banques, comme partout ailleurs.
   const parTheme = {};
-  for (const q of QUESTIONS) {
+  for (const q of TOUTES_LES_QUESTIONS) {
     if (p.progress?.[q.id]) parTheme[q.theme] = (parTheme[q.theme] || 0) + 1;
   }
   const themesTouches = Object.keys(parTheme).length;
-  const themesFinis = Object.entries(THEMES).filter(([k]) => {
-    const total = QUESTIONS.filter((q) => q.theme === k).length;
-    return (parTheme[k] || 0) >= total;
-  }).length;
+  const themesFinis = Object.entries(THEMES)
+    .filter(([k]) => (parTheme[k] || 0) >= tailleTheme(k)).length;
 
   const vuesLivret = LIVRET_QUESTIONS.filter((q) => p.progress?.[q.id]).length;
 
@@ -126,7 +125,9 @@ export function badges() {
     { id: 'premier-pas', nom: 'Premier pas', icone: 'bolt', desc: 'Répondre à sa première question', valeur: vues, cible: 1 },
     { id: 'dix', nom: 'Ça démarre', icone: 'check', desc: 'Dix questions vues', valeur: vues, cible: 10 },
     { id: 'cent', nom: 'Centurion', icone: 'target', desc: 'Cent questions vues', valeur: vues, cible: 100 },
-    { id: 'toute-la-banque', nom: 'Tout vu', icone: 'list', desc: 'Avoir vu les 363 questions d\'examen', valeur: vues, cible: QUESTIONS.length },
+    // `vues` compte les trois banques : la cible doit les compter aussi, sans
+    // quoi le badge s'obtient sans avoir tout vu.
+    { id: 'toute-la-banque', nom: 'Tout vu', icone: 'list', desc: `Avoir vu les ${TOUTES_LES_QUESTIONS.length} questions de l'application`, valeur: vues, cible: TOUTES_LES_QUESTIONS.length },
 
     { id: 'cinquante-justes', nom: 'Bonne pioche', icone: 'ok', desc: 'Cinquante bonnes réponses', valeur: justes, cible: 50 },
     { id: 'acquises', nom: 'Ancré', icone: 'shield', desc: 'Cinquante questions solidement acquises', valeur: acquises, cible: 50 },

@@ -6,14 +6,15 @@
  * - `mastery()` / `readiness()` estiment le niveau de préparation.
  */
 
-import { QUESTIONS, BY_ID, pool } from './data/questions.js';
+import { QUESTIONS, pool } from './data/questions.js';
 import { BLUEPRINT, THEMES, EXAM, blueprintCount } from './data/programme.js';
-import { LIVRET_QUESTIONS, LIVRET_BY_ID, questionsOf } from './data/q-livret.js';
+import { LIVRET_QUESTIONS, questionsOf } from './data/q-livret.js';
 import { CHAPITRES, CHAPITRE_BY_KEY, PARTIES } from './data/livret.js';
 import {
-  ROMAN_QUESTIONS, ROMAN_BY_ID, ACTES as ROMAN_ACTES, CHAPITRES as ROMAN_CHAPITRES,
+  ROMAN_QUESTIONS, ACTES as ROMAN_ACTES, CHAPITRES as ROMAN_CHAPITRES,
   CHAPITRE_BY_KEY as ROMAN_BY_KEY, questionsOf as romanQuestionsOf, questionsOfActe,
 } from './data/roman.js';
+import { TOUTES_LES_QUESTIONS, poolTheme, trouverQuestion } from './data/banques.js';
 import { shuffle, sample, pct } from './lib/util.js';
 import * as store from './store.js';
 
@@ -184,7 +185,10 @@ export function buildTraining({ mode = 'theme', theme = null, sub = null, count 
     return planErreurs(count).questions.map(toCard);
   }
 
-  const candidates = pool({ theme, sub });
+  /* Le thème entier, les trois banques réunies — la séance travaille donc
+     exactement l'ensemble que la barre du thème mesure. Un sous-thème, lui,
+     n'existe que dans la banque d'examen : elle seule en porte. */
+  const candidates = sub ? pool({ theme, sub }) : poolTheme(theme);
   // Priorité : jamais vues, puis dues, puis le reste — le tout mélangé dans chaque groupe.
   const never = [];
   const due = [];
@@ -294,7 +298,7 @@ export function resteSeance(plan) {
 }
 
 function unseen() {
-  return QUESTIONS.filter((q) => !store.progressOf(q.id));
+  return TOUTES_LES_QUESTIONS.filter((q) => !store.progressOf(q.id));
 }
 
 function themeGap(theme) {
@@ -309,16 +313,24 @@ function scoreOf(qid) {
   return Math.max(0, Math.min(1, (r.box - 1) / (store.MAX_BOX - 1)));
 }
 
-/** Maîtrise d'un thème (0 à 1). Sans argument : maîtrise globale de la banque. */
+/**
+ * Maîtrise d'un thème (0 à 1). Sans argument : maîtrise de tout le programme.
+ *
+ * Le thème compte TOUTES ses questions, quelle que soit la banque d'où elles
+ * viennent : l'examen, le livret, le récit. Répondre juste dans un chapitre du
+ * récit fait donc monter la barre du thème dont le chapitre traite — c'est le
+ * même programme, et une réponse juste vaut ce qu'elle vaut quel que soit
+ * l'écran où elle a été donnée.
+ */
 export function mastery(theme = null) {
-  const qs = theme ? pool({ theme }) : QUESTIONS;
+  const qs = theme ? poolTheme(theme) : TOUTES_LES_QUESTIONS;
   if (!qs.length) return 0;
   return qs.reduce((s, q) => s + scoreOf(q.id), 0) / qs.length;
 }
 
 /** Couverture : part des questions du thème déjà rencontrées au moins une fois. */
 export function coverage(theme = null) {
-  const qs = theme ? pool({ theme }) : QUESTIONS;
+  const qs = theme ? poolTheme(theme) : TOUTES_LES_QUESTIONS;
   if (!qs.length) return 0;
   return qs.filter((q) => store.progressOf(q.id)).length / qs.length;
 }
@@ -347,7 +359,7 @@ export function readiness() {
 /** Statistiques par thème pour l'écran de progression. */
 export function themeStats() {
   return Object.entries(THEMES).map(([key, t]) => {
-    const qs = pool({ theme: key });
+    const qs = poolTheme(key);
     const seen = qs.filter((q) => store.progressOf(q.id));
     const ok = seen.reduce((s, q) => s + (store.progressOf(q.id)?.ok || 0), 0);
     const ko = seen.reduce((s, q) => s + (store.progressOf(q.id)?.ko || 0), 0);
@@ -366,9 +378,11 @@ export function themeStats() {
 
 /** Chiffres-clés globaux. */
 export function overview() {
-  const all = QUESTIONS.length;
+  // Les trois banques. Compter les seules questions d'examen donnait un
+  // « réponses données : 0 » à qui venait d'en faire quarante dans le récit.
+  const all = TOUTES_LES_QUESTIONS.length;
   let seen = 0, ok = 0, ko = 0, mastered = 0;
-  for (const q of QUESTIONS) {
+  for (const q of TOUTES_LES_QUESTIONS) {
     const r = store.progressOf(q.id);
     if (!r) continue;
     seen += 1;
@@ -605,7 +619,7 @@ export function nextUnread() {
 
 /** Recherche d'une question dans l'une des trois banques. */
 export function findQuestion(id) {
-  return BY_ID.get(id) || LIVRET_BY_ID.get(id) || ROMAN_BY_ID.get(id) || null;
+  return trouverQuestion(id);
 }
 
 /** Message d'orientation affiché sur l'accueil. */

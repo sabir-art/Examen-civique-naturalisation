@@ -15,7 +15,7 @@ import { Button, Badge, ProgressBar } from '../ds/index.js';
 import * as store from '../store.js';
 import * as fx from '../lib/feedback.js';
 import { THEMES } from '../data/programme.js';
-import { pool } from '../data/questions.js';
+import { TOUTES_LES_QUESTIONS, poolTheme } from '../data/banques.js';
 import { shuffle } from '../lib/util.js';
 import { refresh } from '../app.js';
 
@@ -26,7 +26,7 @@ export default function renderCartes({ params }) {
 
 /** Prépare un paquet : les questions dues d'abord, puis les jamais vues. */
 function paquet(theme, taille = 12) {
-  const candidates = pool(theme ? { theme } : {});
+  const candidates = theme ? poolTheme(theme) : TOUTES_LES_QUESTIONS;
   const dues = [];
   const neuves = [];
   const reste = [];
