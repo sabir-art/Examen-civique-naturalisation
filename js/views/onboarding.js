@@ -4,7 +4,7 @@ import { h, icon, toast } from '../lib/dom.js';
 import { Card, Button, StatTile } from '../ds/index.js';
 import * as store from '../store.js';
 import { EXAM } from '../data/programme.js';
-import { QUESTIONS } from '../data/questions.js';
+import { TOUTES_LES_QUESTIONS } from '../data/banques.js';
 
 export default function renderOnboarding({ onDone }) {
   const nameInput = h('input', {
@@ -32,7 +32,9 @@ export default function renderOnboarding({ onDone }) {
     h('div', { class: 'hero' }, [
       h('p', { class: 'hero__eyebrow', text: 'Naturalisation française' }),
       h('h1', { class: 'hero__title', text: "Préparez l'examen civique" }),
-      h('p', { class: 'hero__sub', text: `${QUESTIONS.length} questions d'entraînement, des examens blancs en conditions réelles et un suivi de votre progression. Gratuit, sans publicité, hors ligne.` }),
+      h('p', { class: 'hero__sub', // Le total des trois banques : annoncer les seules 363 questions d'examen
+      // sous-estimait de moitié ce que l'application contient réellement.
+      text: `${TOUTES_LES_QUESTIONS.length} questions d'entraînement, des examens blancs en conditions réelles et un suivi de votre progression. Gratuit, sans publicité, hors ligne.` }),
     ]),
 
     h('div', { class: 'tiles-3' },
