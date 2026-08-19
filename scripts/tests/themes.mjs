@@ -59,7 +59,8 @@ const cartes = await page.$$eval('.ds-theme', (els) => els.map((e) => ({
 
 const carteHisto = cartes.find((c) => /Histoire/.test(c.titre));
 verifier(!!carteHisto, `la carte « Histoire & géo » est là (${cartes.length} cartes)`);
-const annonce = parseInt(carteHisto?.meta || '', 10);
+// « 0/209 questions vues · 8 tirées à l'examen » : c'est le total qu'on lit ici.
+const annonce = parseInt((carteHisto?.meta || '').split('/')[1], 10);
 verifier(annonce === tailles['histoire-geo-culture'].unifie,
   `elle annonce les questions des trois banques : ${annonce} (attendu ${tailles['histoire-geo-culture'].unifie}, banque d'examen seule ${tailles['histoire-geo-culture'].examen})`);
 verifier(tailles['histoire-geo-culture'].unifie > tailles['histoire-geo-culture'].examen,
@@ -110,6 +111,33 @@ const apres = await vues('Histoire');
 verifier(jouees >= 4, `le chapitre a bien été joué (${jouees} questions)`);
 verifier(apres && apres.vues === jouees,
   `les questions du récit comptent dans le thème : ${apres?.vues} vues après en avoir répondu ${jouees}`);
+
+/* -------------- 2 bis. et l'écran du thème le montre, section par section */
+
+/**
+ * « Je ne sais pas combien de questions j'ai déjà répondu dans chaque thème. »
+ * Le pourcentage de maîtrise ne le dit pas — il monte par paliers de plusieurs
+ * jours —, et le total du thème non plus. Ce décompte-là doit être écrit.
+ */
+await page.goto(`${BASE}#/`);
+await page.goto(`${BASE}#/reviser`);
+await page.waitForSelector('.ds-theme__meta');
+const metas = await page.$$eval('.ds-theme', (els) => els.map((e) => ({
+  titre: e.querySelector('.ds-theme__title')?.textContent?.trim() || '',
+  meta: e.querySelector('.ds-theme__meta')?.textContent?.trim() || '',
+})));
+const metaHisto = metas.find((m) => /Histoire/.test(m.titre))?.meta || '';
+verifier(metaHisto.startsWith(`${jouees}/${tailles['histoire-geo-culture'].unifie} questions vues`),
+  `la carte du thème dit ce qui est fait, pas seulement sa taille (« ${metaHisto} »)`);
+
+await page.goto(`${BASE}#/reviser/t/histoire-geo-culture`);
+await page.waitForSelector('.card__title');
+const detail = await page.evaluate(() => document.getElementById('app').innerText);
+verifier(/Où vous en êtes/.test(detail), 'l’écran du thème ouvre sur « où vous en êtes »');
+verifier(new RegExp(`La France racontée\\s*${jouees}/48`).test(detail),
+  `il attribue les réponses à la bonne section (récit : ${jouees}/48)`);
+verifier(/Banque d'examen\s*0\/76/.test(detail),
+  "et laisse la banque d'examen à zéro : on n'y a pas répondu");
 
 /* ---------------------- 3. et répondre dans le livret aussi */
 

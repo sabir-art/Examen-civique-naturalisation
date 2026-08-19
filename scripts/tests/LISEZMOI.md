@@ -59,6 +59,7 @@ Chaque script a donc été soumis au défaut qu'il traque :
 | `progression.mjs` | bouton d'accueil réaffichant les questions dues | annonce 10, séance de 20 |
 | `themes.mjs` | thèmes recalculés sur la seule banque d'examen | 4 questions du récit et 18 du livret répondues, compteur du thème à 0 |
 | `themes.mjs` | un chapitre du récit retiré de la table de rattachement | `check-bank` : « 4 questions sans thème » |
+| `themes.mjs` | avancement du thème recompté sur la seule banque d'examen | carte à « 0/209 vues » après quatre réponses, récit à 0/48 |
 | `version.mjs` | `version.json` remis dans le cache hors ligne | il apparaît dans le cache : la recherche de mise à jour ne détecterait plus rien |
 | `version.mjs` | serveur injoignable rapporté comme « à jour » | 2 signalements sur le cas hors ligne |
 | `version.mjs` | `version.json` et l'application mis en désaccord | `check-version` : « version.json annonce deadbee, l'application 2d230a6 » |

@@ -2,7 +2,7 @@
 
 import { h, toast, spot } from '../lib/dom.js';
 import {
-  Card, Button, Chip, Badge, SectionHeader, Icon,
+  Card, Button, Chip, Badge, SectionHeader, Icon, ProgressBar,
   SegmentedControl, ThemeCard, LessonRow,
 } from '../ds/index.js';
 
@@ -28,7 +28,7 @@ import { pool } from '../data/questions.js';
 import { TOUTES_LES_QUESTIONS, poolTheme, phraseComposition } from '../data/banques.js';
 import { CHAPITRES } from '../data/livret.js';
 import { TOTAL_TERMES } from '../data/glossaire.js';
-import { buildTraining, mastery, coverage, planRevision, planErreurs, compositionSeance, resteSeance } from '../engine.js';
+import { buildTraining, mastery, coverage, avancementTheme, planRevision, planErreurs, compositionSeance, resteSeance } from '../engine.js';
 import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
 import { setGuard, refresh, masquerOnglets } from '../app.js';
@@ -113,6 +113,7 @@ function hub() {
       m: Math.round(mastery(key) * 100),
       cov: Math.round(coverage(key) * 100),
       n: poolTheme(key).length,
+      vus: avancementTheme(key).vus,
     }));
     const f = FILTRES.find((x) => x.key === filtre);
     const visibles = lignes.filter(f.match);
@@ -131,7 +132,10 @@ function hub() {
         topic: SUJET[s.key] || 'histoire',
         icon: s.t.icon,
         progress: s.m,
-        meta: `${s.n} questions · ${s.t.count} tirées à l'examen`,
+        // Ce qu'on a déjà répondu passe devant : c'est la question qu'on se
+        // pose en arrivant, et le pourcentage à droite n'y répond pas — il
+        // mesure la mémorisation, qui monte par paliers de plusieurs jours.
+        meta: `${s.vus}/${s.n} questions vues · ${s.t.count} tirées à l'examen`,
         href: `#/reviser/t/${s.key}`,
       })))
       : h('p', { class: 'hint center', style: 'padding:14px 0', text: 'Aucun thème dans cette catégorie.' }));
@@ -197,6 +201,40 @@ function hub() {
   };
 }
 
+/**
+ * « Combien j'en ai déjà fait, et par où ? »
+ *
+ * Les questions d'un thème arrivent par trois portes — l'entraînement, le
+ * livret, le récit — et une réponse compte quelle que soit la porte. Encore
+ * faut-il pouvoir le constater : sans ce détail, on lit « 43/209 » sans savoir
+ * si les 166 qui restent sont dans le livret qu'on n'a pas ouvert ou dans le
+ * récit qu'on a fini.
+ */
+function avancement(theme) {
+  const a = avancementTheme(theme);
+  return Card({ surface: 'white', elevation: 'xs', children: [
+    h('div', { class: 'row row--between' }, [
+      h('h2', { class: 'card__title', text: 'Où vous en êtes' }),
+      Badge({ tone: a.vus >= a.total ? 'correct' : 'info', label: `${a.vus}/${a.total}` }),
+    ]),
+    h('p', { class: 'card__sub', text: `${a.vus} question${a.vus > 1 ? 's' : ''} déjà répondue${a.vus > 1 ? 's' : ''} dans ce thème, toutes sections confondues.` }),
+    h('div', { class: 'stack stack--tight mt' }, a.par.map(([, b]) => h('div', {}, [
+      h('div', { class: 'row row--between' }, [
+        h('span', { class: 'small', text: b.libelle }),
+        h('span', { class: 'hint', text: `${b.vus}/${b.total}` }),
+      ]),
+      h('div', { style: 'margin-top:4px' }, ProgressBar({
+        value: b.total ? Math.round((b.vus / b.total) * 100) : 0,
+        height: 6,
+        // Vert quand la section est entièrement parcourue, comme partout
+        // ailleurs : c'est ce vert qui dit « rien ne reste ici ».
+        tone: b.vus >= b.total ? 'correct' : 'ink',
+      })),
+    ]))),
+    h('p', { class: 'hint mt', text: 'Vu n’est pas retenu : le pourcentage de maîtrise, lui, monte par paliers d’un jour, puis trois, puis sept.' }),
+  ] });
+}
+
 /* -------------------------------------------------- configuration d'un thème */
 
 function themeSetup(theme, preSub) {
@@ -227,6 +265,8 @@ function themeSetup(theme, preSub) {
           h('p', { class: 'card__sub', style: 'margin-top:4px', text: phraseComposition(theme) }),
         ],
       }),
+
+      avancement(theme),
 
       subs.length > 1 ? h('div', { class: 'stack stack--tight' }, [
         SectionHeader({ title: 'Sous-thème' }),

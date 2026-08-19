@@ -356,6 +356,33 @@ export function readiness() {
   return Math.round(base * 0.55 + avg * 0.45);
 }
 
+/**
+ * Ce qui a déjà été répondu dans un thème, banque par banque.
+ *
+ * « Je ne sais pas combien de questions j'ai déjà faites en histoire » : la
+ * maîtrise répond en pourcentage — un pourcentage qui monte lentement, par
+ * paliers d'un jour puis trois puis sept — et ne dit donc pas ce qu'on a
+ * abattu. Ces deux chiffres-là ne mesurent pas la même chose et il faut les
+ * deux : ce qui est vu, et ce qui est retenu.
+ */
+export function avancementTheme(theme) {
+  const nom = (q) => (q.source === 'livret' ? 'livret' : q.source === 'roman' ? 'recit' : 'examen');
+  const par = {
+    examen: { total: 0, vus: 0, libelle: "Banque d'examen" },
+    livret: { total: 0, vus: 0, libelle: 'Livret du citoyen' },
+    recit: { total: 0, vus: 0, libelle: 'La France racontée' },
+  };
+  let total = 0;
+  let vus = 0;
+  for (const q of poolTheme(theme)) {
+    const b = par[nom(q)];
+    b.total += 1;
+    total += 1;
+    if (store.progressOf(q.id)) { b.vus += 1; vus += 1; }
+  }
+  return { total, vus, par: Object.entries(par).filter(([, b]) => b.total) };
+}
+
 /** Statistiques par thème pour l'écran de progression. */
 export function themeStats() {
   return Object.entries(THEMES).map(([key, t]) => {
