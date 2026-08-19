@@ -505,7 +505,11 @@ document.addEventListener('visibilitychange', () => {
 
 /* --------------------------------------------------------- service worker */
 
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+/* Pas de service worker dans la coque native : les fichiers y sont déjà sur
+   l'appareil, et un cache qui survivrait à une mise à jour de l'App Store
+   servirait l'ancienne version par-dessus la nouvelle. C'est le système qui
+   met à jour l'application là-bas, pas nous. */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !hoteNatif()) {
   /*
    * Une mise à jour ne se voyait qu'au DEUXIÈME lancement.
    *

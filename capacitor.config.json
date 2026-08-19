@@ -1,7 +1,7 @@
 {
   "appId": "fr.examencivique.app",
   "appName": "Examen civique",
-  "webDir": ".",
+  "webDir": "dist",
   "ios": {
     "contentInset": "never",
     "backgroundColor": "#E9F1EF"

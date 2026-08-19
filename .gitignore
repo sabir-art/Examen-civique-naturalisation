@@ -24,3 +24,5 @@ scripts/tests/captures/
 /ios/
 /android/
 /node_modules/
+
+/dist/

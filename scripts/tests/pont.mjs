@@ -94,6 +94,15 @@ verifier(demande?.onglets?.every((o) => o.label && o.value),
 verifier(demande?.onglets?.[0]?.sfSymbol === 'house',
   `et son glyphe du système, pas celui de la page (${demande?.onglets?.[0]?.sfSymbol})`);
 
+/* ------------------- 2 bis. et le cache hors ligne s'efface devant l'App Store */
+
+const worker = await page.evaluate(async () => {
+  const regs = await navigator.serviceWorker.getRegistrations();
+  return regs.length;
+});
+verifier(worker === 0,
+  `dans la coque, aucun service worker : c'est l'App Store qui met à jour (${worker})`);
+
 /* -------------------------------- 3. le système signale, la page navigue */
 
 await page.evaluate(() => window.__appuyerSurOnglet('/reviser'));
