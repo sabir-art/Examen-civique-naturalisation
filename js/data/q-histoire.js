@@ -32,12 +32,7 @@ const histoire = [
   },
   {
     q: "Quelle ordonnance de 1539 impose le français dans les actes administratifs ?",
-    c: [
-      "L'ordonnance de Villers-Cotterêts",
-      "L'édit de Nantes",
-      "Le Code civil",
-      "La Pragmatique Sanction",
-    ],
+    c: ["L'ordonnance de Villers-Cotterêts", "L'édit de Nantes", "Le Code civil", "La Pragmatique Sanction de Bourges"],
     a: 0,
     why: "Signée par François Ier, elle remplace le latin par le français dans les actes de justice et d'administration.",
   },
@@ -84,24 +79,19 @@ const histoire = [
   },
   {
     q: "Qui s'est proclamé empereur des Français en 1804 ?",
-    c: ["Napoléon Bonaparte", "Louis XVIII", "Charles X", "Louis-Philippe"],
+    c: ["Napoléon Bonaparte", "Louis XVIII", "Charles X", "Louis-Philippe Ier"],
     a: 0,
     why: "Napoléon Ier crée aussi le franc germinal, les lycées, la Légion d'honneur et les préfets.",
   },
   {
     q: "Que s'est-il passé en 1848 en France ?",
-    c: [
-      "La proclamation de la IIe République, le suffrage universel masculin et l'abolition de l'esclavage",
-      "La Révolution française",
-      "La fin de la Première Guerre mondiale",
-      "L'instauration de la Ve République",
-    ],
+    c: ["La IIe République, le suffrage universel masculin et l'abolition de l'esclavage", "La fin de la Première Guerre mondiale et la signature du traité de Versailles", "L'instauration de la Ve République et l'élection de De Gaulle", "La Révolution française et la prise de la Bastille"],
     a: 0,
     why: "1848 est une année charnière : le décret du 27 avril 1848 abolit définitivement l'esclavage dans les colonies françaises.",
   },
   {
     q: "Quel homme politique est associé à l'abolition définitive de l'esclavage en 1848 ?",
-    c: ["Victor Schœlcher", "Victor Hugo", "Jules Ferry", "Léon Blum"],
+    c: ["Victor Schœlcher", "Victor Hugo, écrivain et député", "Jules Ferry", "Léon Blum"],
     a: 0,
     why: "Le 10 mai est la journée nationale des mémoires de la traite, de l'esclavage et de leurs abolitions ; la loi Taubira de 2001 les reconnaît comme crime contre l'humanité.",
   },
@@ -136,12 +126,7 @@ const histoire = [
   },
   {
     q: "Quelle avancée sociale majeure est associée au Front populaire de 1936 ?",
-    c: [
-      "Les congés payés et la semaine de 40 heures",
-      "La sécurité sociale",
-      "Le droit de vote des femmes",
-      "La retraite à 60 ans",
-    ],
+    c: ["Les congés payés et la semaine de 40 heures", "La création de la sécurité sociale et des allocations", "Le droit de vote accordé aux femmes", "La retraite à 60 ans"],
     a: 0,
     why: "Les accords de Matignon de 1936 instaurent deux semaines de congés payés, devenues cinq semaines en 1982.",
   },
@@ -159,12 +144,7 @@ const histoire = [
   },
   {
     q: "Que commémore le 8 mai ?",
-    c: [
-      "La victoire des Alliés et la fin de la Seconde Guerre mondiale en Europe",
-      "La Libération de Paris",
-      "L'armistice de 1918",
-      "Le débarquement de Normandie",
-    ],
+    c: ["La victoire des Alliés et la fin de la Seconde Guerre mondiale en Europe", "La Libération de Paris et le départ définitif des troupes allemandes", "L'armistice de 1918, signé dans la clairière de Rethondes", "Le débarquement des Alliés sur les plages de Normandie"],
     a: 0,
     why: "Le 8 mai 1945 marque la capitulation de l'Allemagne nazie. Le débarquement de Normandie avait eu lieu le 6 juin 1944.",
   },
@@ -217,12 +197,7 @@ const histoire = [
   },
   {
     q: "Qui était Olympe de Gouges ?",
-    c: [
-      "L'autrice de la Déclaration des droits de la femme et de la citoyenne (1791)",
-      "La première femme députée",
-      "Une résistante de 1940",
-      "La première femme médecin en France",
-    ],
+    c: ["L'autrice de la Déclaration des droits de la femme et de la citoyenne (1791)", "La première femme élue députée à l'Assemblée nationale française", "Une résistante de 1940, compagne de la Libération", "La première femme médecin diplômée en France"],
     a: 0,
     why: "Elle réclamait l'égalité des droits entre les femmes et les hommes. Guillotinée en 1793, elle est devenue une figure du féminisme.",
   },
@@ -234,23 +209,13 @@ const histoire = [
   },
   {
     q: "Qui était Joséphine Baker, entrée au Panthéon en 2021 ?",
-    c: [
-      "Une artiste franco-américaine, résistante et militante antiraciste",
-      "Une physicienne prix Nobel",
-      "Une femme politique de la IIIe République",
-      "Une aviatrice des années 1930",
-    ],
+    c: ["Une artiste franco-américaine, résistante et militante antiraciste", "Une physicienne, deux fois lauréate du prix Nobel", "Une femme politique de la IIIe République, députée", "Une aviatrice célèbre des années 1930, disparue au-dessus de l'Atlantique"],
     a: 0,
     why: "Elle est la première femme noire à entrer au Panthéon.",
   },
   {
     q: "Quel événement les Français commémorent-ils le 27 mai ?",
-    c: [
-      "La journée nationale de la Résistance",
-      "La fête de la Victoire",
-      "L'abolition de l'esclavage",
-      "La fête nationale",
-    ],
+    c: ["La journée nationale de la Résistance", "La fête de la Victoire de 1945", "L'abolition de l'esclavage", "La fête nationale de la République"],
     a: 0,
     why: "Elle rappelle la première réunion du Conseil national de la Résistance, le 27 mai 1943 à Paris, sous la présidence de Jean Moulin.",
   },
@@ -313,7 +278,7 @@ const geographie = [
   },
   {
     q: "Quelle mer borde le sud de la France métropolitaine ?",
-    c: ["La mer Méditerranée", "La mer du Nord", "La mer Baltique", "La mer Noire"],
+    c: ["La mer Méditerranée", "La mer du Nord et la Manche", "La mer Baltique", "La mer Noire"],
     a: 0,
     why: "Au nord et à l'ouest, la France est bordée par la Manche, la mer du Nord et l'océan Atlantique.",
   },
@@ -348,7 +313,7 @@ const geographie = [
   },
   {
     q: "Sur quel continent se situe la Guyane française ?",
-    c: ["L'Amérique du Sud", "L'Afrique", "L'Asie", "L'Océanie"],
+    c: ["L'Amérique du Sud", "L'Afrique de l'Ouest", "L'Asie", "L'Océanie"],
     a: 0,
     why: "La Guyane, couverte de forêt amazonienne, accueille le centre spatial de Kourou.",
   },
@@ -378,18 +343,13 @@ const geographie = [
   },
   {
     q: "Quelle ville française accueille le Parlement européen ?",
-    c: ["Strasbourg", "Lille", "Lyon", "Nantes"],
+    c: ["Strasbourg", "Lille, dans le Nord", "Lyon", "Nantes"],
     a: 0,
     why: "Strasbourg, en Alsace, accueille aussi le Conseil de l'Europe et la Cour européenne des droits de l'homme.",
   },
   {
     q: "Quelle est la principale activité du port de Marseille ?",
-    c: [
-      "Le commerce maritime et le transport de passagers",
-      "La pêche à la baleine",
-      "L'extraction pétrolière en mer",
-      "La construction de sous-marins",
-    ],
+    c: ["Le commerce maritime et le transport de passagers", "La pêche à la baleine", "L'extraction pétrolière au large des côtes", "La construction de sous-marins"],
     a: 0,
     why: "Premier port de France et l'un des plus grands de Méditerranée, il est un carrefour entre l'Europe, l'Afrique et le Moyen-Orient.",
   },
@@ -401,12 +361,7 @@ const geographie = [
   },
   {
     q: "Quelle région française est réputée pour ses châteaux de la Renaissance ?",
-    c: [
-      "Le Val de Loire (Centre-Val de Loire)",
-      "La Bretagne",
-      "Les Hauts-de-France",
-      "La Corse",
-    ],
+    c: ["Le Val de Loire (Centre-Val de Loire)", "La Bretagne", "Les Hauts-de-France et la Picardie", "La Corse"],
     a: 0,
     why: "Chambord, Chenonceau ou Amboise témoignent de la Renaissance française. La vallée est classée au patrimoine mondial.",
   },
@@ -457,7 +412,7 @@ const culture = [
   },
   {
     q: "Quel monument abrite la tombe du Soldat inconnu et sa flamme ravivée chaque soir ?",
-    c: ["L'Arc de triomphe", "Le Panthéon", "Les Invalides", "La Sorbonne"],
+    c: ["L'Arc de triomphe", "Le Panthéon, à Paris", "Les Invalides", "La Sorbonne"],
     a: 0,
     why: "La flamme du souvenir est ravivée tous les jours à 18 h 30 depuis 1923.",
   },
@@ -475,23 +430,13 @@ const culture = [
   },
   {
     q: "Que célèbre la Fête de la musique ?",
-    c: [
-      "La musique sous toutes ses formes, chaque 21 juin, avec des concerts gratuits",
-      "La musique classique uniquement",
-      "L'anniversaire de la Marseillaise",
-      "La fin de l'année scolaire",
-    ],
+    c: ["La musique sous toutes ses formes, chaque 21 juin, dans les rues", "L'anniversaire de la composition de La Marseillaise, en juin 1792", "La musique classique uniquement, dans les salles de concert", "La fin de l'année scolaire dans toutes les écoles"],
     a: 0,
     why: "Créée en 1982 par le ministère de la Culture, elle est aujourd'hui reprise dans plus de cent pays.",
   },
   {
     q: "Quel élément de la culture française est inscrit au patrimoine culturel immatériel de l'UNESCO depuis 2010 ?",
-    c: [
-      "Le repas gastronomique des Français",
-      "Le Tour de France",
-      "La langue française",
-      "Le Festival de Cannes",
-    ],
+    c: ["Le repas gastronomique des Français", "Le Tour de France cycliste", "La langue française et ses régions", "Le Festival de Cannes"],
     a: 0,
     why: "La baguette de pain a également été inscrite en 2022.",
   },
@@ -521,24 +466,19 @@ const culture = [
   },
   {
     q: "Qui était Voltaire ?",
-    c: [
-      "Un philosophe des Lumières, défenseur de la tolérance et de la liberté d'expression",
-      "Un général de Napoléon",
-      "Un peintre impressionniste",
-      "Un roi de France",
-    ],
+    c: ["Un philosophe des Lumières, défenseur de la tolérance et de la liberté", "Un général de Napoléon, célèbre pour ses campagnes d'Italie", "Un peintre impressionniste de la fin du XIXe siècle", "Un roi de France du siècle des Lumières"],
     a: 0,
     why: "Avec Rousseau, Montesquieu et Diderot, les philosophes des Lumières ont inspiré la Révolution française et la Déclaration de 1789.",
   },
   {
     q: "Quel philosophe des Lumières a théorisé la séparation des pouvoirs ?",
-    c: ["Montesquieu", "Voltaire", "Rousseau", "Diderot"],
+    c: ["Montesquieu", "Voltaire, philosophe", "Rousseau", "Diderot"],
     a: 0,
     why: "Dans « De l'esprit des lois » (1748), il distingue les pouvoirs exécutif, législatif et judiciaire.",
   },
   {
     q: "Quel mouvement artistique né en France à la fin du XIXe siècle est représenté par Monet et Renoir ?",
-    c: ["L'impressionnisme", "Le cubisme", "Le surréalisme", "Le romantisme"],
+    c: ["L'impressionnisme", "Le cubisme, au XXe siècle", "Le surréalisme", "Le romantisme"],
     a: 0,
     why: "Le nom vient du tableau de Claude Monet « Impression, soleil levant ». Le musée d'Orsay en conserve une grande collection.",
   },
