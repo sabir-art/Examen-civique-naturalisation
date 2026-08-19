@@ -1133,14 +1133,18 @@ a.themestat__row { min-height: 44px; }
     --verre-texte: var(--ink-700);
     --verre-texte-actif: var(--text-primary);
     --verre-pastille: rgba(255, 255, 255, .92);
-    --verre-flou: blur(22px) saturate(180%);
+    /* Plus fort et plus lumineux que le flou d'usage : le matériau d'Apple
+       ravive les couleurs de ce qui passe dessous au lieu de les ternir. */
+    --verre-flou: blur(30px) saturate(200%) brightness(1.06);
   }
   /* En thème sombre le verre s'assombrit, comme le fait le système. */
   :root[data-plateforme="apple"][data-theme="dark"],
   :root[data-plateforme="apple"]:not([data-theme="light"]) {
-    --verre-fond: rgba(34, 40, 38, .80);
-    --verre-eclat: rgba(255, 255, 255, .10);
-    --verre-cerne: rgba(255, 255, 255, .08);
+    --verre-fond: rgba(34, 40, 38, .78);
+    --verre-eclat: rgba(255, 255, 255, .26);
+    --verre-flanc: rgba(255, 255, 255, .10);
+    --verre-cerne: rgba(255, 255, 255, .09);
+    --verre-appui: rgba(255, 255, 255, .10);
     /* Même raison, en sens inverse : au-dessus d'une page blanche, le gris
        de nuit habituel tombe à 2,6:1. */
     --verre-texte: var(--nuit-verre-texte);
@@ -1151,24 +1155,65 @@ a.themestat__row { min-height: 44px; }
      faut donc rendre le verre clair quand l'appareil, lui, est en clair. */
   @media (prefers-color-scheme: light) {
     :root[data-plateforme="apple"]:not([data-theme="dark"]) {
-      --verre-fond: rgba(255, 255, 255, .70);
-      --verre-eclat: rgba(255, 255, 255, .65);
-      --verre-cerne: rgba(20, 20, 20, .07);
+      --verre-fond: rgba(255, 255, 255, .68);
+      --verre-eclat: rgba(255, 255, 255, .92);
+      --verre-flanc: rgba(255, 255, 255, .45);
+      --verre-cerne: rgba(20, 20, 20, .08);
+      --verre-appui: rgba(255, 255, 255, .55);
       --verre-texte: var(--ink-700);
       --verre-texte-actif: var(--text-primary);
       --verre-pastille: rgba(255, 255, 255, .92);
     }
   }
 
+  /* ── L'épaisseur du verre ────────────────────────────────────────────────
+     Ce qui distingue le matériau d'Apple d'un simple voile flouté, c'est
+     qu'il a une ÉPAISSEUR : la lumière entre par l'arête du haut, court le
+     long des bords, et ressort en bas. Un panneau flouté n'a que du flou ;
+     celui-ci a un dessus, un dessous et des côtés.
+
+     Tout est fait d'ombres intérieures, jamais de dégradés : c'est ce que le
+     système de design autorise, et cela suffit — une ombre intérieure très
+     floue posée sur une arête EST une arête éclairée. */
   :root[data-plateforme="apple"] .ds-bottomnav__bar,
   :root[data-plateforme="apple"] .ds-bottomnav__action {
     background: var(--verre-fond);
     -webkit-backdrop-filter: var(--verre-flou);
     backdrop-filter: var(--verre-flou);
-    /* Le liseré clair en haut est la lumière que le matériau renvoie : c'est
-       lui qui fait voir du verre plutôt qu'un voile. Le cerne, lui, détache la
-       barre de ce qui passe dessous. */
-    box-shadow: var(--shadow-nav), inset 0 1px 0 var(--verre-eclat), inset 0 0 0 1px var(--verre-cerne);
+    box-shadow:
+      var(--shadow-nav),
+      /* l'arête du haut, face à la lumière */
+      inset 0 1.5px 0 var(--verre-eclat),
+      /* les côtés, en lumière rasante */
+      inset 1.5px 0 0 var(--verre-flanc), inset -1.5px 0 0 var(--verre-flanc),
+      /* le dessous, où la lumière ressort, plus douce */
+      inset 0 -1.5px 0 var(--verre-flanc),
+      /* l'épaisseur elle-même : la clarté descend de l'arête vers le centre */
+      inset 0 10px 16px -12px var(--verre-eclat),
+      inset 0 -10px 16px -12px var(--verre-flanc),
+      /* le cerne, qui détache la barre de ce qui passe dessous */
+      inset 0 0 0 1px var(--verre-cerne);
+  }
+  /* Le matériau réagit au doigt : il s'éclaircit sous la pression, comme
+     `interactive()` le fait sur les commandes du système. */
+  :root[data-plateforme="apple"] .ds-bottomnav__tab:active {
+    background: var(--verre-appui);
+    transform: scale(.96);
+  }
+
+  /* La barre du haut appartient à la même famille. Sur iOS, le contenu passe
+     DERRIÈRE elle et on le voit défiler à travers ; une barre opaque qui
+     pousse le contenu devant elle est la marque d'une page web. */
+  :root[data-plateforme="apple"] #chrome-top {
+    background: var(--verre-fond);
+    -webkit-backdrop-filter: var(--verre-flou);
+    backdrop-filter: var(--verre-flou);
+    box-shadow: inset 0 -1px 0 var(--verre-cerne);
+  }
+  :root[data-plateforme="apple"] #chrome-top .ds-iconbtn--white,
+  :root[data-plateforme="apple"] .chrome__avatar {
+    background: var(--verre-pastille);
+    box-shadow: inset 0 1px 0 var(--verre-eclat), inset 0 0 0 1px var(--verre-cerne);
   }
   :root[data-plateforme="apple"] .ds-bottomnav__tab { color: var(--verre-texte); }
   :root[data-plateforme="apple"] .ds-bottomnav__tab[aria-current="page"] {

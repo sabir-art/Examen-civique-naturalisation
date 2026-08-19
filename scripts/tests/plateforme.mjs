@@ -120,6 +120,33 @@ for (const theme of ['light', 'dark']) {
   }
 }
 
+/* ------------------------------ 3. la barre du haut suit la même règle */
+
+for (const [plateforme, attendu] of [['apple', true], ['autre', false]]) {
+  const haut = await page.evaluate((p) => {
+    document.documentElement.dataset.plateforme = p;
+    const el = document.getElementById('chrome-top');
+    const cs = getComputedStyle(el);
+    return { flou: cs.backdropFilter || cs.webkitBackdropFilter || 'none', fond: cs.backgroundColor };
+  }, plateforme);
+  verifier(/blur/.test(haut.flou) === attendu,
+    `barre du haut sur ${plateforme} : ${attendu ? 'le contenu défile derrière' : 'fond plein'} (${haut.flou})`);
+  if (attendu) {
+    // Même exigence que pour le bas : le titre reste lisible dans les deux
+    // extrêmes de ce qui peut passer sous le verre.
+    const titre = await page.evaluate(() => {
+      const t = document.querySelector('.ds-topbar__title, .chrome__avatar');
+      return t ? getComputedStyle(t).color : null;
+    });
+    if (titre) {
+      for (const [nom, fond] of [['une photo noire', [0, 0, 0]], ['une page blanche', [255, 255, 255]]]) {
+        const r = contraste(lire(titre), sur(haut.fond, fond));
+        verifier(r >= 4.5, `barre du haut, sur ${nom} : le titre reste lisible (${r.toFixed(2)}:1)`);
+      }
+    }
+  }
+}
+
 await browser.close();
 console.log(erreurs.length ? `\n${erreurs.length} erreur(s) :\n- ${erreurs.join('\n- ')}` : '\nAucune erreur.');
 process.exit(erreurs.length ? 1 : 0);
