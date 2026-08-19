@@ -68,9 +68,29 @@ esac
 vert "Xcode en place ($chemin_dev)"
 
 if ! command -v pod >/dev/null 2>&1; then
-  echec "CocoaPods manque : Capacitor s'en sert pour assembler le projet iOS." \
-    "    brew install cocoapods" \
-    "  (ou : sudo gem install cocoapods)"
+  if command -v brew >/dev/null 2>&1; then
+    echec "CocoaPods manque : Capacitor s'en sert pour assembler le projet iOS." \
+      "" \
+      "    brew install cocoapods" \
+      "" \
+      "Aucun mot de passe ne sera demandé. Puis relancez ce script."
+  else
+    echec "CocoaPods manque : Capacitor s'en sert pour assembler le projet iOS." \
+      "" \
+      "    sudo gem install cocoapods" \
+      "" \
+      "Le mot de passe demandé est celui de votre session Mac." \
+      "RIEN NE S'AFFICHE pendant que vous le tapez : ni points, ni étoiles," \
+      "ni curseur qui avance. C'est voulu, et c'est déroutant la première" \
+      "fois. Tapez-le en aveugle, puis Entrée." \
+      "" \
+      "Si « Sorry, try again » revient trois fois, la commande s'arrête et" \
+      "rend la main : ce que vous tapez ensuite s'affiche en clair et part" \
+      "dans l'historique du terminal. Relancez la commande plutôt que de" \
+      "retaper le mot de passe." \
+      "" \
+      "Puis relancez ce script."
+  fi
 fi
 vert "CocoaPods $(pod --version 2>/dev/null)"
 
