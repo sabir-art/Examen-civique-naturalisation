@@ -39,28 +39,47 @@ robuste que d'instancier le matériau soi-même — le jour où Apple le fait
 
 ## Construire, dans l'ordre
 
-Une fois pour toutes :
+**D'abord, mettre le projet sur le Mac et entrer dans son dossier.** La moitié
+des échecs d'une première coque viennent de là : les commandes sont lancées
+depuis le dossier personnel, npm ne trouve pas de `package.json` et se plaint
+d'autre chose (« could not determine executable to run »), ce qui envoie
+chercher très loin d'un problème très simple.
 
 ```bash
-npm install                # Capacitor et son outillage
-npx cap add ios
-npx cap add android        # facultatif
+git clone https://github.com/sabir-art/Examen-civique-naturalisation.git
+cd Examen-civique-naturalisation
+git checkout claude/civic-exam-training-platform-794c2u
 ```
 
-Puis le greffon, à copier dans les projets engendrés :
+Ensuite, une seule commande fait le reste et s'arrête à la première chose qui
+manque, en disant laquelle :
 
 ```bash
-cp native/ios/BarreSystemePlugin.swift ios/App/App/
+bash native/preparer-ios.sh
+```
+
+Elle vérifie Node, les outils Xcode et CocoaPods, installe les dépendances,
+crée le projet iOS, y copie le greffon et assemble l'application.
+
+Ce qu'elle ne peut pas faire, et qu'elle rappelle à la fin : dans Xcode,
+**glisser `BarreSystemePlugin.swift` dans le navigateur de projet en cochant la
+cible « App »**. Un fichier posé dans le dossier n'appartient pas encore à
+l'application. Sans ce geste tout démarre quand même — avec la barre de la page
+au lieu de celle du système —, et c'est le piège le plus courant.
+
+Une fois le fichier dans la cible, Capacitor découvre le greffon tout seul : il
+se déclare par sa conformité à `CAPBridgedPlugin`, sans ligne d'enregistrement
+à écrire.
+
+Pour Android, plus tard :
+
+```bash
+npx cap add android
 mkdir -p android/app/src/main/java/fr/examencivique/app
 cp native/android/BarreSystemePlugin.kt android/app/src/main/java/fr/examencivique/app/
 ```
 
-Dans Xcode, ajouter le fichier `.swift` à la cible **App** (glisser-déposer dans
-le navigateur de projet, cocher « Copy items if needed » et la cible). Capacitor
-le découvre ensuite tout seul : le greffon se déclare par sa conformité à
-`CAPBridgedPlugin`, sans ligne d'enregistrement à écrire.
-
-À chaque fois qu'on a modifié l'application :
+À chaque fois qu'on a modifié l'application, ensuite :
 
 ```bash
 npm run natif:sync         # assemble dist/ puis le recopie dans les projets

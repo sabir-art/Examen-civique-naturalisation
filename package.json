@@ -13,7 +13,8 @@
     "natif:sync": "npm run dist && npx cap sync",
     "natif:ios": "npx cap open ios",
     "natif:android": "npx cap open android",
-    "dist": "node scripts/make-dist.mjs"
+    "dist": "node scripts/make-dist.mjs",
+    "natif:preparer": "bash native/preparer-ios.sh"
   },
   "license": "MIT",
   "devDependencies": {
