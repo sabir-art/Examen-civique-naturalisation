@@ -30,10 +30,11 @@
 import { QUESTIONS, BY_ID } from './questions.js';
 import { LIVRET_QUESTIONS, LIVRET_BY_ID } from './q-livret.js';
 import { ROMAN_QUESTIONS, ROMAN_BY_ID } from './roman.js';
+import { OFFICIEL_QUESTIONS, OFFICIEL_BY_ID } from './q-officiel.js';
 import { THEMES } from './programme.js';
 
 /** Tout ce à quoi on peut répondre dans l'application. */
-export const TOUTES_LES_QUESTIONS = [...QUESTIONS, ...LIVRET_QUESTIONS, ...ROMAN_QUESTIONS];
+export const TOUTES_LES_QUESTIONS = [...OFFICIEL_QUESTIONS, ...QUESTIONS, ...LIVRET_QUESTIONS, ...ROMAN_QUESTIONS];
 
 /**
  * Une question, quelle que soit sa banque.
@@ -43,7 +44,7 @@ export const TOUTES_LES_QUESTIONS = [...QUESTIONS, ...LIVRET_QUESTIONS, ...ROMAN
  * carnet de progression pour trois banques.
  */
 export function trouverQuestion(id) {
-  return BY_ID.get(id) || LIVRET_BY_ID.get(id) || ROMAN_BY_ID.get(id) || null;
+  return OFFICIEL_BY_ID.get(id) || BY_ID.get(id) || LIVRET_BY_ID.get(id) || ROMAN_BY_ID.get(id) || null;
 }
 
 /**
@@ -55,17 +56,32 @@ export function trouverQuestion(id) {
  * qu'un seul vocabulaire serve à tout.
  */
 export function sourceDe(q) {
+  if (q.source === 'officiel') return 'officiel';
   if (q.source === 'livret') return 'livret';
   if (q.source === 'roman') return 'recit';
   return 'examen';
 }
 
-/** Les trois banques, dans l'ordre où elles se présentent à l'écran. */
-export const SOURCES = ['examen', 'livret', 'recit'];
+/**
+ * Les quatre banques, dans l'ordre où elles se présentent à l'écran.
+ *
+ * Les questions officielles viennent en tête : ce sont les seules dont
+ * l'intitulé est celui que le candidat lira le jour de l'épreuve.
+ */
+export const SOURCES = ['officiel', 'examen', 'livret', 'recit'];
 
-/** Comment chaque banque se nomme devant l'utilisateur. */
+/**
+ * Comment chaque banque se nomme devant l'utilisateur.
+ *
+ * L'ancien intitulé « Banque d'examen » était trompeur, et c'est la
+ * comparaison avec la liste publiée par le ministère qui l'a montré : ces
+ * questions sont rédigées à partir du PROGRAMME de l'arrêté du 10 octobre
+ * 2025, pas à partir de la liste des questions posées. Elles s'appellent donc
+ * ce qu'elles sont — de l'entraînement.
+ */
 export const LIBELLE_SOURCE = {
-  examen: "Banque d'examen",
+  officiel: 'Questions officielles',
+  examen: 'Entraînement',
   livret: 'Livret du citoyen',
   recit: 'La France racontée',
 };
@@ -79,7 +95,8 @@ export const LIBELLE_SOURCE = {
  * d'avancement, et dans le bilan juste en dessous : rien ne se perd.
  */
 export const COURT_SOURCE = {
-  examen: 'Examen',
+  officiel: 'Officielles',
+  examen: 'Entraînement',
   livret: 'Livret',
   recit: 'Récit',
 };
@@ -92,7 +109,8 @@ export const COURT_SOURCE = {
  * son article.
  */
 export const SOURCE_APRES_DANS = {
-  examen: "la banque d'examen",
+  officiel: 'les questions officielles',
+  examen: "la banque d'entraînement",
   livret: 'le livret du citoyen',
   recit: '« La France racontée »',
 };
@@ -141,6 +159,7 @@ export function tailleTheme(theme) {
 export function compositionTheme(theme) {
   return {
     total: tailleTheme(theme),
+    officiel: poolTheme(theme, 'officiel').length,
     examen: poolTheme(theme, 'examen').length,
     livret: poolTheme(theme, 'livret').length,
     recit: poolTheme(theme, 'recit').length,
@@ -151,7 +170,8 @@ export function compositionTheme(theme) {
 export function phraseComposition(theme) {
   const c = compositionTheme(theme);
   const bouts = [
-    c.examen ? `${c.examen} de la banque d'examen` : null,
+    c.officiel ? `${c.officiel} officielles` : null,
+    c.examen ? `${c.examen} d'entraînement` : null,
     c.livret ? `${c.livret} du livret` : null,
     c.recit ? `${c.recit} du récit` : null,
   ].filter(Boolean);

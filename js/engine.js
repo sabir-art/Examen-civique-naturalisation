@@ -14,7 +14,7 @@ import {
   ROMAN_QUESTIONS, ACTES as ROMAN_ACTES, CHAPITRES as ROMAN_CHAPITRES,
   CHAPITRE_BY_KEY as ROMAN_BY_KEY, questionsOf as romanQuestionsOf, questionsOfActe,
 } from './data/roman.js';
-import { TOUTES_LES_QUESTIONS, poolTheme, trouverQuestion, sourceDe, LIBELLE_SOURCE } from './data/banques.js';
+import { TOUTES_LES_QUESTIONS, poolTheme, trouverQuestion, sourceDe, SOURCES, LIBELLE_SOURCE } from './data/banques.js';
 import { shuffle, sample, pct } from './lib/util.js';
 import * as store from './store.js';
 
@@ -393,11 +393,10 @@ export function readiness() {
  * deux : ce qui est vu, et ce qui est retenu.
  */
 export function avancementTheme(theme) {
-  const par = {
-    examen: { total: 0, vus: 0, libelle: LIBELLE_SOURCE.examen },
-    livret: { total: 0, vus: 0, libelle: LIBELLE_SOURCE.livret },
-    recit: { total: 0, vus: 0, libelle: LIBELLE_SOURCE.recit },
-  };
+  // Construit à partir de la liste des banques, et non écrit à la main :
+  // une banque ajoutée sans sa ligne ici rendait `par[sourceDe(q)]` indéfini,
+  // et l'écran du thème plantait au premier passage.
+  const par = Object.fromEntries(SOURCES.map((s) => [s, { total: 0, vus: 0, libelle: LIBELLE_SOURCE[s] }]));
   let total = 0;
   let vus = 0;
   for (const q of poolTheme(theme)) {

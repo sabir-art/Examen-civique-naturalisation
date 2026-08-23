@@ -61,7 +61,7 @@ async function ouvrir(theme) {
 /* ----------------------------------------------------- les puces existent */
 
 const puces = await ouvrir('histoire-geo-culture');
-for (const attendu of ['Tout (209)', 'Examen (76)', 'Livret (85)', 'Récit (48)']) {
+for (const attendu of ['Tout (209)', 'Entraînement (76)', 'Livret (85)', 'Récit (48)']) {
   verifier(puces.includes(attendu), `la puce « ${attendu} » est proposée`);
 }
 
@@ -108,7 +108,7 @@ verifier(
   'le livret choisi, les sous-thèmes disparaissent — ils ne découpent que l\'examen',
 );
 
-await page.click('.ds-chip:has-text("Examen")');
+await page.click('.ds-chip:has-text("Entraînement")');
 await page.waitForTimeout(120);
 const apresExamen = await page.$$eval('.ds-chip', (n) => n.map((x) => x.textContent.trim()));
 verifier(
@@ -138,7 +138,7 @@ verifier(/\(4 questions\)/.test(bouton || ''), `le bouton annonce le nombre rée
  */
 await ouvrir('histoire-geo-culture');
 for (const [puce, attendu] of [
-  ['Examen', "la banque d'examen"],
+  ['Entraînement', "la banque d'entraînement"],
   ['Livret', 'le livret du citoyen'],
   ['Récit', '« La France racontée »'],
 ]) {

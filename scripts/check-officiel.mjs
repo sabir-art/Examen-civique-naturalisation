@@ -22,6 +22,7 @@
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { QUESTIONS } from '../js/data/questions.js';
+import { OFFICIEL_QUESTIONS } from '../js/data/q-officiel.js';
 
 const REF = readdirSync('docs').filter((f) => /^questions-officielles-.*\.json$/.test(f)).sort().pop();
 if (!REF) {
@@ -41,6 +42,21 @@ const VIDES = new Set(('le la les un une des de du d l a au aux en et est ce que
   + 'quelle quels quelles pour par sur dans il elle on se sa son ses leur leurs plus ne pas y').split(' '));
 const mots = (s) => new Set(norm(s).split(' ').filter((w) => w.length > 2 && !VIDES.has(w)));
 const jaccard = (a, b) => { let i = 0; for (const x of a) if (b.has(x)) i += 1; return i / (a.size + b.size - i || 1); };
+
+/* ─────────────────────────────────────────────────────────────────────────
+   1. La banque officielle doit citer le ministère AU MOT PRÈS.
+   ─────────────────────────────────────────────────────────────────────────
+   C'est tout son intérêt : un intitulé reformulé, même mieux tourné, n'est
+   plus la question que le candidat lira le jour de l'épreuve. Ce contrôle-ci
+   échoue — contrairement au reste du fichier, qui ne fait qu'informer. */
+const officielsExacts = new Map(officiel.questions.map((q) => [norm(q.intitule), q]));
+const derives = [];
+for (const q of OFFICIEL_QUESTIONS) {
+  const ref = officielsExacts.get(norm(q.q));
+  if (!ref) derives.push(`  ✗ intitulé absent de la liste du ministère : « ${q.q} »`);
+  else if (ref.theme !== q.theme) derives.push(`  ✗ thème divergent pour « ${q.q} » : ${q.theme} ici, ${ref.theme} au ministère`);
+}
+const couvertsOff = OFFICIEL_QUESTIONS.length;
 
 const banque = QUESTIONS.map((q) => ({ q, n: norm(q.q), mots: mots(q.q) }));
 const rangs = { identique: [], proche: [], lointaine: [], absente: [] };
@@ -66,6 +82,13 @@ const couvertes = rangs.identique.length;
 const pct = (n) => `${Math.round((n / total) * 100)} %`.padStart(5);
 
 console.log(`\nListe officielle : ${REF}`);
+console.log(`Banque officielle de l'application : ${couvertsOff} / ${officiel.questions.length} questions rédigées.`);
+if (derives.length) {
+  console.log('\nÉCART AVEC LE TEXTE DU MINISTÈRE :');
+  for (const d of derives) console.log(d);
+} else if (couvertsOff) {
+  console.log('  ✓ chaque intitulé est celui du ministère, au mot près.');
+}
 console.log(`Publiée le ${officiel.publie_le} — ${total} questions de connaissance.`);
 console.log(`Banque de l'application : ${QUESTIONS.length} questions.\n`);
 console.log(`  reprises telles quelles   ${String(couvertes).padStart(4)}  ${pct(couvertes)}`);
@@ -88,5 +111,6 @@ if (rangs.absente.length) {
 }
 
 console.log(`\n${couvertes} des ${total} questions officielles figurent dans la banque.`);
-console.log('Ce contrôle informe, il n’échoue pas : combler l’écart est un travail de');
-console.log('contenu, pas une correction de code.\n');
+console.log('Le décompte ci-dessus informe : combler l’écart est un travail de contenu.');
+console.log('La fidélité au texte du ministère, elle, est une exigence — et elle échoue.\n');
+if (derives.length) process.exit(1);

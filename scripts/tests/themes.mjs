@@ -136,8 +136,22 @@ const detail = await page.evaluate(() => document.getElementById('app').innerTex
 verifier(/Où vous en êtes/.test(detail), 'l’écran du thème ouvre sur « où vous en êtes »');
 verifier(new RegExp(`La France racontée\\s*${jouees}/48`).test(detail),
   `il attribue les réponses à la bonne section (récit : ${jouees}/48)`);
-verifier(/Banque d'examen\s*0\/76/.test(detail),
-  "et laisse la banque d'examen à zéro : on n'y a pas répondu");
+// Le libellé vient du module, pas d'une copie : ce contrôle porte sur le
+// rattachement des réponses, pas sur l'orthographe d'un intitulé — lequel a
+// déjà changé une fois, le jour où « Banque d'examen » s'est révélé trompeur.
+const libelles = await page.evaluate(async () => {
+  const { LIBELLE_SOURCE } = await import('./js/data/banques.js');
+  return LIBELLE_SOURCE;
+});
+verifier(new RegExp(`${libelles.examen}\\s*0/76`).test(detail),
+  `et laisse la banque d'entraînement à zéro : on n'y a pas répondu (« ${libelles.examen} »)`);
+// La banque officielle se remplit thème par thème : une ligne n'apparaît que
+// là où elle porte des questions. On la cherche donc là où il y en a.
+await page.goto(`${BASE}#/reviser/t/principes-valeurs`);
+await page.waitForSelector('.card__title');
+const detailPV = await page.evaluate(() => document.getElementById('app').innerText);
+verifier(new RegExp(`${libelles.officiel}\\s*\\d+/\\d+`).test(detailPV),
+  `les questions officielles ont leur propre ligne (« ${libelles.officiel} »)`);
 
 /* ---------------------- 3. et répondre dans le livret aussi */
 
