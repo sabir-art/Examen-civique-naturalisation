@@ -253,6 +253,69 @@ for (const puce of ['Récit', 'Culture et patrimoine']) {
   for (const v of vue) verifier(v.entier, `« ${puce} » choisi : « ${v.texte} » tient entièrement dans sa piste`);
 }
 
+/* ------------------------------------ une puce libre se voit comme un bouton */
+
+/**
+ * Le défaut : puce blanche sur carte blanche.
+ *
+ * Les puces non choisies prenaient le fond de la carte qui les porte. Elles
+ * ressemblaient à du texte posé là : rien ne disait qu'on pouvait appuyer
+ * dessus, ni lesquelles restaient disponibles. Seule celle qui était retenue
+ * se voyait — donc, de l'extérieur, un intitulé noir et trois mots gris.
+ *
+ * Le seuil ci-dessous n'est pas une exigence WCAG : c'est un plancher de
+ * « distinguable tout court ». Un aplat de puce sur son support n'atteint
+ * jamais 3:1 — celui de YouTube non plus —, mais il ne doit jamais valoir 1,0,
+ * qui signifie « exactement la même couleur ».
+ */
+const lum = (c) => {
+  const [r, v, b] = c.match(/\d+/g).slice(0, 3).map((n) => {
+    const x = Number(n) / 255;
+    return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * v + 0.0722 * b;
+};
+const rapport = (a, b) => {
+  const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+  return (x + 0.05) / (y + 0.05);
+};
+
+async function fondsDesPuces(sombre) {
+  const ctx2 = await browser.newContext({ viewport: { width: 393, height: 852 }, locale: 'fr-FR', colorScheme: sombre ? 'dark' : 'light' });
+  const p2 = await ctx2.newPage();
+  await p2.goto(BASE, { waitUntil: 'networkidle' });
+  await p2.waitForSelector('#boot', { state: 'hidden' });
+  await p2.fill('#ob-name', 'Abdellah');
+  await p2.click('button[type=submit]');
+  await p2.waitForSelector('.accueil__hero');
+  await p2.goto(`${BASE}#/reviser/t/histoire-geo-culture`);
+  await p2.reload({ waitUntil: 'networkidle' });
+  await p2.waitForSelector('.ds-filtre__piste');
+  const m = await p2.evaluate(() => {
+    const puces = [...document.querySelectorAll('.ds-filtre__piste .ds-chip')];
+    const libre = puces.find((x) => x.getAttribute('aria-pressed') !== 'true');
+    const prise = puces.find((x) => x.getAttribute('aria-pressed') === 'true');
+    return {
+      carte: getComputedStyle(document.querySelector('.ds-filtres').parentElement).backgroundColor,
+      libre: libre ? getComputedStyle(libre).backgroundColor : null,
+      prise: prise ? getComputedStyle(prise).backgroundColor : null,
+    };
+  });
+  await ctx2.close();
+  return m;
+}
+
+for (const sombre of [false, true]) {
+  const f = await fondsDesPuces(sombre);
+  const theme = sombre ? 'sombre' : 'clair';
+  const contreCarte = rapport(f.libre, f.carte);
+  verifier(contreCarte >= 1.1, `thème ${theme} : une puce libre se détache de sa carte (${contreCarte.toFixed(2)}:1 — ${f.libre} sur ${f.carte})`);
+  // Et la puce retenue doit rester nettement plus tranchée que les libres,
+  // sinon le choix se lit mal.
+  const priseVsLibre = rapport(f.prise, f.libre);
+  verifier(priseVsLibre >= 3, `thème ${theme} : la puce retenue tranche sur les libres (${priseVsLibre.toFixed(2)}:1)`);
+}
+
 /* ------------------------------------------- la séance part vraiment */
 
 await ouvrir('histoire-geo-culture');

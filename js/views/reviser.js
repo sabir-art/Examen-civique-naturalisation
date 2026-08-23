@@ -346,6 +346,14 @@ function themeSetup(theme, preSub) {
     const montrerSubs = subs.length > 1 && (chosenSource === null || chosenSource === 'examen');
 
     const piste = (enfants) => h('div', { class: 'ds-filtre__piste' }, enfants);
+    /* Une puce non choisie doit se voir comme un bouton.
+       Posée en blanc sur une carte blanche, elle ressemblait à du texte : rien
+       ne disait qu'on pouvait appuyer dessus, ni lesquelles étaient encore
+       disponibles. YouTube tranche pareil — fond gris clair pour ce qui
+       attend, fond plein pour ce qui est retenu — et c'est la convention
+       partout ailleurs. Le fond gris est le seul changement : la puce choisie
+       garde son aplat d'encre. */
+    const filtre = (options) => Chip({ tone: 'neutral', ...options });
     const reglage = (nom, contenu) => h('div', { class: 'ds-filtre' }, [
       h('span', { class: 'ds-filtre__nom', text: nom }),
       contenu,
@@ -356,12 +364,12 @@ function themeSetup(theme, preSub) {
       children: [
         h('div', { class: 'ds-filtres' }, [
           banques.length > 1 ? reglage('Banque de questions', piste([
-            Chip({
+            filtre({
               label: `Tout (${a.total})`,
               pressed: chosenSource === null,
               onClick: () => { chosenSource = null; draw(); },
             }),
-            ...banques.map((x) => Chip({
+            ...banques.map((x) => filtre({
               label: `${COURT_SOURCE[x]} (${parBanque[x].total})`,
               pressed: chosenSource === x,
               // Changer de banque annule le sous-thème : il n'existe que dans
@@ -371,12 +379,12 @@ function themeSetup(theme, preSub) {
           ])) : null,
 
           montrerSubs ? reglage('Sous-thème', piste([
-            Chip({
+            filtre({
               label: `Tout (${poolTheme(theme, chosenSource).length})`,
               pressed: chosenSub === null,
               onClick: () => { chosenSub = null; draw(); },
             }),
-            ...subs.map((x) => Chip({
+            ...subs.map((x) => filtre({
               label: `${SUBS[x] || x} (${pool({ theme, sub: x }).length})`,
               pressed: chosenSub === x,
               onClick: () => { chosenSub = x; chosenSource = 'examen'; draw(); },
