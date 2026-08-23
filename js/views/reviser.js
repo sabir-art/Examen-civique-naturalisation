@@ -33,6 +33,7 @@ import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
 import { setGuard, refresh, masquerOnglets } from '../app.js';
 import * as store from '../store.js';
+import { composerLaSeance } from '../lib/seance.js';
 
 const COUNTS = [10, 20, 40];
 
@@ -425,8 +426,15 @@ function themeSetup(theme, preSub) {
       : `${quoi}, toutes déjà vues.`;
   }
 
-  function start() {
-    const cards = buildTraining({ mode: 'theme', theme, sub: chosenSub, source: chosenSource, count });
+  async function start() {
+    const retenues = chosenSub ? pool({ theme, sub: chosenSub }) : poolTheme(theme, chosenSource);
+    const choix = await composerLaSeance({ questions: retenues, demande: count });
+    // Renoncer laisse l'écran de réglages en place : il est déjà affiché.
+    if (!choix) return;
+    const cards = buildTraining({
+      mode: 'theme', theme, sub: chosenSub, source: chosenSource,
+      count: choix.count, inedites: choix.inedites,
+    });
     if (!cards.length) { toast('Aucune question disponible.'); return; }
     runQuiz({
       container,

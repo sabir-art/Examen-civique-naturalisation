@@ -9,6 +9,8 @@ import { LIVRET, PARTIES, PARTIE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES } from '../d
 import { questionsOf, LIVRET_QUESTIONS } from '../data/q-livret.js';
 import { buildLivretSet, livretMastery, livretOverview, livretChapitreProgres, livretPartieProgres } from '../engine.js';
 import { runQuiz } from './reviser.js';
+import { navigate } from '../app.js';
+import { composerLaSeance } from '../lib/seance.js';
 
 export default function renderLivret({ params }) {
   const target = params[0];
@@ -196,11 +198,16 @@ function quiz(chapterKey) {
   const label = c ? c.title : 'Livret du citoyen';
   const backTo = c ? `#/livret/c/${chapterKey}` : '#/livret';
 
-  function start() {
-    const cards = buildLivretSet({
-      chapter: chapterKey,
-      count: chapterKey ? questionsOf(chapterKey).length : 20,
+  async function start() {
+    const questions = chapterKey ? questionsOf(chapterKey) : LIVRET_QUESTIONS;
+    const choix = await composerLaSeance({
+      questions,
+      demande: chapterKey ? questions.length : 20,
     });
+    // Renoncer depuis cet écran-là ne laisse rien derrière : on entre
+    // directement dans le questionnaire, sans écran de réglages où retomber.
+    if (!choix) { navigate(backTo); return; }
+    const cards = buildLivretSet({ chapter: chapterKey, count: choix.count, inedites: choix.inedites });
     if (!cards.length) {
       container.replaceChildren(h('div', { class: 'empty' }, [
         h('div', { class: 'empty__icon' }, icon('book')),
@@ -219,6 +226,8 @@ function quiz(chapterKey) {
     });
   }
 
-  start();
+  // Après le rendu : sans cela, la question s'ouvrirait par-dessus l'écran
+  // qu'on est en train de quitter, le routeur n'ayant pas encore posé le neuf.
+  requestAnimationFrame(() => start());
   return { node: container, title: label, back: backTo, hideTabs: true };
 }

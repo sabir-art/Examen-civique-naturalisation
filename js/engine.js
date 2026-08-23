@@ -166,10 +166,44 @@ export const EXAM_MODE_LIST = Object.values(EXAM_MODES);
 export const modeOf = (exam) => (EXAM_MODES[exam?.mode] ? exam.mode : 'officiel');
 
 /**
+ * L'ordre de service d'une série : jamais vues, puis dues, puis le reste,
+ * mélangées à l'intérieur de chaque groupe.
+ *
+ * Ce classement était recopié à l'identique dans les trois compositeurs de
+ * séance — thème, livret, récit. Une règle écrite trois fois est une règle
+ * qu'on corrigera deux fois.
+ *
+ * `inedites` ne garde que le premier groupe : « je ne veux que ce que je n'ai
+ * jamais vu ». Sans lui, une demande de vingt questions alors qu'il n'en reste
+ * qu'une de neuve servait dix-neuf révisions sans le dire.
+ */
+function ordonner(candidates, { inedites = false } = {}) {
+  const never = [];
+  const due = [];
+  const rest = [];
+  const now = Date.now();
+  for (const q of candidates) {
+    const r = store.progressOf(q.id);
+    if (!r) never.push(q);
+    else if (r.due <= now) due.push(q);
+    else rest.push(q);
+  }
+  if (inedites) return shuffle(never);
+  return [...shuffle(never), ...shuffle(due), ...shuffle(rest)];
+}
+
+/** Combien, dans cet ensemble, n'ont jamais été servies. */
+export function compterInedites(questions) {
+  let n = 0;
+  for (const q of questions) if (!store.progressOf(q.id)) n += 1;
+  return n;
+}
+
+/**
  * Compose une série d'entraînement.
  * mode : 'theme' | 'revision' | 'erreurs' | 'examen-erreurs'
  */
-export function buildTraining({ mode = 'theme', theme = null, sub = null, source = null, count = 20, ids = null } = {}) {
+export function buildTraining({ mode = 'theme', theme = null, sub = null, source = null, count = 20, ids = null, inedites = false } = {}) {
   if (ids) {
     // Les trois banques sont acceptées : la reprise des erreurs sert aussi
     // aux séries du livret et du récit.
@@ -194,19 +228,7 @@ export function buildTraining({ mode = 'theme', theme = null, sub = null, source
      banque d'examen — elle seule en porte —, donc un sous-thème implique cette
      banque et rend `source` sans objet. */
   const candidates = sub ? pool({ theme, sub }) : poolTheme(theme, source);
-  // Priorité : jamais vues, puis dues, puis le reste — le tout mélangé dans chaque groupe.
-  const never = [];
-  const due = [];
-  const rest = [];
-  const now = Date.now();
-  for (const q of candidates) {
-    const r = store.progressOf(q.id);
-    if (!r) never.push(q);
-    else if (r.due <= now) due.push(q);
-    else rest.push(q);
-  }
-  const ordered = [...shuffle(never), ...shuffle(due), ...shuffle(rest)];
-  return ordered.slice(0, count).map(toCard);
+  return ordonner(candidates, { inedites }).slice(0, count).map(toCard);
 }
 
 /**
@@ -447,19 +469,9 @@ export function overview() {
  * Banque distincte de celle des examens blancs : elle sert à vérifier
  * chapitre par chapitre la maîtrise du document du ministère.
  */
-export function buildLivretSet({ chapter = null, count = 15 } = {}) {
+export function buildLivretSet({ chapter = null, count = 15, inedites = false } = {}) {
   const candidates = chapter ? questionsOf(chapter) : LIVRET_QUESTIONS;
-  const never = [];
-  const due = [];
-  const rest = [];
-  const now = Date.now();
-  for (const q of candidates) {
-    const r = store.progressOf(q.id);
-    if (!r) never.push(q);
-    else if (r.due <= now) due.push(q);
-    else rest.push(q);
-  }
-  return [...shuffle(never), ...shuffle(due), ...shuffle(rest)].slice(0, count).map(toCard);
+  return ordonner(candidates, { inedites }).slice(0, count).map(toCard);
 }
 
 /** Maîtrise d'un chapitre du livret (0 à 1). Sans argument : livret entier. */
@@ -497,22 +509,12 @@ export function livretOverview() {
  * Questions du récit. Troisième banque, indépendante des deux autres :
  * elles vérifient ce qui a été retenu d'un chapitre qu'on vient de lire.
  */
-export function buildRomanSet({ chapitre = null, acte = null, count = 20 } = {}) {
+export function buildRomanSet({ chapitre = null, acte = null, count = 20, inedites = false } = {}) {
   let candidates = ROMAN_QUESTIONS;
   if (chapitre) candidates = romanQuestionsOf(chapitre);
   else if (acte) candidates = questionsOfActe(acte);
 
-  const never = [];
-  const due = [];
-  const rest = [];
-  const now = Date.now();
-  for (const q of candidates) {
-    const r = store.progressOf(q.id);
-    if (!r) never.push(q);
-    else if (r.due <= now) due.push(q);
-    else rest.push(q);
-  }
-  return [...shuffle(never), ...shuffle(due), ...shuffle(rest)].slice(0, count).map((q) => toCard(q));
+  return ordonner(candidates, { inedites }).slice(0, count).map((q) => toCard(q));
 }
 
 /** Maîtrise d'un chapitre du récit (0 à 1). Sans argument : récit entier. */

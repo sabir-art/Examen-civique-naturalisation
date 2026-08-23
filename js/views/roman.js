@@ -17,7 +17,7 @@ import {
   ProgressBar, StatTile, SegmentedControl, LessonRow,
 } from '../ds/index.js';
 import { daysBetween } from '../lib/util.js';
-import { ROMAN, ACTES, ACTE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES, TOTAL_MINUTES, nextChapitre, prevChapitre, questionsOf } from '../data/roman.js';
+import { ROMAN, ACTES, ACTE_BY_KEY, CHAPITRE_BY_KEY, CHAPITRES, TOTAL_MINUTES, nextChapitre, prevChapitre, questionsOf, questionsOfActe, ROMAN_QUESTIONS } from '../data/roman.js';
 import { AR_BY_KEY, ACTE_AR_BY_KEY, blocs, TOTAL_TRADUITS } from '../data/roman-ar.js';
 import { GLOSSAIRE, TOTAL_TERMES } from '../data/glossaire.js';
 import { marquer, motsDuChapitre } from '../lib/gloss.js';
@@ -28,6 +28,7 @@ import {
 } from '../engine.js';
 import { TOTAL_FICHES, fichesDuChapitre } from '../data/tableaux.js';
 import { runQuiz } from './reviser.js';
+import { composerLaSeance } from '../lib/seance.js';
 import { preparerDemande } from './assistant.js';
 import { createConverser } from '../components/converser.js';
 import * as ai from '../ai.js';
@@ -727,11 +728,18 @@ function quiz({ chapitre: chapKey = null, acte: acteKey = null }) {
   const label = c ? `Chapitre ${c.num}` : a ? `Acte ${a.num}` : 'La France racontée';
   const backTo = c ? `#/histoire/c/${chapKey}` : a ? `#/histoire/a/${acteKey}` : '#/histoire';
 
-  function start() {
+  async function start() {
+    const questions = chapKey ? questionsOf(chapKey) : acteKey ? questionsOfActe(acteKey) : ROMAN_QUESTIONS;
+    const choix = await composerLaSeance({
+      questions,
+      demande: chapKey ? questions.length : 20,
+    });
+    // Comme au livret : on entre directement dans le questionnaire, il n'y a
+    // pas d'écran de réglages où retomber si l'on renonce.
+    if (!choix) { navigate(backTo); return; }
     const cards = buildRomanSet({
-      chapitre: chapKey,
-      acte: acteKey,
-      count: chapKey ? questionsOf(chapKey).length : 20,
+      chapitre: chapKey, acte: acteKey,
+      count: choix.count, inedites: choix.inedites,
     });
     if (!cards.length) {
       container.replaceChildren(h('div', { class: 'empty' }, [
@@ -762,7 +770,9 @@ function quiz({ chapitre: chapKey = null, acte: acteKey = null }) {
     });
   }
 
-  start();
+  // Après le rendu : sans cela, la question s'ouvrirait par-dessus l'écran
+  // qu'on est en train de quitter, le routeur n'ayant pas encore posé le neuf.
+  requestAnimationFrame(() => start());
   return { node: container, title: label, back: backTo, hideTabs: true };
 }
 
