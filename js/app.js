@@ -425,6 +425,29 @@ export function refresh() {
 }
 
 window.addEventListener('hashchange', route);
+
+/**
+ * Un lien vers l'adresse où l'on se trouve déjà.
+ *
+ * Le navigateur considère qu'il n'y a rien à faire et n'émet aucun
+ * « hashchange » : le routeur ne rejoue pas, et le lien ne fait rien du tout.
+ * Invisible partout ailleurs — sauf qu'un questionnaire remplace le contenu de
+ * l'écran SANS changer l'adresse. Le bouton « Retour » de la page de résultats
+ * d'un thème pointait donc vers l'adresse courante, et restait inerte : on
+ * était bloqué sur son score, les onglets masqués, sans autre issue que la
+ * flèche du haut.
+ *
+ * On rattrape ici la classe entière plutôt que ce bouton-là : tout lien
+ * interne qui vise l'écran courant redemande un rendu.
+ */
+document.addEventListener('click', (ev) => {
+  if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+  const lien = ev.target.closest?.('a[href^="#/"]');
+  if (!lien) return;
+  if (lien.getAttribute('href') !== decodeURIComponent(location.hash)) return;
+  ev.preventDefault();
+  refresh();
+});
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
 /* ------------------------------------------------------ écran d'ouverture */
