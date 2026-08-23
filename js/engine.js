@@ -14,7 +14,7 @@ import {
   ROMAN_QUESTIONS, ACTES as ROMAN_ACTES, CHAPITRES as ROMAN_CHAPITRES,
   CHAPITRE_BY_KEY as ROMAN_BY_KEY, questionsOf as romanQuestionsOf, questionsOfActe,
 } from './data/roman.js';
-import { TOUTES_LES_QUESTIONS, poolTheme, trouverQuestion } from './data/banques.js';
+import { TOUTES_LES_QUESTIONS, poolTheme, trouverQuestion, sourceDe, LIBELLE_SOURCE } from './data/banques.js';
 import { shuffle, sample, pct } from './lib/util.js';
 import * as store from './store.js';
 
@@ -169,7 +169,7 @@ export const modeOf = (exam) => (EXAM_MODES[exam?.mode] ? exam.mode : 'officiel'
  * Compose une série d'entraînement.
  * mode : 'theme' | 'revision' | 'erreurs' | 'examen-erreurs'
  */
-export function buildTraining({ mode = 'theme', theme = null, sub = null, count = 20, ids = null } = {}) {
+export function buildTraining({ mode = 'theme', theme = null, sub = null, source = null, count = 20, ids = null } = {}) {
   if (ids) {
     // Les trois banques sont acceptées : la reprise des erreurs sert aussi
     // aux séries du livret et du récit.
@@ -185,10 +185,15 @@ export function buildTraining({ mode = 'theme', theme = null, sub = null, count 
     return planErreurs(count).questions.map(toCard);
   }
 
-  /* Le thème entier, les trois banques réunies — la séance travaille donc
-     exactement l'ensemble que la barre du thème mesure. Un sous-thème, lui,
-     n'existe que dans la banque d'examen : elle seule en porte. */
-  const candidates = sub ? pool({ theme, sub }) : poolTheme(theme);
+  /* Sans filtre, le thème entier — les trois banques réunies : la séance
+     travaille alors exactement l'ensemble que la barre du thème mesure.
+
+     `source` restreint à une banque : « je ne veux que les questions
+     officielles » est une demande courante, et il n'y avait aucun moyen de
+     l'exprimer. `sub` restreint à un sous-thème, qui n'existe que dans la
+     banque d'examen — elle seule en porte —, donc un sous-thème implique cette
+     banque et rend `source` sans objet. */
+  const candidates = sub ? pool({ theme, sub }) : poolTheme(theme, source);
   // Priorité : jamais vues, puis dues, puis le reste — le tout mélangé dans chaque groupe.
   const never = [];
   const due = [];
@@ -366,16 +371,15 @@ export function readiness() {
  * deux : ce qui est vu, et ce qui est retenu.
  */
 export function avancementTheme(theme) {
-  const nom = (q) => (q.source === 'livret' ? 'livret' : q.source === 'roman' ? 'recit' : 'examen');
   const par = {
-    examen: { total: 0, vus: 0, libelle: "Banque d'examen" },
-    livret: { total: 0, vus: 0, libelle: 'Livret du citoyen' },
-    recit: { total: 0, vus: 0, libelle: 'La France racontée' },
+    examen: { total: 0, vus: 0, libelle: LIBELLE_SOURCE.examen },
+    livret: { total: 0, vus: 0, libelle: LIBELLE_SOURCE.livret },
+    recit: { total: 0, vus: 0, libelle: LIBELLE_SOURCE.recit },
   };
   let total = 0;
   let vus = 0;
   for (const q of poolTheme(theme)) {
-    const b = par[nom(q)];
+    const b = par[sourceDe(q)];
     b.total += 1;
     total += 1;
     if (store.progressOf(q.id)) { b.vus += 1; vus += 1; }

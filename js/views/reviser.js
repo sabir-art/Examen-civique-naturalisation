@@ -25,13 +25,14 @@ const SUJET = {
 };
 import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
-import { TOUTES_LES_QUESTIONS, poolTheme, phraseComposition } from '../data/banques.js';
+import { TOUTES_LES_QUESTIONS, poolTheme, phraseComposition, SOURCES, LIBELLE_SOURCE, SOURCE_APRES_DANS } from '../data/banques.js';
 import { CHAPITRES } from '../data/livret.js';
 import { TOTAL_TERMES } from '../data/glossaire.js';
 import { buildTraining, mastery, coverage, avancementTheme, planRevision, planErreurs, compositionSeance, resteSeance } from '../engine.js';
 import { createQuiz } from '../components/quiz.js';
 import { createResults } from '../components/results.js';
 import { setGuard, refresh, masquerOnglets } from '../app.js';
+import * as store from '../store.js';
 
 const COUNTS = [10, 20, 40];
 
@@ -210,8 +211,7 @@ function hub() {
  * si les 166 qui restent sont dans le livret qu'on n'a pas ouvert ou dans le
  * récit qu'on a fini.
  */
-function avancement(theme) {
-  const a = avancementTheme(theme);
+function avancement(a) {
   return Card({ surface: 'white', elevation: 'xs', children: [
     h('div', { class: 'row row--between' }, [
       h('h2', { class: 'card__title', text: 'Où vous en êtes' }),
@@ -244,13 +244,23 @@ function themeSetup(theme, preSub) {
   const all = poolTheme(theme);
   const subs = [...new Set(pool({ theme }).map((q) => q.sub))];
   let chosenSub = preSub && subs.includes(preSub) ? preSub : null;
+  // Un sous-thème appelé depuis l'extérieur ne peut venir que de l'examen :
+  // l'écran doit le dire, plutôt que d'afficher « toutes banques » en tirant
+  // dans une seule.
+  let chosenSource = chosenSub ? 'examen' : null;
   let count = 20;
 
   const container = h('div', { class: 'stack' });
 
   function draw() {
-    const available = chosenSub ? pool({ theme, sub: chosenSub }).length : all.length;
+    const a = avancementTheme(theme);
+    const retenues = chosenSub ? pool({ theme, sub: chosenSub }) : poolTheme(theme, chosenSource);
+    const available = retenues.length;
     const counts = COUNTS.filter((c) => c <= available);
+    // Une banque peut n'offrir qu'une poignée de questions dans un thème —
+    // quatre pour le récit dans « Vivre en société ». Sans ce repli, le
+    // sélecteur n'aurait aucune option à montrer.
+    if (!counts.length && available) counts.push(available);
     if (!counts.includes(count)) count = counts[counts.length - 1] || available;
 
     container.replaceChildren(
@@ -266,24 +276,35 @@ function themeSetup(theme, preSub) {
         ],
       }),
 
-      avancement(theme),
+      avancement(a),
 
-      subs.length > 1 ? h('div', { class: 'stack stack--tight' }, [
-        SectionHeader({ title: 'Sous-thème' }),
-        h('div', { class: 'chips' }, [
-          Chip({
-            label: `Tout le thème (${all.length})`,
-            pressed: chosenSub === null,
-            onClick: () => { chosenSub = null; draw(); },
-          }),
-          ...subs.map((x) => Chip({
-            label: `${SUBS[x] || x} (${pool({ theme, sub: x }).length})`,
-            pressed: chosenSub === x,
-            onClick: () => { chosenSub = x; draw(); },
-          })),
-        ]),
-        h('p', { class: 'hint', text: "Les sous-thèmes ne découpent que les questions d'examen ; le livret et le récit restent dans « tout le thème »." }),
-      ]) : null,
+      banques(a, retenues),
+
+      // Les sous-thèmes ne découpent que la banque d'examen. Les proposer
+      // quand on révise le livret ou le récit offrirait un filtre qui, une
+      // fois appuyé, changerait la banque sous les pieds de l'utilisateur.
+      subs.length > 1 && (chosenSource === null || chosenSource === 'examen')
+        ? h('div', { class: 'stack stack--tight' }, [
+          SectionHeader({ title: 'Sous-thème' }),
+          h('div', { class: 'chips' }, [
+            Chip({
+              label: `Tout${chosenSource === 'examen' ? '' : ' le thème'} (${poolTheme(theme, chosenSource).length})`,
+              pressed: chosenSub === null,
+              onClick: () => { chosenSub = null; draw(); },
+            }),
+            ...subs.map((x) => Chip({
+              label: `${SUBS[x] || x} (${pool({ theme, sub: x }).length})`,
+              pressed: chosenSub === x,
+              // Choisir un sous-thème, c'est choisir la banque d'examen : on
+              // l'inscrit au-dessus au lieu de le laisser deviner.
+              onClick: () => { chosenSub = x; chosenSource = 'examen'; draw(); },
+            })),
+          ]),
+          chosenSource === null
+            ? h('p', { class: 'hint', text: "Choisir un sous-thème restreint à la banque d'examen : le livret et le récit n'en portent pas." })
+            : null,
+        ])
+        : null,
 
       h('div', { class: 'stack stack--tight' }, [
         SectionHeader({ title: 'Nombre de questions' }),
@@ -303,8 +324,49 @@ function themeSetup(theme, preSub) {
     );
   }
 
+  /**
+   * Le choix de la banque.
+   *
+   * « Je veux juste les questions de l'examen » n'avait aucun moyen de
+   * s'exprimer : une séance de vingt questions tirait dans les trois banques,
+   * et on retombait sur un récit déjà terminé ou sur un livret qu'on ne
+   * voulait pas encore ouvrir. Le thème continue de tout compter — c'est ce
+   * que mesurent les barres au-dessus —, mais s'entraîner et mesurer sont
+   * deux gestes différents, et le premier se choisit.
+   */
+  function banques(a, retenues) {
+    const vus = Object.fromEntries(a.par.map(([cle, b]) => [cle, b]));
+    const dispo = SOURCES.filter((x) => vus[x]?.total);
+    if (dispo.length < 2) return null;
+
+    const neuves = retenues.filter((q) => !store.progressOf(q.id)).length;
+    const nom = chosenSource ? SOURCE_APRES_DANS[chosenSource] : 'ce thème';
+    const phrase = neuves
+      ? `${neuves} question${neuves > 1 ? 's' : ''} jamais vue${neuves > 1 ? 's' : ''} dans ${nom} — la séance commence par celles-là.`
+      : `Tout est déjà vu dans ${nom} : la séance repassera d'anciennes questions, les plus anciennes d'abord.`;
+
+    return h('div', { class: 'stack stack--tight' }, [
+      SectionHeader({ title: 'Banque de questions' }),
+      h('div', { class: 'chips' }, [
+        Chip({
+          label: `Les trois (${a.total})`,
+          pressed: chosenSource === null,
+          onClick: () => { chosenSource = null; draw(); },
+        }),
+        ...dispo.map((x) => Chip({
+          label: `${LIBELLE_SOURCE[x]} (${vus[x].total})`,
+          pressed: chosenSource === x,
+          // Changer de banque annule le sous-thème : il n'existe que dans
+          // celle de l'examen, et le garder afficherait un filtre inerte.
+          onClick: () => { chosenSource = x; if (x !== 'examen') chosenSub = null; draw(); },
+        })),
+      ]),
+      h('p', { class: 'hint', text: phrase }),
+    ]);
+  }
+
   function start() {
-    const cards = buildTraining({ mode: 'theme', theme, sub: chosenSub, count });
+    const cards = buildTraining({ mode: 'theme', theme, sub: chosenSub, source: chosenSource, count });
     if (!cards.length) { toast('Aucune question disponible.'); return; }
     runQuiz({
       container,

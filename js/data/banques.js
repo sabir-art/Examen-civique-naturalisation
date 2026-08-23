@@ -46,19 +46,70 @@ export function trouverQuestion(id) {
   return BY_ID.get(id) || LIVRET_BY_ID.get(id) || ROMAN_BY_ID.get(id) || null;
 }
 
+/**
+ * D'où vient une question.
+ *
+ * Les questions d'examen ne portent pas de marque : elles sont la banque
+ * d'origine, et tout le reste est venu se poser à côté. Le nom rendu ici est
+ * celui qu'on emploie partout ailleurs — écrans, filtres, statistiques — pour
+ * qu'un seul vocabulaire serve à tout.
+ */
+export function sourceDe(q) {
+  if (q.source === 'livret') return 'livret';
+  if (q.source === 'roman') return 'recit';
+  return 'examen';
+}
+
+/** Les trois banques, dans l'ordre où elles se présentent à l'écran. */
+export const SOURCES = ['examen', 'livret', 'recit'];
+
+/** Comment chaque banque se nomme devant l'utilisateur. */
+export const LIBELLE_SOURCE = {
+  examen: "Banque d'examen",
+  livret: 'Livret du citoyen',
+  recit: 'La France racontée',
+};
+
+/**
+ * Le même nom, prêt à suivre une préposition : « … dans le livret du citoyen ».
+ *
+ * Une mise en minuscules automatique donnait « dans la france racontée » : le
+ * titre d'un livre ne se décapitalise pas. Chaque forme est donc écrite, avec
+ * son article.
+ */
+export const SOURCE_APRES_DANS = {
+  examen: "la banque d'examen",
+  livret: 'le livret du citoyen',
+  recit: '« La France racontée »',
+};
+
 const PAR_THEME = new Map(Object.keys(THEMES).map((k) => [k, []]));
+// Un ensemble par thème ET par banque : c'est ce qui permet de s'entraîner sur
+// « l'examen seul » sans recalculer ni recopier à chaque affichage.
+const PAR_THEME_SOURCE = new Map();
+for (const t of Object.keys(THEMES)) {
+  for (const s of SOURCES) PAR_THEME_SOURCE.set(`${t}|${s}`, []);
+}
 for (const q of TOUTES_LES_QUESTIONS) {
-  if (PAR_THEME.has(q.theme)) PAR_THEME.get(q.theme).push(q);
+  if (!PAR_THEME.has(q.theme)) continue;
+  PAR_THEME.get(q.theme).push(q);
+  PAR_THEME_SOURCE.get(`${q.theme}|${sourceDe(q)}`).push(q);
 }
 
 /**
- * Toutes les questions d'un thème, les trois banques confondues.
+ * Les questions d'un thème — les trois banques réunies, ou une seule.
+ *
+ * Sans second argument, le thème entier : c'est ce que mesurent les barres de
+ * progression. Avec, une banque précise : « je révise l'examen, et rien
+ * d'autre » est une demande légitime, et personne ne devrait avoir à traverser
+ * le livret pour l'obtenir.
  *
  * Le tableau rendu est celui du cache : à ne pas trier ni modifier sur place.
  * Les appelants qui mélangent en font une copie (`shuffle` en rend une).
  */
-export function poolTheme(theme) {
-  return PAR_THEME.get(theme) || [];
+export function poolTheme(theme, source = null) {
+  if (!source) return PAR_THEME.get(theme) || [];
+  return PAR_THEME_SOURCE.get(`${theme}|${source}`) || [];
 }
 
 /** Nombre de questions rattachées à un thème. */
@@ -74,12 +125,11 @@ export function tailleTheme(theme) {
  * pas un renseignement, c'est une devinette.
  */
 export function compositionTheme(theme) {
-  const qs = poolTheme(theme);
   return {
-    total: qs.length,
-    examen: qs.filter((q) => !q.source).length,
-    livret: qs.filter((q) => q.source === 'livret').length,
-    recit: qs.filter((q) => q.source === 'roman').length,
+    total: tailleTheme(theme),
+    examen: poolTheme(theme, 'examen').length,
+    livret: poolTheme(theme, 'livret').length,
+    recit: poolTheme(theme, 'recit').length,
   };
 }
 
