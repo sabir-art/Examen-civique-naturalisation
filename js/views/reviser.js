@@ -25,7 +25,7 @@ const SUJET = {
 };
 import { THEMES, SUBS } from '../data/programme.js';
 import { pool } from '../data/questions.js';
-import { TOUTES_LES_QUESTIONS, poolTheme, phraseComposition, SOURCES, LIBELLE_SOURCE, SOURCE_APRES_DANS } from '../data/banques.js';
+import { TOUTES_LES_QUESTIONS, poolTheme, phraseComposition, SOURCES, COURT_SOURCE, SOURCE_APRES_DANS } from '../data/banques.js';
 import { CHAPITRES } from '../data/livret.js';
 import { TOTAL_TERMES } from '../data/glossaire.js';
 import { buildTraining, mastery, coverage, avancementTheme, planRevision, planErreurs, compositionSeance, resteSeance } from '../engine.js';
@@ -278,42 +278,7 @@ function themeSetup(theme, preSub) {
 
       avancement(a),
 
-      banques(a, retenues),
-
-      // Les sous-thèmes ne découpent que la banque d'examen. Les proposer
-      // quand on révise le livret ou le récit offrirait un filtre qui, une
-      // fois appuyé, changerait la banque sous les pieds de l'utilisateur.
-      subs.length > 1 && (chosenSource === null || chosenSource === 'examen')
-        ? h('div', { class: 'stack stack--tight' }, [
-          SectionHeader({ title: 'Sous-thème' }),
-          h('div', { class: 'chips' }, [
-            Chip({
-              label: `Tout${chosenSource === 'examen' ? '' : ' le thème'} (${poolTheme(theme, chosenSource).length})`,
-              pressed: chosenSub === null,
-              onClick: () => { chosenSub = null; draw(); },
-            }),
-            ...subs.map((x) => Chip({
-              label: `${SUBS[x] || x} (${pool({ theme, sub: x }).length})`,
-              pressed: chosenSub === x,
-              // Choisir un sous-thème, c'est choisir la banque d'examen : on
-              // l'inscrit au-dessus au lieu de le laisser deviner.
-              onClick: () => { chosenSub = x; chosenSource = 'examen'; draw(); },
-            })),
-          ]),
-          chosenSource === null
-            ? h('p', { class: 'hint', text: "Choisir un sous-thème restreint à la banque d'examen : le livret et le récit n'en portent pas." })
-            : null,
-        ])
-        : null,
-
-      h('div', { class: 'stack stack--tight' }, [
-        SectionHeader({ title: 'Nombre de questions' }),
-        SegmentedControl({
-          options: counts.map((c) => ({ value: c, label: String(c) })),
-          value: count,
-          onChange: (c) => { count = c; draw(); },
-        }),
-      ]),
+      reglages(a, retenues, counts),
 
       Button({
         variant: 'primary', size: 'lg', fullWidth: true, iconLeft: 'play',
@@ -322,47 +287,134 @@ function themeSetup(theme, preSub) {
 
       h('p', { class: 'hint center', text: 'Correction et explication après chaque réponse.' }),
     );
+    montrerLeChoix();
   }
 
   /**
-   * Le choix de la banque.
+   * Ramener la puce choisie dans le champ de sa piste.
    *
-   * « Je veux juste les questions de l'examen » n'avait aucun moyen de
-   * s'exprimer : une séance de vingt questions tirait dans les trois banques,
-   * et on retombait sur un récit déjà terminé ou sur un livret qu'on ne
-   * voulait pas encore ouvrir. Le thème continue de tout compter — c'est ce
-   * que mesurent les barres au-dessus —, mais s'entraîner et mesurer sont
-   * deux gestes différents, et le premier se choisit.
+   * Chaque redessin reconstruit les pistes, qui repartent donc au début.
+   * Choisir « Récit », la dernière puce, la laissait coupée au bord droit :
+   * l'écran affichait un filtre actif qu'on ne voyait pas. On déplace la
+   * piste, jamais la page — d'où le calcul à la main plutôt que
+   * `scrollIntoView`, qui remonte toute la chaîne des parents.
    */
-  function banques(a, retenues) {
-    const vus = Object.fromEntries(a.par.map(([cle, b]) => [cle, b]));
-    const dispo = SOURCES.filter((x) => vus[x]?.total);
-    if (dispo.length < 2) return null;
+  function montrerLeChoix() {
+    for (const piste of container.querySelectorAll('.ds-filtre__piste')) {
+      const choisi = piste.querySelector('[aria-pressed="true"]');
+      if (!choisi) continue;
+      const cadre = piste.getBoundingClientRect();
+      const puce = choisi.getBoundingClientRect();
+      const marge = 16;
+      if (puce.left < cadre.left + marge) piste.scrollLeft -= cadre.left + marge - puce.left;
+      else if (puce.right > cadre.right - marge) piste.scrollLeft += puce.right - cadre.right + marge;
+    }
+  }
 
-    const neuves = retenues.filter((q) => !store.progressOf(q.id)).length;
-    const nom = chosenSource ? SOURCE_APRES_DANS[chosenSource] : 'ce thème';
-    const phrase = neuves
-      ? `${neuves} question${neuves > 1 ? 's' : ''} jamais vue${neuves > 1 ? 's' : ''} dans ${nom} — la séance commence par celles-là.`
-      : `Tout est déjà vu dans ${nom} : la séance repassera d'anciennes questions, les plus anciennes d'abord.`;
+  /**
+   * Les trois réglages de la séance, dans un seul bloc.
+   *
+   * ─────────────────────────────────────────────────────────────────────────
+   *  Pourquoi cette forme, et pas des rangées empilées
+   * ─────────────────────────────────────────────────────────────────────────
+   *  La première version posait chaque réglage à la suite : un titre de
+   *  section, des puces qui passaient à la ligne, un paragraphe d'explication.
+   *  Trois fois. Sur « Vivre en société », les réglages occupaient plus de
+   *  place que tout le reste de l'écran réuni.
+   *
+   *  Material 3 tranche : deux rangées de puces ou plus rendent chaque puce
+   *  plus difficile à parcourir, et une ligne unique qui défile est préférable
+   *  au retour à la ligne. Apple réserve le contrôle segmenté aux choix courts,
+   *  de largeur égale, cinq au plus — ce qui décrit exactement « 10 / 20 / 40 »
+   *  et ce qui exclut « La France racontée ». Et la divulgation progressive
+   *  veut qu'on garde ouvert le réglage le plus employé et qu'on retire les
+   *  autres quand ils n'ont plus d'objet.
+   *
+   *  D'où : une carte, une piste par réglage, et un seul bilan chiffré à la
+   *  fin — au lieu de deux paragraphes qui expliquaient ce que l'écran montre
+   *  déjà. Choisir un sous-thème fait sauter la puce de banque sur « Examen »
+   *  sous les yeux de l'utilisateur : c'était le contenu de l'un des deux
+   *  paragraphes, et le montrer vaut mieux que le dire.
+   * ─────────────────────────────────────────────────────────────────────────
+   */
+  function reglages(a, retenues, counts) {
+    const parBanque = Object.fromEntries(a.par.map(([cle, b]) => [cle, b]));
+    const banques = SOURCES.filter((x) => parBanque[x]?.total);
+    // Les sous-thèmes ne découpent que la banque d'examen. Les proposer sur le
+    // livret ou le récit offrirait un filtre qui, une fois appuyé, changerait
+    // la banque sous les pieds de l'utilisateur.
+    const montrerSubs = subs.length > 1 && (chosenSource === null || chosenSource === 'examen');
 
-    return h('div', { class: 'stack stack--tight' }, [
-      SectionHeader({ title: 'Banque de questions' }),
-      h('div', { class: 'chips' }, [
-        Chip({
-          label: `Les trois (${a.total})`,
-          pressed: chosenSource === null,
-          onClick: () => { chosenSource = null; draw(); },
-        }),
-        ...dispo.map((x) => Chip({
-          label: `${LIBELLE_SOURCE[x]} (${vus[x].total})`,
-          pressed: chosenSource === x,
-          // Changer de banque annule le sous-thème : il n'existe que dans
-          // celle de l'examen, et le garder afficherait un filtre inerte.
-          onClick: () => { chosenSource = x; if (x !== 'examen') chosenSub = null; draw(); },
-        })),
-      ]),
-      h('p', { class: 'hint', text: phrase }),
+    const piste = (enfants) => h('div', { class: 'ds-filtre__piste' }, enfants);
+    const reglage = (nom, contenu) => h('div', { class: 'ds-filtre' }, [
+      h('span', { class: 'ds-filtre__nom', text: nom }),
+      contenu,
     ]);
+
+    return Card({
+      surface: 'white', elevation: 'xs', padding: 'md',
+      children: [
+        h('div', { class: 'ds-filtres' }, [
+          banques.length > 1 ? reglage('Banque de questions', piste([
+            Chip({
+              label: `Tout (${a.total})`,
+              pressed: chosenSource === null,
+              onClick: () => { chosenSource = null; draw(); },
+            }),
+            ...banques.map((x) => Chip({
+              label: `${COURT_SOURCE[x]} (${parBanque[x].total})`,
+              pressed: chosenSource === x,
+              // Changer de banque annule le sous-thème : il n'existe que dans
+              // celle de l'examen, et le garder afficherait un filtre inerte.
+              onClick: () => { chosenSource = x; if (x !== 'examen') chosenSub = null; draw(); },
+            })),
+          ])) : null,
+
+          montrerSubs ? reglage('Sous-thème', piste([
+            Chip({
+              label: `Tout (${poolTheme(theme, chosenSource).length})`,
+              pressed: chosenSub === null,
+              onClick: () => { chosenSub = null; draw(); },
+            }),
+            ...subs.map((x) => Chip({
+              label: `${SUBS[x] || x} (${pool({ theme, sub: x }).length})`,
+              pressed: chosenSub === x,
+              onClick: () => { chosenSub = x; chosenSource = 'examen'; draw(); },
+            })),
+          ])) : null,
+
+          reglage('Nombre de questions', SegmentedControl({
+            options: counts.map((c) => ({ value: c, label: String(c) })),
+            value: count,
+            onChange: (c) => { count = c; draw(); },
+          })),
+
+          h('p', { class: 'ds-filtres__bilan', text: bilan(retenues) }),
+        ].filter(Boolean)),
+      ],
+    });
+  }
+
+  /**
+   * Ce que le choix courant contient, en une ligne.
+   *
+   * Remplace les deux paragraphes d'avant. Le second chiffre est celui qui
+   * décide : quelqu'un qui a fini « La France racontée » veut savoir, avant
+   * d'appuyer, qu'il n'y reste rien de neuf.
+   */
+  function bilan(retenues) {
+    const neuves = retenues.filter((q) => !store.progressOf(q.id)).length;
+    const quoi = chosenSub
+      ? `${retenues.length} questions sur « ${(SUBS[chosenSub] || chosenSub).toLowerCase()} »`
+      : chosenSource
+        ? `${retenues.length} questions dans ${SOURCE_APRES_DANS[chosenSource]}`
+        : `${retenues.length} questions dans ce thème`;
+    // Une seule phrase, et courte : elle doit tenir sur une ligne. La règle
+    // d'ordre — jamais vues d'abord, puis les plus anciennes — est constante,
+    // et la répéter sous chaque thème en faisait un bruit de fond.
+    return neuves
+      ? `${quoi}, dont ${neuves} jamais vue${neuves > 1 ? 's' : ''}.`
+      : `${quoi}, toutes déjà vues.`;
   }
 
   function start() {

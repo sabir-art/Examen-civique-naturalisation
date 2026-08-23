@@ -48,7 +48,12 @@ const appartient = (id, banque) => banques[banque].includes(id);
 
 /** Ouvre un thème et rend la liste des puces de banque affichées. */
 async function ouvrir(theme) {
+  // Le rechargement n'est pas un ornement : viser deux fois la même URL à
+  // fragment ne relance pas le routeur, et l'écran garderait le filtre choisi
+  // par le contrôle précédent. Un test qui se croit à l'état neuf sans y être
+  // mesure autre chose que ce qu'il annonce — on s'est déjà fait prendre.
   await page.goto(`${BASE}#/reviser/t/${theme}`);
+  await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('.ds-chip');
   return page.$$eval('.ds-chip', (n) => n.map((x) => x.textContent.trim()));
 }
@@ -56,7 +61,7 @@ async function ouvrir(theme) {
 /* ----------------------------------------------------- les puces existent */
 
 const puces = await ouvrir('histoire-geo-culture');
-for (const attendu of ['Les trois (209)', "Banque d'examen (76)", 'Livret du citoyen (85)', 'La France racontée (48)']) {
+for (const attendu of ['Tout (209)', 'Examen (76)', 'Livret (85)', 'Récit (48)']) {
   verifier(puces.includes(attendu), `la puce « ${attendu} » est proposée`);
 }
 
@@ -90,11 +95,11 @@ verifier(familles.size === 3, `sans choix, les trois banques sont tirées (${[..
 
 /* ----------------------------------- le sous-thème suit, ou se retire */
 
-await page.click('.ds-chip:has-text("Livret du citoyen")');
+await page.click('.ds-chip:has-text("Livret")');
 await page.waitForTimeout(120);
 const marquee = await page.$$eval('.ds-chip[aria-pressed="true"]', (n) => n.map((x) => x.textContent.trim()));
 verifier(
-  marquee.some((x) => x.startsWith('Livret du citoyen')),
+  marquee.some((x) => x.startsWith('Livret')),
   `la banque choisie se voit à l'écran (marquées : ${marquee.join(' / ') || 'aucune'})`,
 );
 const apresLivret = await page.$$eval('.ds-chip', (n) => n.map((x) => x.textContent.trim()));
@@ -103,7 +108,7 @@ verifier(
   'le livret choisi, les sous-thèmes disparaissent — ils ne découpent que l\'examen',
 );
 
-await page.click('.ds-chip:has-text("Banque d\'examen")');
+await page.click('.ds-chip:has-text("Examen")');
 await page.waitForTimeout(120);
 const apresExamen = await page.$$eval('.ds-chip', (n) => n.map((x) => x.textContent.trim()));
 verifier(
@@ -116,7 +121,7 @@ verifier(
 // « Vivre en société » n'a que quatre questions dans le récit : moins que le
 // plus petit palier proposé. Le sélecteur doit tout de même offrir un nombre.
 await ouvrir('vivre-societe');
-await page.click('.ds-chip:has-text("La France racontée")');
+await page.click('.ds-chip:has-text("Récit")');
 await page.waitForTimeout(120);
 const paliers = await page.$$eval('.ds-seg__btn', (n) => n.map((x) => x.textContent.trim()));
 verifier(paliers.length > 0, `quatre questions au récit : le sélecteur propose quand même un nombre (${paliers.join(', ') || 'aucun'})`);
@@ -133,13 +138,13 @@ verifier(/\(4 questions\)/.test(bouton || ''), `le bouton annonce le nombre rée
  */
 await ouvrir('histoire-geo-culture');
 for (const [puce, attendu] of [
-  ["Banque d'examen", "la banque d'examen"],
-  ['Livret du citoyen', 'le livret du citoyen'],
-  ['La France racontée', '« La France racontée »'],
+  ['Examen', "la banque d'examen"],
+  ['Livret', 'le livret du citoyen'],
+  ['Récit', '« La France racontée »'],
 ]) {
   await page.click(`.ds-chip:has-text("${puce}")`);
   await page.waitForTimeout(120);
-  const phrases = await page.$$eval('.hint', (n) => n.map((x) => x.textContent.trim()));
+  const phrases = await page.$$eval('.ds-filtres__bilan', (n) => n.map((x) => x.textContent.trim()));
   const dite = phrases.find((x) => x.includes('dans '));
   verifier(
     Boolean(dite && dite.includes(`dans ${attendu}`)),
@@ -147,10 +152,111 @@ for (const [puce, attendu] of [
   );
 }
 
+/* --------------------------------------------------- le bloc est rangé */
+
+/**
+ * Une piste de filtre tient sur UNE ligne.
+ *
+ * La première version laissait les puces passer à la ligne : sur « Vivre en
+ * société », deux rangées de banques et deux rangées de sous-thèmes, plus deux
+ * paragraphes d'explication, occupaient plus de place que tout le reste de
+ * l'écran. Material 3 est explicite — deux rangées ou plus rendent chaque puce
+ * plus difficile à parcourir —, et recommande une ligne unique qui défile.
+ *
+ * On mesure donc la position verticale de chaque puce dans sa piste : toutes
+ * doivent partager la même. Une seule qui descend d'un cran, et le retour à la
+ * ligne est revenu.
+ */
+for (const theme of ['histoire-geo-culture', 'vivre-societe']) {
+  await ouvrir(theme);
+  const pistes = await page.$$eval('.ds-filtre__piste', (n) => n.map((piste) => {
+    const lignes = new Set([...piste.children].map((c) => Math.round(c.getBoundingClientRect().top)));
+    return { nom: piste.previousElementSibling?.textContent?.trim() || '?', lignes: lignes.size, puces: piste.children.length };
+  }));
+  verifier(pistes.length > 0, `${theme} : les pistes de filtre existent (${pistes.length})`);
+  for (const piste of pistes) {
+    verifier(piste.lignes === 1, `${theme} — « ${piste.nom} » : ${piste.puces} puces sur une seule ligne (${piste.lignes} ligne(s))`);
+  }
+}
+
+/**
+ * Chaque piste commence sous son étiquette, pas seize pixels à sa gauche.
+ *
+ * La piste déborde volontairement jusqu'aux bords de la carte, pour qu'une
+ * puce coupée annonce la suite. Mais `scroll-snap-align: start` cale l'enfant
+ * sur le bord du scrollport, qui ignore le rembourrage : la première puce
+ * venait se coller au bord de la carte, décalée de son propre titre. Le défaut
+ * était de seize pixels — assez pour salir la colonne, trop peu pour sauter
+ * aux yeux sur une capture.
+ */
+await ouvrir('vivre-societe');
+const colonnes = await page.$$eval('.ds-filtre', (n) => n.map((f) => {
+  const nom = f.querySelector('.ds-filtre__nom');
+  const premier = f.querySelector('.ds-filtre__piste > *') || f.querySelector('.ds-seg');
+  return {
+    nom: nom?.textContent.trim() || '?',
+    etiquette: nom ? Math.round(nom.getBoundingClientRect().left) : null,
+    contenu: premier ? Math.round(premier.getBoundingClientRect().left) : null,
+  };
+}));
+for (const c of colonnes) {
+  verifier(c.etiquette === c.contenu, `« ${c.nom} » : titre et contenu sur la même colonne (${c.etiquette} / ${c.contenu})`);
+}
+
+/**
+ * Une piste déborde de la carte pour que la puce coupée annonce la suite —
+ * mais la carte recoupe, et la PAGE ne doit jamais défiler de côté.
+ */
+const debordement = await page.evaluate(() => ({
+  page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  defilable: [...document.querySelectorAll('.ds-filtre__piste')].some((p) => p.scrollWidth > p.clientWidth + 1),
+}));
+verifier(debordement.page <= 0, `la page ne défile pas de côté (${debordement.page}px de trop)`);
+verifier(debordement.defilable, 'au moins une piste défile bien à l\'intérieur de sa carte');
+
+/**
+ * Et le bloc entier reste court. Ce plafond n'est pas une élégance : c'est le
+ * chiffre qui a motivé la refonte, et sans lui rien n'empêche un futur réglage
+ * de rendre l'écran aussi long qu'avant.
+ */
+await ouvrir('vivre-societe');
+const hauteur = await page.evaluate(() => {
+  // La carte est le parent direct de la grille de réglages : pas besoin
+  // d'une classe posée là uniquement pour que ce contrôle sache la trouver.
+  const carte = document.querySelector('.ds-filtres')?.parentElement;
+  return carte ? Math.round(carte.getBoundingClientRect().height) : -1;
+});
+verifier(hauteur > 0 && hauteur <= 300, `le bloc de réglages tient en 300px (${hauteur}px)`);
+
+/**
+ * La puce choisie reste visible.
+ *
+ * « Récit » est la dernière puce de la piste, et chaque redessin remet la
+ * piste au début : l'écran affichait un filtre actif coupé par le bord droit,
+ * donc un réglage qu'on ne pouvait pas relire. On vérifie la dernière puce de
+ * chaque piste, celle qui court le plus de risques.
+ */
+for (const puce of ['Récit', 'Culture et patrimoine']) {
+  // Écran neuf à chaque tour : choisir « Récit » retire la piste des
+  // sous-thèmes, et « Culture et patrimoine » n'existerait plus au tour suivant.
+  await ouvrir('histoire-geo-culture');
+  await page.click(`.ds-chip:has-text("${puce}")`);
+  await page.waitForTimeout(200);
+  const vue = await page.evaluate(() => {
+    const choisis = [...document.querySelectorAll('.ds-filtre__piste [aria-pressed="true"]')];
+    return choisis.map((c) => {
+      const cadre = c.closest('.ds-filtre__piste').getBoundingClientRect();
+      const b = c.getBoundingClientRect();
+      return { texte: c.textContent.trim(), entier: b.left >= cadre.left - 1 && b.right <= cadre.right + 1 };
+    });
+  });
+  for (const v of vue) verifier(v.entier, `« ${puce} » choisi : « ${v.texte} » tient entièrement dans sa piste`);
+}
+
 /* ------------------------------------------- la séance part vraiment */
 
 await ouvrir('histoire-geo-culture');
-await page.click('.ds-chip:has-text("La France racontée")');
+await page.click('.ds-chip:has-text("Récit")');
 await page.waitForTimeout(120);
 await page.click('.ds-btn--primary');
 await page.waitForSelector('.quiz', { timeout: 5000 });

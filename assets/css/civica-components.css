@@ -701,3 +701,38 @@ button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); 
 @media (prefers-reduced-motion: reduce) {
   .ds-sheet__scrim, .ds-sheet__panel { animation: none; }
 }
+
+/* ------------------------------------------------------- bloc de filtres */
+/* Trois réglages tenaient sur une demi-page : deux rangées de puces qui
+   passaient à la ligne, plus deux paragraphes d'explication. Material 3 le
+   dit sans détour — deux rangées ou plus rendent chaque puce plus difficile
+   à lire — et recommande une seule ligne qui défile. Apple réserve le
+   contrôle segmenté aux choix courts et de largeur égale, cinq au plus.
+   D'où : une piste par réglage, un seul bilan chiffré à la fin. */
+.ds-filtres { display: grid; gap: var(--space-8); }
+.ds-filtre { display: grid; gap: var(--space-2); }
+.ds-filtre__nom {
+  font: var(--type-caption); color: var(--text-secondary);
+}
+
+/* La piste déborde jusqu'aux bords de la carte : une puce coupée au bord
+   annonce qu'il y en a d'autres. La carte, elle, recoupe — sans quoi la page
+   entière défilerait de côté. */
+.ds-filtre__piste {
+  display: flex; flex-wrap: nowrap; gap: var(--space-4);
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  margin-inline: calc(var(--space-8) * -1); padding-inline: var(--space-8);
+  /* `scroll-snap-align: start` cale l'enfant sur le bord du scrollport, qui
+     ignore le rembourrage : la première puce venait donc se coller au bord de
+     la carte, seize pixels à gauche de l'étiquette au-dessus d'elle.
+     `scroll-padding` déplace ce bord de référence. */
+  scroll-padding-inline: var(--space-8);
+  scrollbar-width: none;
+}
+.ds-filtre__piste::-webkit-scrollbar { display: none; }
+.ds-filtre__piste > * { flex: 0 0 auto; scroll-snap-align: start; }
+
+.ds-filtres__bilan {
+  margin: 0; font: var(--type-caption); color: var(--text-secondary);
+}

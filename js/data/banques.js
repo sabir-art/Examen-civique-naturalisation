@@ -71,6 +71,20 @@ export const LIBELLE_SOURCE = {
 };
 
 /**
+ * Le nom court, pour une puce de filtre.
+ *
+ * « La France racontée (48) » et « Banque d'examen (45) » côte à côte
+ * dépassaient la largeur d'un téléphone et repoussaient les puces à la ligne
+ * suivante. Le nom entier reste écrit juste au-dessus, dans le relevé
+ * d'avancement, et dans le bilan juste en dessous : rien ne se perd.
+ */
+export const COURT_SOURCE = {
+  examen: 'Examen',
+  livret: 'Livret',
+  recit: 'Récit',
+};
+
+/**
  * Le même nom, prêt à suivre une préposition : « … dans le livret du citoyen ».
  *
  * Une mise en minuscules automatique donnait « dans la france racontée » : le

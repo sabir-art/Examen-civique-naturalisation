@@ -78,6 +78,20 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
       const SVG_NS = 'http://www.w3.org/2000/svg';
       const nom = (el) => (typeof el.className === 'string' && el.className) || el.getAttribute?.('class') || el.tagName;
 
+      /* Ce qui vit dans un conteneur à défilement horizontal a le droit de
+         sortir du cadre : c'est même le but — une puce coupée au bord annonce
+         qu'il y en a d'autres derrière. Le conteneur, lui, reste contrôlé
+         comme n'importe quel autre élément, et c'est là que se verrait un
+         vrai débordement. Sans cette exception, toute galerie qui défile
+         serait signalée comme cassée. */
+      const dansUnDefilement = (el) => {
+        for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+          const o = getComputedStyle(p).overflowX;
+          if (o === 'auto' || o === 'scroll') return true;
+        }
+        return false;
+      };
+
       for (const el of document.querySelectorAll('.app *')) {
         const cs = getComputedStyle(el);
         if (cs.display === 'none' || cs.visibility === 'hidden') continue;
@@ -106,7 +120,7 @@ for (const [largeur, hauteur] of [[320, 568], [390, 844], [430, 932]]) {
           out.tronques.push(`${nom(el)} « ${el.textContent.trim().slice(0, 30)} »`);
         }
         // débordement à droite du cadre de l'application
-        if (b.right > doc.clientWidth + 2) {
+        if (b.right > doc.clientWidth + 2 && !dansUnDefilement(el)) {
           out.recouverts.push(`${nom(el)} déborde jusqu'à ${Math.round(b.right)}`);
         }
         /* Un chiffre trop long pour sa tuile.
