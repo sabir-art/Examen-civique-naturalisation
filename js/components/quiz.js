@@ -42,8 +42,16 @@ export function createQuiz({
   const root = h('div', { class: 'quiz' });
   const startedAt = Date.now();
   const answers = new Array(cards.length).fill(null); // index choisi
+  /* Corrigée ou non, question par question. C'était un seul drapeau pour toute
+     la série : revenir en arrière affichait alors une question déjà corrigée
+     comme si elle était neuve, réponse cachée. */
+  const reveles = new Array(cards.length).fill(false);
+  /* Ce qui a DÉJÀ été porté au carnet de progression, pour chaque question.
+     Sans cette mémoire, changer sa réponse enregistrerait une deuxième fois la
+     même question, et la boîte de révision avancerait deux fois pour un seul
+     apprentissage. */
+  const enregistres = new Array(cards.length).fill(undefined);
   let index = 0;
-  let revealed = false;
   let finished = false;
   let remaining = timeLimitSec;
   let ticker = null;
@@ -108,6 +116,7 @@ export function createQuiz({
     const card = cards[index];
     const q = card.q;
     const chosen = answers[index];
+    const revealed = reveles[index];
 
     countEl.textContent = `Question ${index + 1} sur ${cards.length}`;
     barFill.style.width = `${pct(index + (revealed || chosen !== null ? 1 : 0), cards.length)}%`;
@@ -136,7 +145,10 @@ export function createQuiz({
       letter: LETTERS[i],
       label: text,
       state: etatDe(i),
-      disabled: revealed,
+      // En entraînement, une question corrigée reste appuyable : on revient
+      // dessus et on change sa réponse. En conditions d'examen la correction
+      // n'arrive qu'à la fin, il n'y a donc rien à rouvrir.
+      disabled: false,
       onClick: () => pick(i),
     })));
 
@@ -212,6 +224,7 @@ export function createQuiz({
 
   function drawFoot() {
     const chosen = answers[index];
+    const revealed = reveles[index];
     const last = index === cards.length - 1;
     const buttons = [];
 
@@ -237,39 +250,71 @@ export function createQuiz({
       }));
     }
 
-    foot.replaceChildren(h('div', { class: 'stack stack--tight' }, buttons));
+    /* « Précédent » se pose À CÔTÉ de l'action principale, pas au-dessus :
+       une série se lit vers l'avant, et un bouton de retour pleine largeur
+       ferait hésiter à chaque question. Il n'apparaît qu'à partir de la
+       deuxième — avant, il n'y a rien derrière. */
+    const principal = buttons.shift();
+    const tete = index > 0
+      ? h('div', { class: 'quizfoot__row' }, [
+        Button({
+          variant: 'ghost', size: 'lg', iconLeft: 'chevron-left',
+          label: 'Précédent', onClick: () => prev(),
+        }),
+        principal,
+      ])
+      : principal;
+
+    foot.replaceChildren(h('div', { class: 'stack stack--tight' }, [tete, ...buttons]));
   }
 
   /* ------------------------------------------------------------ actions */
 
+  /**
+   * Porte la réponse courante au carnet de progression — une seule fois par
+   * valeur. Rappuyer sur la même proposition ne compte pas deux fois ; changer
+   * d'avis remplace ce qui avait été noté.
+   */
+  function enregistrer() {
+    if (enregistres[index] === answers[index]) return;
+    store.recordAnswer(cards[index].id, answers[index] === cards[index].correct);
+    enregistres[index] = answers[index];
+  }
+
   function pick(i) {
-    if (revealed) return;
-    if (answers[index] !== i) fx.tap();
+    const change = answers[index] !== i;
+    if (change) fx.tap();
     answers[index] = i;
-    if (immediate) { draw(); return; }
-    // En conditions d'examen, la réponse est enregistrée et l'on passe à la suite.
+    // Une question déjà corrigée dont on change la réponse : on note le
+    // changement tout de suite, sinon la correction affichée et le carnet
+    // diraient deux choses différentes.
+    if (reveles[index]) enregistrer();
     draw();
   }
 
   function reveal() {
-    revealed = true;
-    const juste = answers[index] === cards[index].correct;
-    store.recordAnswer(cards[index].id, juste);
-    if (juste) fx.bonneReponse(); else fx.mauvaiseReponse();
+    reveles[index] = true;
+    enregistrer();
+    if (answers[index] === cards[index].correct) fx.bonneReponse(); else fx.mauvaiseReponse();
     draw();
   }
 
-  function next() {
+  /** Se placer sur une autre question de la série, en avant ou en arrière. */
+  function aller(vers) {
     closeDeepen();
-    if (!immediate) {
-      store.recordAnswer(cards[index].id, answers[index] === cards[index].correct);
-    }
-    if (index === cards.length - 1) { finish(false); return; }
-    index += 1;
-    revealed = false;
+    index = vers;
     draw();
     root.scrollIntoView({ block: 'start', behavior: 'instant' });
     window.scrollTo(0, 0);
+  }
+
+  function prev() {
+    if (index > 0) aller(index - 1);
+  }
+
+  function next() {
+    if (index === cards.length - 1) { closeDeepen(); finish(false); return; }
+    aller(index + 1);
   }
 
   function finish(byTimeout) {
@@ -278,13 +323,15 @@ export function createQuiz({
     stopTimer();
     closeDeepen();
 
-    // Temps écoulé : les questions non atteintes comptent comme fausses. Celles
-    // qui précèdent ont déjà été enregistrées au fil de la série.
-    if (byTimeout) {
-      for (let i = index; i < cards.length; i++) {
-        if (i === index && revealed) continue;
-        store.recordAnswer(cards[i].id, answers[i] === cards[i].correct);
-      }
+    /* Tout ce qui n'a pas encore été porté au carnet l'est ici, et une seule
+       fois. Cela couvre trois cas d'un même geste : l'examen blanc, où rien
+       n'est noté avant la fin pour qu'on puisse revenir changer ses réponses ;
+       le temps écoulé, où les questions non atteintes comptent comme fausses ;
+       et l'entraînement, où tout est déjà noté — la boucle ne fait alors rien. */
+    for (let i = 0; i < cards.length; i += 1) {
+      if (enregistres[i] === answers[i]) continue;
+      store.recordAnswer(cards[i].id, answers[i] === cards[i].correct);
+      enregistres[i] = answers[i];
     }
 
     const detail = cards.map((c, i) => ({

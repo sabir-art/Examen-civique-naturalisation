@@ -281,11 +281,15 @@ await step("le bouton du chapitre suivant tient sur une ligne", async () => {
     if (!(await p.locator('.ds-answer').count())) break;
     await p.locator('.ds-answer').first().click();
     await p.waitForTimeout(200);
-    const btn = p.locator('.quizfoot button, .quizfoot a').first();
+    /* L'action principale, et non « le premier bouton du pied » : depuis que la
+       série se parcourt dans les deux sens, « Précédent » vient avant elle dans
+       l'ordre du document. Un test qui vise une position plutôt qu'un rôle
+       cliquait alors sur le retour et tournait en rond sans jamais avancer. */
+    const btn = p.locator('.quizfoot .ds-btn--full').first();
     if (!(await btn.count())) break;
     await btn.click();
     await p.waitForTimeout(200);
-    const suite = p.locator('.quizfoot button, .quizfoot a').first();
+    const suite = p.locator('.quizfoot .ds-btn--full').first();
     if ((await suite.count()) && (await suite.textContent() || '').match(/suivante|Terminer/)) {
       await suite.click();
       await p.waitForTimeout(200);

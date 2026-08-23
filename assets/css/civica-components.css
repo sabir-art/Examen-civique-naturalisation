@@ -736,3 +736,11 @@ button.ds-chip, a.ds-chip { cursor: pointer; min-height: var(--tap-target-min); 
 .ds-filtres__bilan {
   margin: 0; font: var(--type-caption); color: var(--text-secondary);
 }
+
+/* Le pied du questionnaire quand on peut revenir en arrière : « Précédent »
+   garde sa largeur de texte, l'action principale prend le reste. Empilés, ils
+   auraient poussé la correction hors de l'écran et fait hésiter à chaque
+   question — une série se lit vers l'avant. */
+.quizfoot__row { display: flex; align-items: stretch; gap: var(--space-4); }
+.quizfoot__row > :first-child { flex: 0 0 auto; }
+.quizfoot__row > :last-child { flex: 1 1 auto; min-width: 0; }
